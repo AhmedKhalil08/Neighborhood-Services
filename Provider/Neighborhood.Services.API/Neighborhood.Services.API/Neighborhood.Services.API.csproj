@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Neighborhood.Services.Application\Neighborhood.Services.Application.csproj" />
+    <ProjectReference Include="..\Neighborhood.Services.Infrastructure\Neighborhood.Services.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

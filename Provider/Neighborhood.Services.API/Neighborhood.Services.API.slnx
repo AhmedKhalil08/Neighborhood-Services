@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Neighborhood.Services.API/Neighborhood.Services.API.csproj" />
+  <Project Path="Neighborhood.Services.Application/Neighborhood.Services.Application.csproj" />
+  <Project Path="Neighborhood.Services.Domain/Neighborhood.Services.Domain.csproj" />
+  <Project Path="Neighborhood.Services.Infrastructure/Neighborhood.Services.Infrastructure.csproj" />
+</Solution>
