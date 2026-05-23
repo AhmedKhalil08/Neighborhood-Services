@@ -4,9 +4,7 @@ using System.Text;
 
 namespace Neighborhood.Services.Domain.Shared
 {
-    public class BaseEntity <T>
+    internal class BaseEntity
     {
-        public T Id { get; set; }
-        public bool IsDeleted { get; set; }
     }
 }
