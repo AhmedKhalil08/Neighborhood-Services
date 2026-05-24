@@ -1,6 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Neighborhood.Services.Domain.AiAnalyses;
+using Neighborhood.Services.Domain.BookingImages;
+using Neighborhood.Services.Domain.Offers;
+using Neighborhood.Services.Domain.RecurringBookings;
+using Neighborhood.Services.Domain.ServiceRequests;
 
 namespace Neighborhood.Services.Domain.Bookings
 {
@@ -32,5 +34,25 @@ namespace Neighborhood.Services.Domain.Bookings
         public int? PromoCodeId { get; set; }
         public int? RecurringBookingId { get; set; }
         public int? CancelledBy { get; set; }
+
+        // Navigation Properties
+        //public Customer Customer { get; set; }
+        //public Technician Technician { get; set; }
+        //public ProblemType ProblemType { get; set; }
+        public Offer? Offer { get; set; }
+        public ServiceRequest? ServiceRequest { get; set; }
+        //public PromoCode? PromoCode { get; set; }
+        public RecurringBooking? RecurringBooking { get; set; }
+        //public User? CancelledByUser { get; set; }
+
+        public ICollection<BookingImage> BookingImages { get; set; } = new HashSet<BookingImage>();
+        //public ICollection<PromoCodeUsage> PromoCodeUsages { get; set; }
+        public AiAnalysis? AiAnalysis { get; set; }
+        //public Escrow? Escrow { get; set; }
+        //public Invoice? Invoice { get; set; }
+        //public Dispute? Dispute { get; set; }
+        //public Review? Review { get; set; }
+        //public Conversation? Conversation { get; set; }
+        //public SupportTicket? SupportTicket { get; set; }
     }
 }
