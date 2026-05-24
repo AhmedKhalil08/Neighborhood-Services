@@ -1,4 +1,10 @@
 
+using Microsoft.EntityFrameworkCore;
+using Neighborhood.Services.Infrastructure.Persistence.Context;
+using Neighborhood.Services.Application;
+
+
+
 namespace Neighborhood.Services.API
 {
     public class Program
@@ -10,6 +16,13 @@ namespace Neighborhood.Services.API
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            
+          //injecting Application Dependency 
+            builder.Services.AddApplication();
+
+
             builder.Services.AddSignalR();
 
             var app = builder.Build();
