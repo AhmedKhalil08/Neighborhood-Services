@@ -16,11 +16,8 @@
     <Folder Include="Disputes\Interfaces\" />
     <Folder Include="Disputes\Services\" />
     <Folder Include="Disputes\Queries\" />
-    <Folder Include="Staff\Commands\" />
-    <Folder Include="Staff\DTOs\" />
-    <Folder Include="Staff\Interfaces\" />
-    <Folder Include="Staff\Services\" />
-    <Folder Include="Staff\Queries\" />
+    <Folder Include="Staffs\Commands\" />
+    <Folder Include="Staffs\Queries\" />
     <Folder Include="SupportTickets\Commands\" />
     <Folder Include="SupportTickets\DTOs\" />
     <Folder Include="SupportTickets\Interfaces\" />

@@ -27,6 +27,32 @@ namespace Neighborhood.Services.Domain.Reviews
 
         // Navigation Property
         public ReviewAnalysis Analysis { get; private set; }
+        // Empty Constructor For EF Core
+        private Review()
+        {
+        }
+
+
+        // Main Constructor
+        public Review(
+            int bookingId,
+            int reviewerId,
+            int revieweeId,
+            int rating,
+            string comment)
+        {
+            BookingId = bookingId;
+            ReviewerId = reviewerId;
+            RevieweeId = revieweeId;
+            Rating = rating;
+            Comment = comment;
+
+            Status = ReviewStatus.Pending;
+
+            CreatedAt = DateTime.UtcNow;
+
+            IsDeleted = false;
+        }
 
         public void Delete()
         {

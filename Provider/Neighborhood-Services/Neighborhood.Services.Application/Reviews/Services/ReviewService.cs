@@ -22,7 +22,13 @@ public class ReviewService : IReviewService
         }
 
         // Create Entity
-        var review = new Review();
+        var review = new Review(
+     dto.BookingId,
+     dto.ReviewerId,
+     dto.RevieweeId,
+     dto.Rating,
+     dto.Comment
+ );
 
         // Save
         await _reviewRepository.AddAsync(review);

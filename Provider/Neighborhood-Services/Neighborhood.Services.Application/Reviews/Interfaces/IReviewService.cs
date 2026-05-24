@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Application.Reviews.Services
+namespace Neighborhood.Services.Application.Reviews.Interfaces
 {
     public interface IReviewService
     {

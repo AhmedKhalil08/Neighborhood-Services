@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.Staff
+namespace Neighborhood.Services.Domain.Staffs
 {
     public enum PermissionType
     {
