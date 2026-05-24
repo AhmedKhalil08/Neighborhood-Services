@@ -18,6 +18,6 @@ namespace Neighborhood.Services.Domain.Technician
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public int ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; } = string.Empty;
     }
 }

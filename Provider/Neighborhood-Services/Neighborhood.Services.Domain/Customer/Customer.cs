@@ -13,6 +13,6 @@ namespace Neighborhood.Services.Domain.Customer
         public DateTime UpdatedAt { get; set; }
 
 
-        public int ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; } = string.Empty;
     }
 }

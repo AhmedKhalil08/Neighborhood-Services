@@ -16,6 +16,6 @@ namespace Neighborhood.Services.Domain.CustomerAddress
         public DateTime CreatedAt { get; set; }
 
 
-        public int ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; } = string.Empty;
     }
 }
