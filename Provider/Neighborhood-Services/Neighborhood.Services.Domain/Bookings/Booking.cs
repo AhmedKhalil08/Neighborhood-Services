@@ -54,5 +54,6 @@ namespace Neighborhood.Services.Domain.Bookings
         //public Review? Review { get; set; }
         //public Conversation? Conversation { get; set; }
         //public SupportTicket? SupportTicket { get; set; }
+        //--
     }
 }
