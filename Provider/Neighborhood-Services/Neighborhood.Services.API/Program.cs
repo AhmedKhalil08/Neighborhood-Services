@@ -1,3 +1,4 @@
+
 namespace Neighborhood.Services.API
 {
     public class Program
@@ -9,6 +10,7 @@ namespace Neighborhood.Services.API
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -18,6 +20,8 @@ namespace Neighborhood.Services.API
 
             app.UseAuthorization();
 
+            //app.MapHub<ChatHub>("/chattt");
+            //app.MapHub<NotificationHub>("/notf");
 
             app.MapControllers();
 

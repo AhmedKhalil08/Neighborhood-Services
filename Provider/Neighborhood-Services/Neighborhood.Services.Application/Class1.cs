@@ -1,4 +1,5 @@
-﻿namespace Neighborhood.Services.Application
+﻿
+namespace Neighborhood.Services.Application
 {
     public class Class1
     {

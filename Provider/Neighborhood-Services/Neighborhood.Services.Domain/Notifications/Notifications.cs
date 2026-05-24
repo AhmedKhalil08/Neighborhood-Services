@@ -5,7 +5,7 @@ using Neighborhood.Services.Domain.Shared;
 
 namespace Neighborhood.Services.Domain.Notifications
 {
-    public class Notifications: BaseEntity<int>
+    public class Notification: BaseEntity<int>
     {
       public int UserId {  get; set; }
        public NotificationTypes type { get; set; }

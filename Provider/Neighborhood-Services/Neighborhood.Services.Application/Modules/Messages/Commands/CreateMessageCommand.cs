@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Neighborhood.Services.Domain.Shared;
+using MediatR;
+using Neighborhood.Services.Application.Modules.Messages.DTOs;
 
-
-namespace Neighborhood.Services.Domain.Message
+namespace Neighborhood.Services.Application.Modules.Messages.Commands
 {
-    public class Message:BaseEntity<int>
+    public class CreateMessageCommand: IRequest<MessageCreatedDto>
     {
-       //foriegn Key
+        //foriegn key
         public int ConversationId { get; set; }
         //foriegn Key
         public int SenderId { get; set; }

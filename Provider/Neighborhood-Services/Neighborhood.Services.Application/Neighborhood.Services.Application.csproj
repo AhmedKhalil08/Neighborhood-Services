@@ -7,12 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Neighborhood.Services.Domain\Neighborhood.Services.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Modules\Messages\Queries\" />
+    <Folder Include="Modules\Newsletter\" />
+    <Folder Include="Modules\Notifications\Commands\" />
+    <Folder Include="Modules\Notifications\DTOs\" />
+    <Folder Include="Modules\Notifications\Queries\" />
   </ItemGroup>
 
 </Project>
