@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.BookingImage
+namespace Neighborhood.Services.Domain.BookingImages
 {
     public class BookingImage
     {
