@@ -18,11 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Modules\Messages\Queries\" />
-    <Folder Include="Modules\Newsletter\" />
-    <Folder Include="Modules\Notifications\Commands\" />
-    <Folder Include="Modules\Notifications\DTOs\" />
-    <Folder Include="Modules\Notifications\Queries\" />
+    <Folder Include="Messages\Queries\" />
+    <Folder Include="Newsletter\" />
+    <Folder Include="Notifications\Commands\" />
+    <Folder Include="Notifications\DTOs\" />
+    <Folder Include="Notifications\Queries\" />
   </ItemGroup>
 
 </Project>
