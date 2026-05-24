@@ -1,0 +1,21 @@
+﻿using NetTopologySuite.Geometries;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Neighborhood.Services.Domain.CustomerAddress
+{
+    public class CustomerAddress
+    {
+        public int Id { get; set; }
+        public CustomerAddressLabel Label { get; set; }
+        public string Address { get; set; } = string.Empty;
+        public Point Location { get; set; } = null!;
+        public bool IsDefault { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+
+        public int ApplicationUserId { get; set; }
+    }
+}
