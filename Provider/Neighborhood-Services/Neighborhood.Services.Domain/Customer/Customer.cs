@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Neighborhood.Services.Domain.CustomerAddresses;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.Customer
+namespace Neighborhood.Services.Domain.Customers
 {
     public class Customer
     {
@@ -14,5 +15,8 @@ namespace Neighborhood.Services.Domain.Customer
 
 
         public string ApplicationUserId { get; set; } = string.Empty;
+
+        public ICollection<CustomerAddress> CustomerAddresses { get; set; } 
+            = new List<CustomerAddress>();
     }
 }

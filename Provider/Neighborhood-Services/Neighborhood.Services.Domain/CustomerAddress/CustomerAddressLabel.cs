@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.CustomerAddress
+namespace Neighborhood.Services.Domain.CustomerAddresses
 {
     public enum CustomerAddressLabel
     {

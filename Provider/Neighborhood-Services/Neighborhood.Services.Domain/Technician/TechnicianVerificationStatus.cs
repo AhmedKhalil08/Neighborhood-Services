@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.Technician
+namespace Neighborhood.Services.Domain.Technicians
 {
     public enum TechnicianVerificationStatus
     {

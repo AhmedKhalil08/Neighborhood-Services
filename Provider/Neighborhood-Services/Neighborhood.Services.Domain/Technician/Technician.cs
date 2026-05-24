@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Neighborhood.Services.Domain.TechnicianPhotos;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.Technician
+namespace Neighborhood.Services.Domain.Technicians
 {
     public class Technician
     {
@@ -19,5 +20,9 @@ namespace Neighborhood.Services.Domain.Technician
         public DateTime UpdatedAt { get; set; }
 
         public string ApplicationUserId { get; set; } = string.Empty;
+
+
+        public ICollection<TechnicianPhoto> TechnicianPhotos { get; set; } 
+            = new List<TechnicianPhoto>();
     }
 }

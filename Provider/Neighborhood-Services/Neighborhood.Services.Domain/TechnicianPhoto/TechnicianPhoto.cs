@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Neighborhood.Services.Domain.Technicians;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.TechnicianPhoto
+namespace Neighborhood.Services.Domain.TechnicianPhotos
 {
     public class TechnicianPhoto
     {
@@ -13,5 +14,8 @@ namespace Neighborhood.Services.Domain.TechnicianPhoto
 
 
         public string ApplicationUserId { get; set; } = string.Empty;
+
+        public int TechnicianId { get; set; }
+        public Technician Technician { get; set; } = null!;
     }
 }

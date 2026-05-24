@@ -1,9 +1,10 @@
-﻿using NetTopologySuite.Geometries;
+﻿using Neighborhood.Services.Domain.Customers;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Domain.CustomerAddress
+namespace Neighborhood.Services.Domain.CustomerAddresses
 {
     public class CustomerAddress
     {
@@ -17,5 +18,9 @@ namespace Neighborhood.Services.Domain.CustomerAddress
 
 
         public string ApplicationUserId { get; set; } = string.Empty;
+
+
+        public int CustomerId { get; set; }
+        public Customer Customer { get; set; } = null!;
     }
 }
