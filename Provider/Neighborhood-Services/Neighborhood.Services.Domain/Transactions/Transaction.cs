@@ -3,7 +3,7 @@ using Neighborhood.Services.Domain.Shared;
 using Neighborhood.Services.Domain.Wallets;
 namespace Neighborhood.Services.Domain.Transactions
 {
-    public class Transaction : BaseEntity
+    public class Transaction : BaseEntity<int>
     {
         public int? FromWalletId { get; set; }
         public int? ToWalletId { get; set; }
