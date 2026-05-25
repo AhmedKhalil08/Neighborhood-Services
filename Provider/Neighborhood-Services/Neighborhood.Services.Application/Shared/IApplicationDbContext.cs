@@ -1,9 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Neighborhood.Services.Domain.Conversation;
+﻿
 using Neighborhood.Services.Domain.Disputes;
 using Neighborhood.Services.Domain.Reviews;
 using Neighborhood.Services.Domain.Staffs;
 using Neighborhood.Services.Domain.SupportTickets;
+using Microsoft.EntityFrameworkCore;
+using Neighborhood.Services.Domain.Conversation;
+using Neighborhood.Services.Domain.Message;
+using Neighborhood.Services.Domain.Newsletter;
+using Neighborhood.Services.Domain.Notifications;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Neighborhood.Services.Application.Shared
 {
@@ -26,5 +33,14 @@ namespace Neighborhood.Services.Application.Shared
         DbSet<SupportMessage> SupportMessages { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+
+        //Arwa
+        public DbSet<Message> Messages { get; }
+        public DbSet<Conversation> Conversations { get;  }
+
+        public DbSet<Notification> Notifications { get;  }
+        public DbSet<Newsletter> Newsletters { get; }
+        ////////////////////END OF ARWA //////////////////////
     }
 }

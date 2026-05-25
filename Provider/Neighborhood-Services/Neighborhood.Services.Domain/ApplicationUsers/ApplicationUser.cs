@@ -52,5 +52,13 @@ namespace Neighborhood.Services.Domain.ApplicationUsers
 
 
 
+        
+    
+        //Nav Props added by Arwa
+        public ICollection<Message.Message> Messages { get; set; } = new List<Message.Message>();
+        //End of Arwa Additions
+
+
+
     }
 }
