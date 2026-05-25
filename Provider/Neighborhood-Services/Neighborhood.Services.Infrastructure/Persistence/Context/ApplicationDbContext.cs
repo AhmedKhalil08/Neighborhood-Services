@@ -7,6 +7,11 @@ using Neighborhood.Services.Domain.Disputes;
 using Neighborhood.Services.Domain.Reviews;
 using Neighborhood.Services.Domain.Staffs;
 using Neighborhood.Services.Domain.SupportTickets;
+
+using Neighborhood.Services.Domain.Message;
+using Neighborhood.Services.Domain.Notifications;
+using Neighborhood.Services.Domain.Newsletter;
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -37,6 +42,19 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Context
             base.OnModelCreating(Modelbuilder);
             Modelbuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
+
+       
+        
+        //Arwa
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
+
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Newsletter> Newsletters { get; set; }
+        ////////////////////END OF ARWA //////////////////////
+
+
+
 
 
     }
