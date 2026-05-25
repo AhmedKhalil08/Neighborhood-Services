@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neighborhood.Services.Application.User.Interfaces
+namespace Neighborhood.Services.Application.Users.Interfaces
 {
     public interface IUserRepository : IGenericRepository<ApplicationUser,string>
     {
