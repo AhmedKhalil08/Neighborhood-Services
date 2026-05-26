@@ -1,4 +1,7 @@
 
+using Neighborhood.Services.Application;
+using Neighborhood.Services.Infrastructure;
+
 namespace Neighborhood.Services.API
 {
     public class Program
@@ -11,8 +14,13 @@ namespace Neighborhood.Services.API
 
             builder.Services.AddControllers();
             builder.Services.AddSignalR();
-            builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(builder.Configuration);
+                      builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+
 
 
             var app = builder.Build();
