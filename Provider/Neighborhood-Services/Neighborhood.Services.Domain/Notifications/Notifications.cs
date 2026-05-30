@@ -7,7 +7,7 @@ namespace Neighborhood.Services.Domain.Notifications
 {
     public class Notification: BaseEntity<int>
     {
-      public int UserId {  get; set; }
+        public string UserId { get; set; } = string.Empty;
        public NotificationTypes type { get; set; }
       public string message { get; set; }
       public int refrenceId { get; set; }
@@ -16,7 +16,7 @@ namespace Neighborhood.Services.Domain.Notifications
         public DateTime createdAt { get; set; }
 
         //Nav Prop: User
-        public ApplicationUser.ApplicationUser User { set; get; } = new ApplicationUser.ApplicationUser();
+        public ApplicationUser.ApplicationUser User { set; get; } = null;
 
 
 

@@ -10,15 +10,15 @@ namespace Neighborhood.Services.Domain.favorites
 {
     public class Favorites :BaseEntity<int>
     {
-        public int UserId;
-        public int TechnicianId;
-        public DateTime addedAt = DateTime.Now;
+        public string UserId { set; get; }
+        public int TechnicianId { set; get; }
+        public DateTime addedAt { get; } = DateTime.Now;
 
         //Nav probs
-        public ApplicationUser.ApplicationUser User { get; set; } = new ApplicationUser.ApplicationUser();
+        public ApplicationUser.ApplicationUser User { get; set; } = null;
         //public User
         //public Technician
-        public Technician Technician { get; set; } = new Technician();
+        public Technician Technician { get; set; } = null;
 
     }
 }

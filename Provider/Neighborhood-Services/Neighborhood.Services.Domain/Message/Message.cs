@@ -20,8 +20,8 @@ namespace Neighborhood.Services.Domain.Message
         public DateTime createdAt = DateTime.UtcNow;
 
 
-        public ApplicationUser.ApplicationUser Sender { set; get; } = new ApplicationUser.ApplicationUser();
-        public Conversation.Conversation Conversation { set; get; } =new Conversation.Conversation();
+        public ApplicationUser.ApplicationUser Sender { set; get; } = null;
+        public Conversation.Conversation Conversation { set; get; } =null;
     }
 }
 
