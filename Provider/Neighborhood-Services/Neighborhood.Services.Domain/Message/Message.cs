@@ -10,7 +10,7 @@ namespace Neighborhood.Services.Domain.Message
         public string content { get; set; }
         public bool isRead { get; set; }
 
-        public DateTime createdAt = DateTime.UtcNow;
+        public DateTime createdAt {  get; set; }
 
 
         public ApplicationUser Sender { set; get; } = null;
