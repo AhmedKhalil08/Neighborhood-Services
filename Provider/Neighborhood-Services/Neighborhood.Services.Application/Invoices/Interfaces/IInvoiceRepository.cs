@@ -6,7 +6,7 @@ namespace Neighborhood.Services.Application.Invoices.Interfaces
     {
         Task<Invoice?> GetByBookingIdAsync(int bookingId);
         Task<IEnumerable<Invoice>> GetByCustomerIdAsync(int customerId);
-        Task<IEnumerable<Invoice>> GetByTechnicalIdAsync(DateTime startDate, DateTime endDate);
+        Task<IEnumerable<Invoice>> GetByTechnicianIdAsync(int technicianId);
         Task VoidAsync(int invoiceId);
     }
 }
