@@ -1,53 +1,58 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore.Storage;
 using Neighborhood.Services.Application.Escrows.DTOs;
 using Neighborhood.Services.Application.Escrows.Interfaces;
-using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Application.Shared;
-using Neighborhood.Services.Application.Transactions.Commands.CreateTransaction;
 using Neighborhood.Services.Application.Transactions.Interfaces;
 using Neighborhood.Services.Application.Wallets.Interfaces;
 using Neighborhood.Services.Domain.Escrows;
 using Neighborhood.Services.Domain.Transactions;
-namespace Neighborhood.Services.Application.Escrows.Commands.ReleaseEscrow
+namespace Neighborhood.Services.Application.Escrows.Commands.RefundEscrow
 {
-    public class ReleaseEscrowCommandHandler : IRequestHandler<ReleaseEscrowCommand, EscrowResponseDto>
+    public class RefundEscrowCommandHandler : IRequestHandler<RefundEscrowCommand, EscrowResponseDto>
     {
         private readonly IEscrowRepository _escrowRepository;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public ReleaseEscrowCommandHandler(IEscrowRepository escrowRepository, ITransactionRepository transactionRepository, IWalletRepository walletRepository, IUnitOfWork unitOfWork)
+
+        public RefundEscrowCommandHandler(
+            IEscrowRepository escrowRepository,
+            ITransactionRepository transactionRepository,
+            IWalletRepository walletRepository,
+            IUnitOfWork unitOfWork)
         {
             _escrowRepository = escrowRepository;
             _transactionRepository = transactionRepository;
             _walletRepository = walletRepository;
             _unitOfWork = unitOfWork;
         }
-        public async Task<EscrowResponseDto> Handle(ReleaseEscrowCommand request, CancellationToken cancellationToken)
+
+        public async Task<EscrowResponseDto> Handle(RefundEscrowCommand request, CancellationToken cancellationToken)
         {
             var escrow = (await _escrowRepository.GetByConditionAsync(
-                e => e.Id == request.EscrowId, includeProperties: "Booking.Technician")).FirstOrDefault()
+                e => e.Id == request.EscrowId,
+                includeProperties: "Booking.Customer"))
+                .FirstOrDefault()
                 ?? throw new KeyNotFoundException($"Escrow with ID {request.EscrowId} not found.");
 
             if (escrow.Status != EscrowStatus.Held)
-                throw new InvalidOperationException($"Escrow is not in Held status");
+                throw new InvalidOperationException("Escrow is not in Held status");
 
-            await _escrowRepository.ReleaseAsync(request.EscrowId);
+            var customerWallet = await _walletRepository.GetByUserIdAsync(
+                escrow.Booking.Customer.ApplicationUserId)
+                ?? throw new KeyNotFoundException("Customer wallet not found");
 
-            var technicianWallet = await _walletRepository.GetByUserIdAsync(
-                escrow.Booking.Technician.ApplicationUserId) ??
-                throw new NotFoundException($"Technician's wallet not found.");
+            await _escrowRepository.RefundAsync(request.EscrowId);
 
             await _transactionRepository.AddAsync(new Transaction
             {
                 FromWalletId = escrow.WalletId,
-                ToWalletId = technicianWallet.Id,
+                ToWalletId = customerWallet.Id,
                 PaymentMethodId = null,
                 Amount = escrow.Amount,
                 Fee = 0,
                 Currency = "EGP",
-                Type = TransactionType.Transfer,
+                Type = TransactionType.Refund,
                 Status = TransactionStatus.Completed,
                 CreatedAt = DateTime.UtcNow
             });
@@ -60,7 +65,7 @@ namespace Neighborhood.Services.Application.Escrows.Commands.ReleaseEscrow
                 BookingId = escrow.BookingId,
                 WalletId = escrow.WalletId,
                 Amount = escrow.Amount,
-                Status = EscrowStatus.Released,
+                Status = EscrowStatus.Refunded,
                 HeldAt = escrow.HeldAt,
                 ReleasedAt = DateTime.UtcNow
             };
