@@ -28,7 +28,7 @@ namespace Neighborhood.Services.Infrastructure.Persistence.AvilabilitiesExceptio
 
 
             builder.HasOne(AE => AE.Technician)
-                    .WithMany(e=>e.AvailabilityExceptions)
+                    .WithMany(t=>t.AvailabilityExceptions)
                     .HasForeignKey(AE => AE.TechnicianId)
                     .OnDelete(DeleteBehavior.NoAction);
 

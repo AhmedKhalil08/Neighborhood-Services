@@ -21,8 +21,8 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Escrows
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(e => e.Booking)
-                .WithOne(e=>e.Escrow)
-                .HasForeignKey<Escrow>(l => l.BookingId)
+                .WithOne(b=>b.Escrow)
+                .HasForeignKey<Escrow>(e => e.BookingId)
                 .OnDelete(DeleteBehavior.NoAction);
 
         }

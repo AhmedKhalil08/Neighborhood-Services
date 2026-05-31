@@ -13,12 +13,12 @@ namespace Neighborhood.Services.Infrastructure.Persistence.PromoCodes
             builder.Property(pu => pu.BookingId);
             builder.Property(pu => pu.UsedAt);
             builder.HasOne(pu => pu.PromoCode)
-                .WithMany(e=>e.Usages)
+                .WithMany(p=>p.Usages)
                 .HasForeignKey(pu => pu.PromoCodeId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(pu => pu.Booking)
-               .WithOne(e=>e.PromoCodeUsages)
+               .WithOne(b=>b.PromoCodeUsages)
                .HasForeignKey<PromoCodeUsage>(pu => pu.BookingId)
                .OnDelete(DeleteBehavior.NoAction);
         }

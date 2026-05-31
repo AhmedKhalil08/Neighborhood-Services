@@ -27,11 +27,11 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Invoices
                 .HasForeignKey<Invoice>(x => x.TransactionId)
                 .OnDelete(DeleteBehavior.NoAction);
             builder.HasOne(x => x.Customer)
-                .WithMany(x=>x.Invoices)
+                .WithMany(c=>c.Invoices)
                 .HasForeignKey(x => x.CustomerId)
                 .OnDelete(DeleteBehavior.NoAction);
             builder.HasOne(x => x.Technician)
-                .WithMany(e=>e.Invoices)
+                .WithMany(t=>t.Invoices)
                 .HasForeignKey(x => x.TechnicianId)
                 .OnDelete(DeleteBehavior.NoAction);
             builder.Property(x => x.PaidAt);
