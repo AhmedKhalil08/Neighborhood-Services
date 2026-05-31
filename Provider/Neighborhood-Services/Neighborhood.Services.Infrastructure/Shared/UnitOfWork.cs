@@ -1,10 +1,6 @@
 ﻿using Neighborhood.Services.Application.Shared;
 
-using Neighborhood.Services.Infrastructure.Persistence.Context; 
-
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Neighborhood.Services.Infrastructure.Persistence.Context;
 
 namespace Neighborhood.Services.Infrastructure.Shared
 {
