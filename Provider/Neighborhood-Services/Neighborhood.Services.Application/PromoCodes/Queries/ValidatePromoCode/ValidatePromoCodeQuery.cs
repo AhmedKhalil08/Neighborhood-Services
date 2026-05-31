@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿using MediatR;
 namespace Neighborhood.Services.Application.PromoCodes.Queries.ValidatePromoCode
 {
-    internal class ValidatePromoCodeQuery
+    public class ValidatePromoCodeQuery : IRequest<bool>
     {
+        public string Code { get; set; } = string.Empty;
     }
 }
