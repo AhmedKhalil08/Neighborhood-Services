@@ -28,7 +28,6 @@
     <Folder Include="BookingImages\Commands\" />
     <Folder Include="BookingImages\DTOs\" />
     <Folder Include="BookingImages\Queries\" />
-    <Folder Include="CancellationPolicies\Commands\" />
     <Folder Include="CancellationPolicies\DTOs\" />
     <Folder Include="CancellationPolicies\Queries\" />
     <Folder Include="Messages\Queries\" />
