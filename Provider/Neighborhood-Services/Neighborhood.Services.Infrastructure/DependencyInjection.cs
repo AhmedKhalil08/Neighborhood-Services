@@ -26,6 +26,7 @@ using Neighborhood.Services.Application.Staffs.Interfaces;
 using Neighborhood.Services.Application.SupportTickets.Interfaces;
 using Neighborhood.Services.Application.Technicians.Interfaces;
 using Neighborhood.Services.Application.Transactions.Interfaces;
+using Neighborhood.Services.Application.Users.Interfaces;
 using Neighborhood.Services.Application.Wallets.Interfaces;
 using Neighborhood.Services.Infrastructure.Persistence.AgentLogs;
 using Neighborhood.Services.Infrastructure.Persistence.AiAnalysises;
@@ -56,6 +57,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Technicians;
 using Neighborhood.Services.Infrastructure.Persistence.TechnitianAvailability;
 using Neighborhood.Services.Infrastructure.Persistence.TechnitianPricing;
 using Neighborhood.Services.Infrastructure.Persistence.Transactions;
+using Neighborhood.Services.Infrastructure.Persistence.Users;
 using Neighborhood.Services.Infrastructure.Persistence.Wallets;
 using Neighborhood.Services.Infrastructure.Shared;
 using System;
@@ -80,6 +82,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IOfferRepository, OfferRepository>();
             services.AddScoped<IRecurringBookingRepository, RecurringBookingRepository>();
             services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             //--
             services.AddScoped<IWalletRepository, WalletRepository>();
