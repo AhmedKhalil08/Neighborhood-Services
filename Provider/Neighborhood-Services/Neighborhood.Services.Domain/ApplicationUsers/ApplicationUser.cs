@@ -46,7 +46,7 @@ namespace Neighborhood.Services.Domain.ApplicationUsers
         public Customer Customer { get; set; } = null!;
         public Staff Staff { get; set; } = null!;
         public Technician Technician { get; set; } = null!;
-        public Wallet Wallet { get; set; } = null!;
+        public Wallet? Wallet { get; set; } = null!;
 
 
 
