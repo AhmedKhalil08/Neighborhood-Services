@@ -1,11 +1,13 @@
 using MediatR;
 using Neighborhood.Services.Application.Bookings.Interface;
 using Neighborhood.Services.Application.CancellationPolicies.Interfaces;
+using Neighborhood.Services.Application.Escrows.Commands.RefundEscrow;
 using Neighborhood.Services.Application.Escrows.Interfaces;
 using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Application.Shared;
 using Neighborhood.Services.Domain.Bookings;
 using Neighborhood.Services.Domain.CancellationPolicies;
+using Neighborhood.Services.Domain.Escrows;
 
 namespace Neighborhood.Services.Application.Bookings.Commands.CancelBookingCommands
 {
@@ -15,13 +17,20 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CancelBookingComma
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICancellationPolicyRepository _cancellationPolicyRepository;
         private readonly IEscrowRepository _escrowRepository;
+        private readonly IMediator _mediator;
 
-        public CancelBookingCommandHandler(IBookingRepository bookingRepository, IUnitOfWork unitOfWork, ICancellationPolicyRepository cancellationPolicyRepository , IEscrowRepository escrowRepository)
+        public CancelBookingCommandHandler(
+            IBookingRepository bookingRepository,
+            IUnitOfWork unitOfWork,
+            ICancellationPolicyRepository cancellationPolicyRepository,
+            IEscrowRepository escrowRepository,
+            IMediator mediator)
         {
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
-            _cancellationPolicyRepository= cancellationPolicyRepository;
+            _cancellationPolicyRepository = cancellationPolicyRepository;
             _escrowRepository = escrowRepository;
+            _mediator = mediator;
         }
 
         public async Task<bool> Handle(CancelBookingCommand request, CancellationToken cancellationToken)
@@ -53,9 +62,16 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CancelBookingComma
             {
                 var escrow = await _escrowRepository.GetByBookingIdAsync(booking.Id);
 
-                // TODO: Deduct penalty from escrow
+                // TODO: Deduct penalty from escrow before refunding remainder
                 // penalty amount = escrow.Amount * policy.PenaltyPct / 100
-                // Coordinate with (financials)
+                // Coordinate with Ziad (financials) — needs partial refund support
+            }
+            else
+            {
+                // No penalty — full refund if escrow exists and is still held
+                var escrow = await _escrowRepository.GetByBookingIdAsync(booking.Id);
+                if (escrow is not null && escrow.Status == EscrowStatus.Held)
+                    await _mediator.Send(new RefundEscrowCommand { EscrowId = escrow.Id }, cancellationToken);
             }
 
 

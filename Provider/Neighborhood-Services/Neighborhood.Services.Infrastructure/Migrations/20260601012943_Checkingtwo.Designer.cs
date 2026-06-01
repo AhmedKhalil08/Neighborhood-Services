@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace Neighborhood.Services.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260531002639_init")]
-    partial class init
+    [Migration("20260601012943_Checkingtwo")]
+    partial class Checkingtwo
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -496,6 +496,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("EstimatedPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -558,7 +561,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[ServiceRequestId] IS NOT NULL");
 
-                    b.HasIndex("TechnicianId");
+                    b.HasIndex("TechnicianId", "ScheduledAt")
+                        .IsUnique()
+                        .HasFilter("[Status] != 'Cancelled'");
 
                     b.ToTable("Bookings");
                 });
@@ -1129,7 +1134,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.Property<string>("ProviderToken")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1229,6 +1235,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.ToTable("PromoCodes");
                 });
 
@@ -1255,8 +1264,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<DateTime>("UsedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -1265,7 +1275,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasIndex("BookingId")
                         .IsUnique();
 
-                    b.HasIndex("PromoCodeId");
+                    b.HasIndex("PromoCodeId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("PromoCodeUsages");
                 });
@@ -1471,6 +1482,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.Property<int>("ProblemTypeId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1929,6 +1943,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FromWalletId");
+
+                    b.HasIndex("OriginalTransactionId");
 
                     b.HasIndex("PaymentMethodId");
 

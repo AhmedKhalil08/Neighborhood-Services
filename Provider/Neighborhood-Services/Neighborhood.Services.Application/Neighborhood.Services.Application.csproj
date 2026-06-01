@@ -42,8 +42,6 @@
     <Folder Include="RecurringBookings\Commands\" />
     <Folder Include="RecurringBookings\DTOs\" />
     <Folder Include="RecurringBookings\Queries\" />
-    <Folder Include="ServiceRequests\Commands\" />
-    <Folder Include="ServiceRequests\DTOs\" />
     <Folder Include="ServiceRequests\Queries\" />
   </ItemGroup>
 

@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace Neighborhood.Services.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260531181720_MoneyFlowConsistency")]
-    partial class MoneyFlowConsistency
+    [Migration("20260531221221_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -558,7 +558,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[ServiceRequestId] IS NOT NULL");
 
-                    b.HasIndex("TechnicianId");
+                    b.HasIndex("TechnicianId", "ScheduledAt")
+                        .IsUnique()
+                        .HasFilter("[Status] != 'Cancelled'");
 
                     b.ToTable("Bookings");
                 });

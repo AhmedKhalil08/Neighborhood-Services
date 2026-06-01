@@ -1,8 +1,11 @@
 using MediatR;
 using Neighborhood.Services.Application.Bookings.Interface;
+using Neighborhood.Services.Application.Escrows.Commands.ReleaseEscrow;
+using Neighborhood.Services.Application.Escrows.Interfaces;
 using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Application.Shared;
 using Neighborhood.Services.Domain.Bookings;
+using Neighborhood.Services.Domain.Escrows;
 
 namespace Neighborhood.Services.Application.Bookings.Commands.ConfirmBookingCommands
 {
@@ -10,11 +13,19 @@ namespace Neighborhood.Services.Application.Bookings.Commands.ConfirmBookingComm
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMediator _mediator;
+        private readonly IEscrowRepository _escrowRepository;
 
-        public ConfirmBookingCommandHandler(IBookingRepository bookingRepository, IUnitOfWork unitOfWork)
+        public ConfirmBookingCommandHandler(
+            IBookingRepository bookingRepository,
+            IUnitOfWork unitOfWork,
+            IMediator mediator,
+            IEscrowRepository escrowRepository)
         {
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
+            _mediator = mediator;
+            _escrowRepository = escrowRepository;
         }
 
         public async Task<bool> Handle(ConfirmBookingCommand request, CancellationToken cancellationToken)
@@ -29,19 +40,17 @@ namespace Neighborhood.Services.Application.Bookings.Commands.ConfirmBookingComm
 
             if (booking.ClientConfirmed)
                 throw new BadRequestException("Booking has already been confirmed by the client.");
+            // TODO: Authorization check once current user service is ready
+            // Only the customer who created this booking can confirm it
+            // booking.Customer.UserId == requestingUserId
 
             booking.ClientConfirmed = true;
             booking.ConfirmedAt = DateTime.UtcNow;
             booking.UpdatedAt = DateTime.UtcNow;
 
-            // TODO: release escrow funds to technician wallet
-            // coordinate with financials teammate
-            // TODO: Release escrow funds to technician wallet
-            // When ClientConfirmed = true:
-            // 1. Get Escrow by BookingId
-            // 2. Transfer amount from Escrow to Technician wallet
-            // 3. Update Escrow status to Released
-            // Coordinate with Mahmoud (financials)
+            var escrow = await _escrowRepository.GetByBookingIdAsync(booking.Id);
+            if (escrow is not null && escrow.Status == EscrowStatus.Held)
+                await _mediator.Send(new ReleaseEscrowCommand { EscrowId = escrow.Id }, cancellationToken);
 
             await _bookingRepository.UpdateAsync(booking);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

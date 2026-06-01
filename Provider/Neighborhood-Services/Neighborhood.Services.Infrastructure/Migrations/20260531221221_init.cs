@@ -413,7 +413,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     PaymentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PaymentProvider = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProviderToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProviderToken = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     LastFourDigits = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: true),
                     ExpiryMonth = table.Column<int>(type: "int", nullable: true),
                     ExpiryYear = table.Column<int>(type: "int", nullable: true),
@@ -1051,7 +1051,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PromoCodeId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BookingId = table.Column<int>(type: "int", nullable: false),
                     UsedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -1333,9 +1333,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 filter: "[ServiceRequestId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_TechnicianId",
+                name: "IX_Bookings_TechnicianId_ScheduledAt",
                 table: "Bookings",
-                column: "TechnicianId");
+                columns: new[] { "TechnicianId", "ScheduledAt" },
+                unique: true,
+                filter: "[Status] != 'Cancelled'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Conversations_BookingId",
@@ -1469,6 +1471,12 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PromoCodes_Code",
+                table: "PromoCodes",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PromoCodeUsages_ApplicationUserId",
                 table: "PromoCodeUsages",
                 column: "ApplicationUserId");
@@ -1480,9 +1488,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PromoCodeUsages_PromoCodeId",
+                name: "IX_PromoCodeUsages_PromoCodeId_UserId",
                 table: "PromoCodeUsages",
-                column: "PromoCodeId");
+                columns: new[] { "PromoCodeId", "UserId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RecurringBookings_CustomerId",
@@ -1662,6 +1671,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 name: "IX_Transactions_FromWalletId",
                 table: "Transactions",
                 column: "FromWalletId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_OriginalTransactionId",
+                table: "Transactions",
+                column: "OriginalTransactionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_PaymentMethodId",
