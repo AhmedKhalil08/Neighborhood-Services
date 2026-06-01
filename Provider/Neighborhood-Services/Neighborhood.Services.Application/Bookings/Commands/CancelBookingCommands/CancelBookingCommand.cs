@@ -5,7 +5,7 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CancelBookingComma
     public class CancelBookingCommand : IRequest<bool>
     {
         public int BookingId { get; set; }
-        public string CancelledBy { get; set; } = string.Empty;
+        // CancelledBy is resolved from the authenticated user in the handler.
         public string CancellationReason { get; set; } = string.Empty;
     }
 }

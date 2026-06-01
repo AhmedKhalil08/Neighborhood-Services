@@ -15,34 +15,41 @@ namespace Neighborhood.Services.Application.Bookings.Commands.ConfirmBookingComm
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMediator _mediator;
         private readonly IEscrowRepository _escrowRepository;
+        private readonly ICurrentUserService _currentUserService;
 
         public ConfirmBookingCommandHandler(
             IBookingRepository bookingRepository,
             IUnitOfWork unitOfWork,
             IMediator mediator,
-            IEscrowRepository escrowRepository)
+            IEscrowRepository escrowRepository,
+            ICurrentUserService currentUserService)
         {
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
             _mediator = mediator;
             _escrowRepository = escrowRepository;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(ConfirmBookingCommand request, CancellationToken cancellationToken)
         {
-            var booking = await _bookingRepository.GetByIdAsync(request.BookingId);
+            var userId = _currentUserService.UserId
+                ?? throw new UnauthorizedException("User is not authenticated.");
+
+            var booking = await _bookingRepository.GetBookingWithDetailsAsync(request.BookingId);
 
             if (booking is null)
                 throw new NotFoundException(nameof(Booking), request.BookingId);
+
+            // Only the customer who owns this booking can confirm it
+            if (booking.Customer.ApplicationUserId != userId)
+                throw new ForbiddenException("You don't have access to this booking.");
 
             if (booking.Status != BookingStatus.Completed)
                 throw new BadRequestException("Booking can only be confirmed by the client after it is marked Completed by the technician.");
 
             if (booking.ClientConfirmed)
                 throw new BadRequestException("Booking has already been confirmed by the client.");
-            // TODO: Authorization check once current user service is ready
-            // Only the customer who created this booking can confirm it
-            // booking.Customer.UserId == requestingUserId
 
             booking.ClientConfirmed = true;
             booking.ConfirmedAt = DateTime.UtcNow;

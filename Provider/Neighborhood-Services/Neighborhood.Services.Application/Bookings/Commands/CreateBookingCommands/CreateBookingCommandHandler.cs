@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Neighborhood.Services.Application.Bookings.Interface;
 using Neighborhood.Services.Application.Bookings.Services;
+using Neighborhood.Services.Application.Customers.Interfaces;
 using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Application.PromoCodes.Interface;
 using Neighborhood.Services.Application.Shared;
@@ -20,20 +21,31 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CreateBookingComma
         private readonly IPriceEstimationService _priceEstimationService;
         private readonly ITechnicianAvailabilityRepository _technicianAvailabilityRepository;
         private readonly IPromoCodeRepository _promoCodeRepository;
-        // trying to handle concurrency 
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ICustomerRepository _customerRepository;
+        // trying to handle concurrency
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
-        public CreateBookingCommandHandler(IBookingRepository bookingRepository, IUnitOfWork unitOfWork, IPriceEstimationService priceEstimationService, ITechnicianAvailabilityRepository technicianAvailabilityRepository, IPromoCodeRepository promoCodeRepository)
+        public CreateBookingCommandHandler(IBookingRepository bookingRepository, IUnitOfWork unitOfWork, IPriceEstimationService priceEstimationService, ITechnicianAvailabilityRepository technicianAvailabilityRepository, IPromoCodeRepository promoCodeRepository, ICurrentUserService currentUserService, ICustomerRepository customerRepository)
         {
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
             _priceEstimationService = priceEstimationService;
             _technicianAvailabilityRepository = technicianAvailabilityRepository;
             _promoCodeRepository = promoCodeRepository;
+            _currentUserService = currentUserService;
+            _customerRepository = customerRepository;
         }
 
         public async Task<int> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
         {
             PromoCode? promoCode = null;
+
+            // Resolve the customer from the authenticated user
+            var userId = _currentUserService.UserId
+                ?? throw new UnauthorizedException("User is not authenticated.");
+            var customer = await _customerRepository.GetByUserIdAsync(userId)
+                ?? throw new NotFoundException("Customer", userId);
+
             // Trying the Lock : Per technician + time slot lock
             var lockKey = $"{request.TechnicianId}_{request.ScheduledAt:yyyyMMddHHmm}";
             var semaphore = _locks.GetOrAdd(lockKey, _ => new SemaphoreSlim(1, 1));
@@ -83,7 +95,7 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CreateBookingComma
 
             var booking = new Booking
             {
-                CustomerId = request.CustomerId,
+                CustomerId = customer.Id,
                 ProblemTypeId = request.ProblemTypeId,
                 Description = request.Description,
                 Address = request.Address,

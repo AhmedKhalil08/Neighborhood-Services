@@ -13,23 +13,33 @@ namespace Neighborhood.Services.Application.BookingImages.Commands
         private readonly IBookingImageRepository _bookingImageRepository;
         private readonly IBookingRepository _bookingRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService _currentUserService;
 
         public UploadBookingImageCommandHandler(
             IBookingImageRepository bookingImageRepository,
             IBookingRepository bookingRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService)
         {
             _bookingImageRepository = bookingImageRepository;
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
+            _currentUserService = currentUserService;
         }
 
         public async Task<int> Handle(UploadBookingImageCommand request, CancellationToken cancellationToken)
         {
-            var booking = await _bookingRepository.GetByIdAsync(request.BookingId);
+            var userId = _currentUserService.UserId
+                ?? throw new UnauthorizedException("User is not authenticated.");
+
+            var booking = await _bookingRepository.GetBookingWithDetailsAsync(request.BookingId);
 
             if (booking is null)
                 throw new NotFoundException(nameof(Booking), request.BookingId);
+
+            // Only the customer or technician on this booking can upload images
+            if (booking.Customer.ApplicationUserId != userId && booking.Technician.ApplicationUserId != userId)
+                throw new ForbiddenException("You don't have access to this booking.");
 
             if (!IsValidHttpUrl(request.ImageUrl))
                 throw new BadRequestException("ImageUrl must be a valid absolute http/https URL.");
@@ -39,7 +49,7 @@ namespace Neighborhood.Services.Application.BookingImages.Commands
                 BookingId = request.BookingId,
                 ImageUrl = request.ImageUrl,
                 Type = request.Type,
-                UploadedBy = request.UploadedBy,
+                UploadedBy = userId,
                 UploadedAt = DateTime.UtcNow
             };
 

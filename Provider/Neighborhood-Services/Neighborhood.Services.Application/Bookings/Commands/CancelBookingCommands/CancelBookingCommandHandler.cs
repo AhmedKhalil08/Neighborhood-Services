@@ -18,38 +18,45 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CancelBookingComma
         private readonly ICancellationPolicyRepository _cancellationPolicyRepository;
         private readonly IEscrowRepository _escrowRepository;
         private readonly IMediator _mediator;
+        private readonly ICurrentUserService _currentUserService;
 
         public CancelBookingCommandHandler(
             IBookingRepository bookingRepository,
             IUnitOfWork unitOfWork,
             ICancellationPolicyRepository cancellationPolicyRepository,
             IEscrowRepository escrowRepository,
-            IMediator mediator)
+            IMediator mediator,
+            ICurrentUserService currentUserService)
         {
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
             _cancellationPolicyRepository = cancellationPolicyRepository;
             _escrowRepository = escrowRepository;
             _mediator = mediator;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(CancelBookingCommand request, CancellationToken cancellationToken)
         {
-            var booking = await _bookingRepository.GetBookingWithDetailsAsync(request.BookingId);
-            // TODO: Authorization check once current user service is ready
-            // Verify requesting user is either the customer or technician of this booking
-            // if (booking.Customer.UserId != requestingUserId && booking.Technician.UserId != requestingUserId)
-            //     throw new ForbiddenException("You don't have access to this booking");
+            var userId = _currentUserService.UserId
+                ?? throw new UnauthorizedException("User is not authenticated.");
 
-            // checking if booking exists 
+            var booking = await _bookingRepository.GetBookingWithDetailsAsync(request.BookingId);
+
+            // checking if booking exists
             if (booking is null)
                 throw new NotFoundException(nameof(Booking), request.BookingId);
 
+            // Authorization: only the customer or technician on this booking can cancel it
+            var cancelledByCustomer = booking.Customer.ApplicationUserId == userId;
+            var cancelledByTechnician = booking.Technician.ApplicationUserId == userId;
+            if (!cancelledByCustomer && !cancelledByTechnician)
+                throw new ForbiddenException("You don't have access to this booking.");
+
             if (booking.Status == BookingStatus.Cancelled || booking.Status == BookingStatus.Completed)
                 throw new BadRequestException($"Booking cannot be cancelled because it is already {booking.Status}.");
-            // getting who cancelled it ?
-            // Determine who is cancelling
-            var cancelledByCustomer = booking.Customer.ApplicationUserId == request.CancelledBy;
+
+            // Determine who is cancelling, to pick the right cancellation policy target
             var target = cancelledByCustomer
                 ? CancellationPolicyTarget.Customer
                 : CancellationPolicyTarget.Technican;
@@ -77,7 +84,7 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CancelBookingComma
 
             booking.Status = BookingStatus.Cancelled;
             booking.CancellationReason = request.CancellationReason;
-            booking.CancelledBy = request.CancelledBy;
+            booking.CancelledBy = userId;
             booking.CancelledAt = DateTime.UtcNow;
             booking.UpdatedAt = DateTime.UtcNow;
 

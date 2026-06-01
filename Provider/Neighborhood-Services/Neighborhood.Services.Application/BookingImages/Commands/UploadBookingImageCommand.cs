@@ -9,7 +9,6 @@ namespace Neighborhood.Services.Application.BookingImages.Commands
         // ImageUrl is the already-hosted URL returned by the frontend's direct upload to Cloudinary
         public string ImageUrl { get; set; } = string.Empty;
         public BookingImageType Type { get; set; }
-        // TODO: UploadedBy will come from current user service when available
-        public string UploadedBy { get; set; } = string.Empty;
+        // UploadedBy is resolved from the authenticated user in the handler.
     }
 }

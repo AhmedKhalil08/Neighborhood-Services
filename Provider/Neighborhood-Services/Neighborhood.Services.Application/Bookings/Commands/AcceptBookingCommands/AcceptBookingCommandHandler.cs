@@ -14,17 +14,20 @@ namespace Neighborhood.Services.Application.Bookings.Commands.AcceptBookingComma
         private readonly IWalletRepository _walletRepository;
         private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService _currentUserService;
 
         public AcceptBookingCommandHandler(
             IBookingRepository bookingRepository,
             IWalletRepository walletRepository,
             IMediator mediator,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService)
         {
             _bookingRepository = bookingRepository;
             _walletRepository = walletRepository;
             _mediator = mediator;
             _unitOfWork = unitOfWork;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(AcceptBookingCommand request, CancellationToken cancellationToken)
@@ -32,13 +35,17 @@ namespace Neighborhood.Services.Application.Bookings.Commands.AcceptBookingComma
             if (request.DurationMinutes <= 0)
                 throw new ValidationException("Duration must be greater than zero.");
 
+            var userId = _currentUserService.UserId
+                ?? throw new UnauthorizedException("User is not authenticated.");
+
             var booking = await _bookingRepository.GetBookingWithDetailsAsync(request.BookingId);
 
             if (booking is null)
                 throw new NotFoundException(nameof(Booking), request.BookingId);
 
-            // TODO: Authorization check once current user service is ready
             // Only the assigned technician can accept this booking
+            if (booking.Technician.ApplicationUserId != userId)
+                throw new ForbiddenException("You don't have access to this booking.");
 
             if (booking.Status != BookingStatus.Pending)
                 throw new BadRequestException($"Only a pending booking can be accepted. Current status: {booking.Status}.");

@@ -1,4 +1,5 @@
 using MediatR;
+using Neighborhood.Services.Application.Customers.Interfaces;
 using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Application.ServiceRequests.Interfaces;
 using Neighborhood.Services.Application.Shared;
@@ -11,11 +12,15 @@ namespace Neighborhood.Services.Application.ServiceRequests.Commands.CreateServi
     {
         private readonly IServiceRequestRepository _serviceRequestRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ICustomerRepository _customerRepository;
 
-        public CreateServiceRequestCommandHandler(IServiceRequestRepository serviceRequestRepository, IUnitOfWork unitOfWork)
+        public CreateServiceRequestCommandHandler(IServiceRequestRepository serviceRequestRepository, IUnitOfWork unitOfWork, ICurrentUserService currentUserService, ICustomerRepository customerRepository)
         {
             _serviceRequestRepository = serviceRequestRepository;
             _unitOfWork = unitOfWork;
+            _currentUserService = currentUserService;
+            _customerRepository = customerRepository;
         }
 
         public async Task<int> Handle(CreateServiceRequestCommand request, CancellationToken cancellationToken)
@@ -32,9 +37,15 @@ namespace Neighborhood.Services.Application.ServiceRequests.Commands.CreateServi
             if (request.ScheduledAt <= DateTime.UtcNow)
                 throw new ValidationException("Scheduled time cannot be in the past");
 
+            // Resolve the customer from the authenticated user
+            var userId = _currentUserService.UserId
+                ?? throw new UnauthorizedException("User is not authenticated.");
+            var customer = await _customerRepository.GetByUserIdAsync(userId)
+                ?? throw new NotFoundException("Customer", userId);
+
             var serviceRequest = new ServiceRequest
             {
-                CustomerId = request.CustomerId,
+                CustomerId = customer.Id,
                 CategoryId = request.CategoryId,
                 ProblemTypeId = request.ProblemTypeId,
                 Description = request.Description,

@@ -10,22 +10,28 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CompleteBookingCom
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CompleteBookingCommandHandler(IBookingRepository bookingRepository, IUnitOfWork unitOfWork)
+        public CompleteBookingCommandHandler(IBookingRepository bookingRepository, IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
         {
             _bookingRepository = bookingRepository;
             _unitOfWork = unitOfWork;
+            _currentUserService = currentUserService;
         }
 
         public async Task<bool> Handle(CompleteBookingCommand request, CancellationToken cancellationToken)
         {
-            var booking = await _bookingRepository.GetByIdAsync(request.BookingId);
+            var userId = _currentUserService.UserId
+                ?? throw new UnauthorizedException("User is not authenticated.");
+
+            var booking = await _bookingRepository.GetBookingWithDetailsAsync(request.BookingId);
 
             if (booking is null)
                 throw new NotFoundException(nameof(Booking), request.BookingId);
 
-            // TODO: Authorization check once current user service is ready
             // Only the assigned technician can mark the booking Completed
+            if (booking.Technician.ApplicationUserId != userId)
+                throw new ForbiddenException("You don't have access to this booking.");
 
             if (booking.Status != BookingStatus.Confirmed)
                 throw new BadRequestException($"Only a confirmed booking can be completed. Current status: {booking.Status}.");

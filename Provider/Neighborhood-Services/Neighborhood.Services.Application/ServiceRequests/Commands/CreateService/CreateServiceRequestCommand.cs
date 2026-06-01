@@ -4,8 +4,7 @@ namespace Neighborhood.Services.Application.ServiceRequests.Commands.CreateServi
 {
     public class CreateServiceRequestCommand : IRequest<int>
     {
-        // TODO: CustomerId will come from current user service when available
-        public int CustomerId { get; set; }
+        // CustomerId is resolved from the authenticated user in the handler.
         public int CategoryId { get; set; }
         public int ProblemTypeId { get; set; }
         public string Description { get; set; } = string.Empty;

@@ -5,7 +5,6 @@ namespace Neighborhood.Services.Application.Bookings.Commands.ConfirmBookingComm
     public class ConfirmBookingCommand : IRequest<bool>
     {
         public int BookingId { get; set; }
-        // TODO: ConfirmedBy will come from current user service when available
-        public string ConfirmedBy { get; set; } = string.Empty;
+        // The confirming customer is resolved from the authenticated user in the handler.
     }
 }

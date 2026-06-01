@@ -9,8 +9,7 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CreateBookingComma
     // Bidding bookings are created internally via AcceptOfferCommand.
     public class CreateBookingCommand : IRequest<int>
     {
-        // TODO: CustomerId will come from current user service when available
-        public int CustomerId { get; set; }
+        // CustomerId is resolved from the authenticated user in the handler.
         public int TechnicianId { get; set; }
         public int ProblemTypeId { get; set; }
         public string Description { get; set; } = string.Empty;
