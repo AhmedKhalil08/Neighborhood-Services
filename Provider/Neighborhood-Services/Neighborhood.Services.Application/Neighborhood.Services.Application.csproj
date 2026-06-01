@@ -43,6 +43,7 @@
     <Folder Include="RecurringBookings\DTOs\" />
     <Folder Include="RecurringBookings\Queries\" />
     <Folder Include="ServiceRequests\Queries\" />
+    <Folder Include="Users\Services\" />
   </ItemGroup>
 
 </Project>
