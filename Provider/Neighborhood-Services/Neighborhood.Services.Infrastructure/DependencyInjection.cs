@@ -9,16 +9,13 @@ using Neighborhood.Services.Application.AvilabilitiesException;
 using Neighborhood.Services.Application.BookingImages.Interface;
 using Neighborhood.Services.Application.Bookings.Interface;
 using Neighborhood.Services.Application.CancellationPolicies.Interfaces;
-<<<<<<< HEAD
-=======
 using Neighborhood.Services.Application.Categories;
 using Neighborhood.Services.Application.Conversations;
->>>>>>> 95eca3d6b98319c71763fd73f9bb786a2fd9ab75
 using Neighborhood.Services.Application.CustomerAddresses.Interfaces;
 using Neighborhood.Services.Application.Customers.Interfaces;
 using Neighborhood.Services.Application.Disputes.Interfaces;
 using Neighborhood.Services.Application.Escrows.Interfaces;
-using Neighborhood.Services.Application.HistoricalPrices;
+using Neighborhood.Services.Application.HistoricalPrices.Interfaces;
 using Neighborhood.Services.Application.Invoices.Interfaces;
 using Neighborhood.Services.Application.Offers.Interfaces;
 using Neighborhood.Services.Application.Payments.Interfaces;
@@ -101,6 +98,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 
             services.AddScoped<ITechnicianRepository, TechnicianRepository>();
+
             services.AddScoped<ITechnicianAvailabilityRepository, TechnitianAvailabilityRepository>();
             services.AddScoped<IAvailabilityExceptionRepository, AvailabilityExceptionRepository>();
             services.AddScoped<ITechnicianPricingRepository, TechnicianPricingRepository>();
@@ -115,6 +113,7 @@ namespace Neighborhood.Services.Infrastructure
             //services.AddScoped<INewsletterRepository, NewsletterRepository>();
 
             services.AddScoped<ICategoryRepository, CategoriesRepository>();
+
             services.AddScoped<IProblemTypeRepository, ProblemTypesRepository>();
             services.AddScoped<IReviewRepository, ReviewRepository>();
             services.AddScoped<IDisputeRepository, DisputeRepository>();
@@ -127,12 +126,11 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
             services.AddScoped<ISupportMessageRepository, SupportMessageRepository>();
 
+
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+
 
             return services;
         }

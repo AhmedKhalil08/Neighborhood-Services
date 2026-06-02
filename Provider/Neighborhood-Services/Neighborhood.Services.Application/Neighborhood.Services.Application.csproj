@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+
     <Compile Remove="NewFolder\**" />
     <Compile Remove="Newsletter\**" />
     <EmbeddedResource Remove="NewFolder\**" />
@@ -16,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+
+    <PackageReference Include="Mapster" Version="10.0.7" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <!--<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.10" />-->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
@@ -48,6 +51,7 @@
     <Folder Include="RecurringBookings\DTOs\" />
     <Folder Include="RecurringBookings\Queries\" />
     <Folder Include="ServiceRequests\Queries\" />
+    <Folder Include="TechnitianCategory\DTOs\" />
     <Folder Include="Users\Services\" />
   </ItemGroup>
 

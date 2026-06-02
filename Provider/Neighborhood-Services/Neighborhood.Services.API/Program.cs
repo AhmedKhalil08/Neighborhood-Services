@@ -26,6 +26,7 @@ namespace Neighborhood.Services.API
 
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -42,6 +43,7 @@ namespace Neighborhood.Services.API
                     };
                 });
             builder.Services.AddAuthorization();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -49,6 +51,9 @@ namespace Neighborhood.Services.API
 
             builder.Services.AddHttpContextAccessor();
 
+
+
+           
 
             var app = builder.Build();
 
