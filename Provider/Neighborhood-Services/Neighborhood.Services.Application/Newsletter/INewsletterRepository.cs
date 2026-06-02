@@ -9,7 +9,7 @@ namespace Neighborhood.Services.Application.Newsletter
 {
     public interface INewsletterRepository : IGenericRepository<Domain.Newsletter.Newsletter, int>
     {
-        public int id { set; get; }
+       // public int id { set; get; }
     }
 }
 

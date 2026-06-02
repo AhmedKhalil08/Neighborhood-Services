@@ -36,7 +36,7 @@ namespace Neighborhood.Services.API
             //Arwa///
 
             //Mapping Notification Hub
-            app.MapHub<Neighborhood.Services.Application.Notifications.Services.NotificationHub>("/notificationHub");
+            app.MapHub<Neighborhood.Services.Infrastructure.Services.NotificationService.NotificationHub>("/notificationHub");
             //app.MapHub<ChatHub>("/chattt");
             //app.MapHub<NotificationHub>("/notf");
 

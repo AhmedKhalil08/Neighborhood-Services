@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Neighborhood.Services.Domain.ApplicationUsers;
 using Neighborhood.Services.Application.AgentLogs.Interfaces;
 using Neighborhood.Services.Application.AiAnalysises.Interface;
 using Neighborhood.Services.Application.AvilabilitiesException;
@@ -15,11 +14,11 @@ using Neighborhood.Services.Application.CustomerAddresses.Interfaces;
 using Neighborhood.Services.Application.Customers.Interfaces;
 using Neighborhood.Services.Application.Disputes.Interfaces;
 using Neighborhood.Services.Application.Escrows.Interfaces;
+using Neighborhood.Services.Application.Favorites;
 using Neighborhood.Services.Application.HistoricalPrices;
 using Neighborhood.Services.Application.Invoices.Interfaces;
 using Neighborhood.Services.Application.Messages;
-using Neighborhood.Services.Infrastructure.Persistence.Conversations;
-using Neighborhood.Services.Infrastructure.Persistence.Newsletters;
+using Neighborhood.Services.Application.Newsletter;
 using Neighborhood.Services.Application.Notifications;
 using Neighborhood.Services.Application.Offers.Interfaces;
 using Neighborhood.Services.Application.Payments.Interfaces;
@@ -38,6 +37,7 @@ using Neighborhood.Services.Application.TechnitianPricing;
 using Neighborhood.Services.Application.Transactions.Interfaces;
 using Neighborhood.Services.Application.Users.Interfaces;
 using Neighborhood.Services.Application.Wallets.Interfaces;
+using Neighborhood.Services.Domain.ApplicationUsers;
 using Neighborhood.Services.Infrastructure.Persistence.AgentLogs;
 using Neighborhood.Services.Infrastructure.Persistence.AiAnalysises;
 using Neighborhood.Services.Infrastructure.Persistence.BookingImages;
@@ -45,14 +45,16 @@ using Neighborhood.Services.Infrastructure.Persistence.Bookings;
 using Neighborhood.Services.Infrastructure.Persistence.CancellationPolicies;
 using Neighborhood.Services.Infrastructure.Persistence.Categories;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
+using Neighborhood.Services.Infrastructure.Persistence.Conversations;
 using Neighborhood.Services.Infrastructure.Persistence.CustomerAddresses;
 using Neighborhood.Services.Infrastructure.Persistence.Customers;
 using Neighborhood.Services.Infrastructure.Persistence.Disputes.Repository;
 using Neighborhood.Services.Infrastructure.Persistence.Escrows;
+using Neighborhood.Services.Infrastructure.Persistence.Favorites;
 using Neighborhood.Services.Infrastructure.Persistence.HistoricalPrices;
 using Neighborhood.Services.Infrastructure.Persistence.Invoices;
 using Neighborhood.Services.Infrastructure.Persistence.Messages;
-using Neighborhood.Services.Application.Newsletter;
+using Neighborhood.Services.Infrastructure.Persistence.Newsletters;
 using Neighborhood.Services.Infrastructure.Persistence.Notifications;
 using Neighborhood.Services.Infrastructure.Persistence.Offers;
 using Neighborhood.Services.Infrastructure.Persistence.Payments;
@@ -69,6 +71,12 @@ using Neighborhood.Services.Infrastructure.Persistence.Users;
 using Neighborhood.Services.Infrastructure.Persistence.Wallets;
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Shared;
+using Neighborhood.Services.Domain.TechniciansAvailability;
+using Neighborhood.Services.Infrastructure.Persistence.TechnitianAvailability;
+using Neighborhood.Services.Infrastructure.Persistence.AvilabilitiesException;
+using Neighborhood.Services.Infrastructure.Persistence.TechnitianPricing;
+
+
 
 namespace Neighborhood.Services.Infrastructure
 {
@@ -124,7 +132,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<INotificationsRepository, NotificationsRepoisitory>();
             services.AddScoped<INewsletterRepository, NewsletterRepository>();
-            //services.AddScoped<IFavoriteRepository, FavoritRepository>();
+            services.AddScoped<IFavoritesRepository, FavoritesRepository>();
 
 
             //End of Arwa's

@@ -15,5 +15,6 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Newsletters
         public NewsletterRepository(ApplicationDbContext context) : base(context)
         {
         }
+
     }
 }

@@ -16,7 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Newsletter\Commands\CreateNewsletterCommand.cs" />
+    <Compile Include="Newsletter\Commands\DeleteNewsletterCommand.cs" />
     <Compile Include="Newsletter\INewsletterRepository.cs" />
+    <Compile Include="Newsletter\Queries\GetAllNewsQ.cs" />
+    <Compile Include="Newsletter\Queries\GetByIdNewsQ.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,6 +52,8 @@
     <Folder Include="NewFolder\" />
     <Folder Include="NewFolder\" />
     <Folder Include="NewFolder\" />
+    <Folder Include="Newsletter\DTOs\" />
+    <Folder Include="Newsletter\NewFolder\" />
     <Folder Include="Notifications\DTOs\" />
     <Folder Include="Notifications\Queries\" />
     <Folder Include="Offers\Commands\" />
