@@ -20,6 +20,7 @@
 
     <PackageReference Include="Mapster" Version="10.0.7" />
     <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.10" />
     <!--<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.10" />-->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
@@ -43,7 +44,11 @@
     <Folder Include="CancellationPolicies\DTOs\" />
     <Folder Include="CancellationPolicies\Queries\" />
     <Folder Include="Messages\Queries\" />
-    <Folder Include="Notifications\Commands\" />
+    <Folder Include="NewFolder\" />
+    <Folder Include="NewFolder\" />
+    <Folder Include="NewFolder\" />
+    <Folder Include="Newsletter\DTOs\" />
+    <Folder Include="Newsletter\NewFolder\" />
     <Folder Include="Notifications\DTOs\" />
     <Folder Include="Notifications\Queries\" />
     <Folder Include="Offers\DTOs\" />
