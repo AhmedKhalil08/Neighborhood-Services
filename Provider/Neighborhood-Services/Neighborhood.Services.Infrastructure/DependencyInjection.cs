@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Neighborhood.Services.Application.AgentLogs.Interfaces;
@@ -29,6 +30,7 @@ using Neighborhood.Services.Application.Technicians.Interfaces;
 using Neighborhood.Services.Application.Transactions.Interfaces;
 using Neighborhood.Services.Application.Users.Interfaces;
 using Neighborhood.Services.Application.Wallets.Interfaces;
+using Neighborhood.Services.Domain.ApplicationUsers;
 using Neighborhood.Services.Infrastructure.Persistence.AgentLogs;
 using Neighborhood.Services.Infrastructure.Persistence.AiAnalysises;
 using Neighborhood.Services.Infrastructure.Persistence.AvilabilitiesException;
@@ -63,20 +65,24 @@ using Neighborhood.Services.Infrastructure.Persistence.Users;
 using Neighborhood.Services.Infrastructure.Persistence.Wallets;
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Shared;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Neighborhood.Services.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static  IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            // Unit of Work
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    o => o.UseNetTopologySuite()));
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            //  repositories
             services.AddScoped<IBookingRepository, BookingRepository>();
             services.AddScoped<IBookingImageRepository, BookingImageRepository>();
             services.AddScoped<IAiAnalysisRepository, AiAnalysisRepository>();
@@ -87,7 +93,6 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<ICancellationPolicyRepository, CancellationPolicyRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
-            //--
             services.AddScoped<IWalletRepository, WalletRepository>();
             services.AddScoped<ITransactionRepository, TransactionRepository>();
             services.AddScoped<IEscrowRepository, EscrowRepository>();
@@ -101,8 +106,7 @@ namespace Neighborhood.Services.Infrastructure
             //services.AddScoped<ITechnicianPricingRepository, TechnicianPricingRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
-            services.AddScoped<IStaffRepository, StaffRepository>(); // ← add this
-
+            services.AddScoped<IStaffRepository, StaffRepository>();
 
             services.AddScoped<IPromoCodeRepository, PromoCodeRepository>();
             services.AddScoped<IPromoCodeUsageRepository, PromoCodeUsageRepository>();
@@ -123,12 +127,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<ISupportMessageRepository, SupportMessageRepository>();
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(
-             configuration.GetConnectionString("DefaultConnection"),
-                o => o.UseNetTopologySuite()
-                ));
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             return services;
         }
