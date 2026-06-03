@@ -175,6 +175,7 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
             context.RecurringBookings.Add(new RecurringBooking
             {
                 Address = "12 Nile St, Alexandria",
+                Location = new Point(29.9187, 31.2001) { SRID = 4326 },
                 Pattern = RecurringPattern.Weekly,
                 DayOfWeek = DayOfWeek.Monday,
                 TimeOfDay = new TimeOnly(10, 0),

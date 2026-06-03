@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace Neighborhood.Services.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260602141035_Init")]
-    partial class Init
+    [Migration("20260603020359_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1326,6 +1326,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<Point>("Location")
+                        .IsRequired()
+                        .HasColumnType("geography");
+
                     b.Property<string>("Pattern")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1903,7 +1907,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.HasIndex("ProblemTypeId");
 
-                    b.HasIndex("TechnicianId");
+                    b.HasIndex("TechnicianId", "ProblemTypeId")
+                        .IsUnique();
 
                     b.ToTable("TechnicianPricings");
                 });
