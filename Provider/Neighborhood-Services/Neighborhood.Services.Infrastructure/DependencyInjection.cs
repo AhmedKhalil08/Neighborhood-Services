@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +34,7 @@ using Neighborhood.Services.Application.SupportTickets.Interfaces;
 using Neighborhood.Services.Application.TechnicianPhotos.Interfaces;
 using Neighborhood.Services.Application.Technicians.Interfaces;
 using Neighborhood.Services.Application.TechnitianAvailability.Interfaces;
+using Neighborhood.Services.Application.TechnitianCategory.Interface;
 using Neighborhood.Services.Application.TechnitianPricing.Interface;
 using Neighborhood.Services.Application.Transactions.Interfaces;
 using Neighborhood.Services.Application.Users.Interfaces;
@@ -66,6 +68,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository;
 using Neighborhood.Services.Infrastructure.Persistence.ServiceRequests;
 using Neighborhood.Services.Infrastructure.Persistence.Staffs.Repository;
 using Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Repository;
+using Neighborhood.Services.Infrastructure.Persistence.TechnicianCategories;
 using Neighborhood.Services.Infrastructure.Persistence.TechnicianPhotos;
 using Neighborhood.Services.Infrastructure.Persistence.Technicians;
 using Neighborhood.Services.Infrastructure.Persistence.TechnitianAvailability;
@@ -125,7 +128,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IPromoCodeRepository, PromoCodeRepository>();
             services.AddScoped<IPromoCodeUsageRepository, PromoCodeUsageRepository>();
             //services.AddScoped<IFavoriteRepository, FavoriteRepository>();
-            //services.AddScoped<INewsletterRepository, NewsletterRepository>();
+            services.AddScoped<INewsletterRepository, NewsletterRepository>();
 
             services.AddScoped<ICategoryRepository, CategoriesRepository>();
 
@@ -154,7 +157,15 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 
-
+            services.AddScoped<ITechnicianCategoryRepository, TechnicianCategoryRepository>();
+            services.AddHangfire(config => config
+                    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection")));
+            services.AddHangfireServer();
+            services.AddScoped<RecurringBookingGeneratorService>();
+            services.AddScoped<ServiceRequestExpiryService>();
             return services;
         }
     }

@@ -5,6 +5,7 @@ using Neighborhood.Services.Application.RecurringBookings.Interfaces;
 using Neighborhood.Services.Application.Shared;
 using Neighborhood.Services.Application.Technicians.Interfaces;
 using Neighborhood.Services.Domain.RecurringBookings;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -62,6 +63,7 @@ namespace Neighborhood.Services.Application.RecurringBookings.Commands.CreateRec
                 TechnicianId = request.TechnicianId,
                 ProblemTypeId = request.ProblemTypeId,
                 Address = request.Address,
+                Location = new Point(request.Longitude, request.Latitude) { SRID = 4326 },
                 Pattern = request.Pattern,
                 DayOfWeek = request.DayOfWeek,
                 DayOfMonth = request.DayOfMonth,
