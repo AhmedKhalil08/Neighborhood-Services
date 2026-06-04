@@ -21,6 +21,7 @@ using Neighborhood.Services.Application.Invoices.Interfaces;
 using Neighborhood.Services.Application.Messages;
 using Neighborhood.Services.Application.Newsletter;
 using Neighborhood.Services.Application.Notifications;
+using Neighborhood.Services.Application.Notifications.Services;
 using Neighborhood.Services.Application.Offers.Interfaces;
 using Neighborhood.Services.Application.Payments.Interfaces;
 using Neighborhood.Services.Application.ProblemTypes.Interface;
@@ -80,6 +81,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Wallets;
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Services.EmailService;
 using Neighborhood.Services.Infrastructure.Shared;
+using Neighborhood.Services.Infrastructure.Services.NotificationService;
 
 
 
@@ -147,6 +149,10 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<INewsletterRepository, NewsletterRepository>();
             services.AddScoped<IFavoritesRepository, FavoritesRepository>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            
+
+
             services.Configure<EmailConfiguration>(configuration.GetSection("EmailSettings"));
             //End of Arwa's
 

@@ -55,6 +55,18 @@ namespace Neighborhood.Services.API
             builder.Services.AddSwaggerGen();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowJS", policy =>
+                {
+                    policy.WithOrigins("http://127.0.0.1:5500")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
+            
 
             builder.Services.AddHttpContextAccessor();
 
@@ -86,7 +98,7 @@ namespace Neighborhood.Services.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors("AllowJS");
             app.UseHttpsRedirection();
             app.UseExceptionHandler();
             app.UseAuthentication();
