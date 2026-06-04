@@ -9,6 +9,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
 using Neighborhood.Services.Infrastructure.Services;
 using System.Text;
+using Microsoft.AspNetCore.Hosting;
 
 
 namespace Neighborhood.Services.API
