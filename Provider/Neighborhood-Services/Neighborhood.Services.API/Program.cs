@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Neighborhood.Services.API.Middlewares;
@@ -9,6 +10,8 @@ using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
 using StackExchange.Redis;
+using Neighborhood.Services.Infrastructure.Services;
+
 using System.Text;
 
 
@@ -114,8 +117,15 @@ namespace Neighborhood.Services.API
             app.UseExceptionHandler();
             app.UseAuthentication();
             app.UseAuthorization();
-
-           
+            app.UseHangfireDashboard("/hangfire");
+            RecurringJob.AddOrUpdate<RecurringBookingGeneratorService>(
+                "recurring-booking-generator",
+                service => service.GenerateBookings(),
+                Cron.Daily);
+            RecurringJob.AddOrUpdate<ServiceRequestExpiryService>(
+                "service_request_expiry",
+                service => service.ExpireOpenRequestAndOffer(),
+                Cron.Daily);
 
             app.MapControllers();
 

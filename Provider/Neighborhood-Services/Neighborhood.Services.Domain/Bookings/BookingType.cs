@@ -7,6 +7,7 @@ namespace Neighborhood.Services.Domain.Bookings
     public  enum BookingType
     {
         Direct,
-        Bidding
+        Bidding,
+        Recurring
     }
 }
