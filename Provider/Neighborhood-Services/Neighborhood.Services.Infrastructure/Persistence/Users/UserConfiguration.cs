@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Neighborhood.Services.Domain.ApplicationUsers;
+using Neighborhood.Services.Domain.Staffs;
 
 namespace Neighborhood.Services.Infrastructure.Persistence.Users
 {
@@ -45,6 +46,11 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Users
             builder.HasIndex(u => u.RefferalCode)
                 .IsUnique()
                 .HasFilter("[RefferalCode] IS NOT NULL AND [RefferalCode] <> ''");
+
+            builder.HasOne(u => u.Staff)
+    .WithOne(s => s.User)
+    .HasForeignKey<Staff>(s => s.UserId)
+    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

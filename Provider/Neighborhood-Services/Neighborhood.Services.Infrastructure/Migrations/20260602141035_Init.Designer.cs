@@ -1385,11 +1385,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("Range", new[] { 1, 5 });
 
-                    b.Property<int>("RevieweeId")
-                        .HasColumnType("int");
+                    b.Property<string>("RevieweeId")
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("ReviewerId")
-                        .HasColumnType("int");
+                    b.Property<string>("ReviewerId")
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1624,8 +1624,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
+                    b.Property<string>("SenderId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("TicketId")
                         .HasColumnType("int");

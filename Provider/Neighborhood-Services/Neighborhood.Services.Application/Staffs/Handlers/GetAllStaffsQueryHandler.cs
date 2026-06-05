@@ -17,7 +17,7 @@ namespace Neighborhood.Services.Application.Staffs.Handlers
 
         public async Task<IReadOnlyList<StaffDto>> Handle(GetAllStaffsQuery request, CancellationToken cancellationToken)
         {
-            var staffs = await _repository.GetAllAsync(cancellationToken);
+            var staffs = await _repository.GetAllAsync();
             return staffs.Select(StaffMapper.MapToDto).ToList();
         }
     }

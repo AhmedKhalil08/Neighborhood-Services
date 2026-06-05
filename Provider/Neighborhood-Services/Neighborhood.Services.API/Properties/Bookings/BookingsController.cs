@@ -17,7 +17,7 @@ using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByTechnician
 using Neighborhood.Services.Domain.BookingImages;
 using Neighborhood.Services.Domain.Bookings;
 
-namespace Neighborhood.Services.API.Bookings
+namespace Neighborhood.Services.API.Properties.Bookings
 {
     [Route("api/[controller]")]
     [ApiController]

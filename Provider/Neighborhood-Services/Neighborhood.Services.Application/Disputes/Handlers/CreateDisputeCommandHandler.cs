@@ -9,23 +9,36 @@ using Neighborhood.Services.Application.Shared.Mappers;
 
 namespace Neighborhood.Services.Application.Disputes.Handlers
 {
-    public class CreateDisputeCommandHandler : IRequestHandler<CreateDisputeCommand, DisputeDto>
+    public class CreateDisputeCommandHandler: IRequestHandler<CreateDisputeCommand, DisputeDto>
     {
         private readonly IDisputeRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
-
-        public CreateDisputeCommandHandler(IDisputeRepository repository, IUnitOfWork unitOfWork)
+        private readonly ICurrentUserService _currentUser;
+        public CreateDisputeCommandHandler(
+            IDisputeRepository repository,
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUser)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _currentUser = currentUser;
         }
 
-        public async Task<DisputeDto> Handle(CreateDisputeCommand request, CancellationToken cancellationToken)
+        public async Task<DisputeDto> Handle(
+            CreateDisputeCommand request,
+            CancellationToken cancellationToken)
         {
+            var exists = await _repository.ExistsByBookingIdAsync(
+                request.BookingId,
+                cancellationToken);
+
+            if (exists)
+                throw new Exception("A dispute already exists for this booking.");
+
             var dispute = new Dispute
             {
                 BookingId = request.BookingId,
-                RaisedBy = request.RaisedBy,
+                RaisedByUserId = _currentUser.UserId,
                 DisputeType = request.DisputeType,
                 Reason = request.Reason,
                 Status = DisputeStatus.Open,
@@ -33,6 +46,7 @@ namespace Neighborhood.Services.Application.Disputes.Handlers
             };
 
             await _repository.AddAsync(dispute);
+
             await _unitOfWork.SaveChangesAsync();
 
             return DisputeMapper.MapToDto(dispute);

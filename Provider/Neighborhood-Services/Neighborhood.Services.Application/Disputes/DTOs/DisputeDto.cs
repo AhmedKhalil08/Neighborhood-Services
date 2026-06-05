@@ -4,7 +4,8 @@
     {
         public int Id { get; set; }
         public int BookingId { get; set; }
-        public int RaisedBy { get; set; }
+        public string RaisedByUserId { get; set; }
+
         public int? ResolvedByStaffId { get; set; }
         public string DisputeType { get; set; }
         public string Reason { get; set; }

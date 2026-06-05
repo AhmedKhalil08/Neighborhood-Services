@@ -14,6 +14,7 @@ namespace Neighborhood.Services.Application.Shared.Mappers
             UserId = ticket.UserId,
             BookingId = ticket.BookingId,
             Subject = ticket.Subject,
+            Description = ticket.Description,
             Status = ticket.Status.ToString(),
             CreatedAt = ticket.CreatedAt,
             UpdatedAt = ticket.UpdatedAt

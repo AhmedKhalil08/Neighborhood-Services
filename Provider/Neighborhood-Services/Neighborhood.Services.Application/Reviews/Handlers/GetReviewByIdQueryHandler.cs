@@ -17,7 +17,7 @@ namespace Neighborhood.Services.Application.Reviews.Handlers
 
         public async Task<ReviewDto> Handle(GetReviewByIdQuery request, CancellationToken cancellationToken)
         {
-            var review = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            var review = await _repository.GetByIdAsync(request.Id);
             if (review is null)
                 throw new Exception($"Review with id {request.Id} not found.");
 

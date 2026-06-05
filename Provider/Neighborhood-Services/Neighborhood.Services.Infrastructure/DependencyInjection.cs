@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +34,7 @@ using Neighborhood.Services.Application.SupportTickets.Interfaces;
 using Neighborhood.Services.Application.TechnicianPhotos.Interfaces;
 using Neighborhood.Services.Application.Technicians.Interfaces;
 using Neighborhood.Services.Application.TechnitianAvailability.Interfaces;
+using Neighborhood.Services.Application.TechnitianCategory.Interface;
 using Neighborhood.Services.Application.TechnitianPricing.Interface;
 using Neighborhood.Services.Application.Transactions.Interfaces;
 using Neighborhood.Services.Application.Users.Interfaces;
@@ -66,6 +68,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository;
 using Neighborhood.Services.Infrastructure.Persistence.ServiceRequests;
 using Neighborhood.Services.Infrastructure.Persistence.Staffs.Repository;
 using Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Repository;
+using Neighborhood.Services.Infrastructure.Persistence.TechnicianCategories;
 using Neighborhood.Services.Infrastructure.Persistence.TechnicianPhotos;
 using Neighborhood.Services.Infrastructure.Persistence.Technicians;
 using Neighborhood.Services.Infrastructure.Persistence.TechnitianAvailability;
@@ -74,6 +77,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Transactions;
 using Neighborhood.Services.Infrastructure.Persistence.Users;
 using Neighborhood.Services.Infrastructure.Persistence.Wallets;
 using Neighborhood.Services.Infrastructure.Services;
+using Neighborhood.Services.Infrastructure.Services.Authorization;
 using Neighborhood.Services.Infrastructure.Shared;
 
 
@@ -118,6 +122,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IAvailabilityExceptionRepository, AvailabilityExceptionRepository>();
             services.AddScoped<ITechnicianPricingRepository, TechnicianPricingRepository>();
             services.AddScoped<ITechnicianPhotoRepository, TechnicianPhotoRepository>();
+            services.AddScoped<ITechnicianCategoryRepository,TechnicianCategoryRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
             services.AddScoped<IStaffRepository, StaffRepository>();
@@ -145,14 +150,14 @@ namespace Neighborhood.Services.Infrastructure
 
             //End of Arwa's
 
-
+           
             services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
             services.AddScoped<ISupportMessageRepository, SupportMessageRepository>();
 
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
-
+            services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 
 
             return services;

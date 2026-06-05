@@ -19,14 +19,14 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Configuration
                 .IsRequired();
 
             builder.Property(r => r.ReviewerId)
-                .IsRequired();
+                 .IsRequired()
+                 .HasMaxLength(450);
 
             builder.Property(r => r.RevieweeId)
-                .IsRequired();
-
-            builder.Property(r => r.Rating)
                 .IsRequired()
-                .HasAnnotation("Range", new[] { 1, 5 }); // 1 to 5 stars
+                .HasMaxLength(450);
+
+          
 
             builder.Property(r => r.Comment)
                 .IsRequired()
@@ -49,14 +49,24 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Configuration
                 .HasForeignKey<ReviewAnalysis>(a => a.ReviewId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Soft delete filter — IsDeleted reviews are invisible by default
-            //builder.HasQueryFilter(r => !r.IsDeleted);
-            //This way the unique constraint is on (BookingId + ReviewerId) together — 
-            //meaning the same person can't review the same booking twice,
-            //but both the customer and the technician can each leave their own review. That's exactly the business rule you need
-            builder.HasIndex(r => new { r.BookingId, r.ReviewerId })
-                .IsUnique()
-                .HasDatabaseName("IX_Reviews_BookingId_ReviewerId");
+            //        builder.HasIndex(r => new { r.BookingId, r.ReviewerId })
+            //.IsUnique();
+            builder.HasIndex(r => new { r.BookingId, r.ReviewerId, r.RevieweeId })
+            .IsUnique();
+            builder.HasOne(r => r.Reviewer)
+                .WithMany()
+                .HasForeignKey(r => r.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(r => r.Reviewee)
+                .WithMany()
+                .HasForeignKey(r => r.RevieweeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasQueryFilter(r => !r.IsDeleted);
+
+          
+          
 
             builder.HasIndex(r => r.ReviewerId)
                 .HasDatabaseName("IX_Reviews_ReviewerId");

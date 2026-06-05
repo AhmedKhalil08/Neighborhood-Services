@@ -1,14 +1,14 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-
 using Neighborhood.Services.API.Middlewares;
 using Neighborhood.Services.Application;
+using Neighborhood.Services.Application.Authorization;
+using Neighborhood.Services.Domain.Staffs;
 using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
-
-using System.Text;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
+using System.Text;
 
 
 namespace Neighborhood.Services.API
@@ -46,6 +46,18 @@ namespace Neighborhood.Services.API
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
                     };
                 });
+            // Add authorization policies for each permission type (Amira)
+            builder.Services.AddAuthorization(options =>
+            {
+                foreach (PermissionType permission in Enum.GetValues(typeof(PermissionType)))
+                {
+                    options.AddPolicy(
+                        $"Permission:{permission}",
+                        policy => policy.Requirements.Add(
+                            new PermissionRequirement(permission)));
+                }
+            });
+            // end of Amira
             builder.Services.AddAuthorization();
 
             builder.Services.AddEndpointsApiExplorer();

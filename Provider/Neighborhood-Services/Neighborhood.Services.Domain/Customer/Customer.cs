@@ -4,13 +4,14 @@ using Neighborhood.Services.Domain.favorites;
 using Neighborhood.Services.Domain.Invoices;
 using Neighborhood.Services.Domain.RecurringBookings;
 using Neighborhood.Services.Domain.ServiceRequests;
+using Neighborhood.Services.Domain.Shared;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Neighborhood.Services.Domain.Customers
 {
-    public class Customer
+    public class Customer 
     {
         public int Id { get; set; }
         public bool IsDeleted { get; set; }

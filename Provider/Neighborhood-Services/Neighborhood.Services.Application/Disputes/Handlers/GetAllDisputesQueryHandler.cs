@@ -6,7 +6,7 @@ using Neighborhood.Services.Application.Shared.Mappers;
 
 namespace Neighborhood.Services.Application.Disputes.Handlers
 {
-    public class GetAllDisputesQueryHandler : IRequestHandler<GetAllDisputesQuery, IReadOnlyList<DisputeDto>>
+    public class GetAllDisputesQueryHandler: IRequestHandler<GetAllDisputesQuery, IReadOnlyList<DisputeDto>>
     {
         private readonly IDisputeRepository _repository;
 
@@ -15,10 +15,15 @@ namespace Neighborhood.Services.Application.Disputes.Handlers
             _repository = repository;
         }
 
-        public async Task<IReadOnlyList<DisputeDto>> Handle(GetAllDisputesQuery request, CancellationToken cancellationToken)
+        public async Task<IReadOnlyList<DisputeDto>> Handle(
+            GetAllDisputesQuery request,
+            CancellationToken cancellationToken)
         {
-            var disputes = await _repository.GetAllAsync(cancellationToken);
-            return disputes.Select(DisputeMapper.MapToDto).ToList();
+            var disputes = await _repository.GetAllAsync();
+
+            return disputes
+                .Select(DisputeMapper.MapToDto)
+                .ToList();
         }
     }
 

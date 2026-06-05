@@ -4,9 +4,7 @@ namespace Neighborhood.Services.Domain.Staffs
 {
     public class StaffPermission: BaseEntity<int>
     {
-      
-
-        public int StaffId { get; set; }
+     public int StaffId { get; set; }
 
         public PermissionType Permission { get;  set; }
 

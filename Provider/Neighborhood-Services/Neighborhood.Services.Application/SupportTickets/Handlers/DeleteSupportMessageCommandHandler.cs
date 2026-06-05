@@ -18,7 +18,7 @@ namespace Neighborhood.Services.Application.SupportTickets.Handlers
 
         public async Task<bool> Handle(DeleteSupportMessageCommand request, CancellationToken cancellationToken)
         {
-            var message = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            var message = await _repository.GetByIdAsync(request.Id);
             if (message is null)
                 throw new Exception($"SupportMessage with id {request.Id} not found.");
 

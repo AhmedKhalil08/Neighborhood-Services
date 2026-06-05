@@ -2,10 +2,7 @@
 {
     public enum StaffRole
     {
-        SuperAdmin = 1,
-        Support = 2,
-        Finance = 3,
-        Moderator = 4,
-        Marketing = 5
+        Admin = 1,
+        TechnicalSupport = 2
     }
 }
