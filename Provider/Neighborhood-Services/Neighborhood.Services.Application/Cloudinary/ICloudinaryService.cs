@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Neighborhood.Services.Application.Cloudinary
 {
-    internal class ICloudinaryService
+    public interface ICloudinaryService
     {
+        CloudinarySignatureDto GenerateSignature();
     }
 }

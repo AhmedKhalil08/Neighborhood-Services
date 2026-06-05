@@ -4,10 +4,12 @@ using Microsoft.IdentityModel.Tokens;
 using Neighborhood.Services.API.Middlewares;
 using Neighborhood.Services.Application;
 using Neighborhood.Services.Application.Authorization;
+using Neighborhood.Services.Application.Cloudinary;
 using Neighborhood.Services.Domain.Staffs;
 using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
+using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
 using System.Text;
 
 
@@ -57,6 +59,12 @@ namespace Neighborhood.Services.API
                             new PermissionRequirement(permission)));
                 }
             });
+
+            builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("Cloudinary"));
+
+            builder.Services.AddScoped<ICloudinaryService,
+                CloudinaryService>();
             // end of Amira
             builder.Services.AddAuthorization();
 

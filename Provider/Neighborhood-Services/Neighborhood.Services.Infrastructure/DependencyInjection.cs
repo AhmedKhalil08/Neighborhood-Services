@@ -10,6 +10,7 @@ using Neighborhood.Services.Application.BookingImages.Interface;
 using Neighborhood.Services.Application.Bookings.Interface;
 using Neighborhood.Services.Application.CancellationPolicies.Interfaces;
 using Neighborhood.Services.Application.Categories.Interfaces;
+using Neighborhood.Services.Application.Cloudinary;
 using Neighborhood.Services.Application.Conversations;
 using Neighborhood.Services.Application.CustomerAddresses.Interfaces;
 using Neighborhood.Services.Application.Customers.Interfaces;
@@ -78,6 +79,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Users;
 using Neighborhood.Services.Infrastructure.Persistence.Wallets;
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Services.Authorization;
+using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
 using Neighborhood.Services.Infrastructure.Shared;
 
 
@@ -157,9 +159,10 @@ namespace Neighborhood.Services.Infrastructure
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
+            //Amira
             services.AddScoped<IAuthorizationHandler, PermissionHandler>();
-
-
+            services.AddScoped<ICloudinaryService,CloudinaryService>();
+            //end Amira
             return services;
         }
     }

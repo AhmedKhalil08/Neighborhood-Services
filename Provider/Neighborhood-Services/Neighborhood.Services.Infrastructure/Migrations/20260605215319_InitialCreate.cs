@@ -86,7 +86,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    subscribedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    subscribedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -112,29 +112,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PromoCodes", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Staffs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Role = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedByStaffId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Staffs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Staffs_Staffs_CreatedByStaffId",
-                        column: x => x.CreatedByStaffId,
-                        principalTable: "Staffs",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -179,26 +156,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         name: "FK_ProblemTypes_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "StaffPermissions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StaffId = table.Column<int>(type: "int", nullable: false),
-                    Permission = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StaffPermissions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StaffPermissions_Staffs_StaffId",
-                        column: x => x.StaffId,
-                        principalTable: "Staffs",
                         principalColumn: "Id");
                 });
 
@@ -307,8 +264,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    StaffId = table.Column<int>(type: "int", nullable: false),
-                    WalletId = table.Column<int>(type: "int", nullable: false),
+                    WalletId = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -327,12 +283,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetUsers_Staffs_StaffId",
-                        column: x => x.StaffId,
-                        principalTable: "Staffs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -413,7 +363,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     PaymentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PaymentProvider = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProviderToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProviderToken = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     LastFourDigits = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: true),
                     ExpiryMonth = table.Column<int>(type: "int", nullable: true),
                     ExpiryYear = table.Column<int>(type: "int", nullable: true),
@@ -432,6 +382,35 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         name: "FK_PaymentMethods_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Staffs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    CreatedByStaffId = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Staffs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Staffs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Staffs_Staffs_CreatedByStaffId",
+                        column: x => x.CreatedByStaffId,
+                        principalTable: "Staffs",
                         principalColumn: "Id");
                 });
 
@@ -522,6 +501,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Budget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ScheduledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Location = table.Column<Point>(type: "geography", nullable: false),
@@ -547,6 +527,26 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         name: "FK_ServiceRequests_ProblemTypes_ProblemTypeId",
                         column: x => x.ProblemTypeId,
                         principalTable: "ProblemTypes",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StaffPermissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StaffId = table.Column<int>(type: "int", nullable: false),
+                    Permission = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StaffPermissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StaffPermissions_Staffs_StaffId",
+                        column: x => x.StaffId,
+                        principalTable: "Staffs",
                         principalColumn: "Id");
                 });
 
@@ -618,10 +618,15 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Pattern = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DayOfWeek = table.Column<int>(type: "int", nullable: true),
                     DayOfMonth = table.Column<int>(type: "int", nullable: true),
+                    TimeOfDay = table.Column<TimeOnly>(type: "time", nullable: false),
+                    DurationMinutes = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
                     EndDate = table.Column<DateOnly>(type: "date", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AgreedPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CancelledBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
                     TechnicianId = table.Column<int>(type: "int", nullable: false),
                     ProblemTypeId = table.Column<int>(type: "int", nullable: false),
@@ -795,6 +800,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     EstimatedDuration = table.Column<int>(type: "int", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ScheduledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ServiceRequestId = table.Column<int>(type: "int", nullable: false),
                     TechnicianId = table.Column<int>(type: "int", nullable: false),
@@ -825,6 +831,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ScheduledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DurationMinutes = table.Column<int>(type: "int", nullable: true),
                     EstimatedPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     FinalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -944,8 +951,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    BookingId = table.Column<int>(type: "int", nullable: false),
-                    RaisedBy = table.Column<int>(type: "int", nullable: false),
                     ResolvedByStaffId = table.Column<int>(type: "int", nullable: true),
                     DisputeType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Reason = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
@@ -953,17 +958,23 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Status = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ResolvedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BookingId = table.Column<int>(type: "int", nullable: false),
+                    RaisedByUserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Disputes", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Disputes_AspNetUsers_RaisedByUserId",
+                        column: x => x.RaisedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Disputes_Bookings_BookingId",
                         column: x => x.BookingId,
                         principalTable: "Bookings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Disputes_Staffs_ResolvedByStaffId",
                         column: x => x.ResolvedByStaffId,
@@ -1051,7 +1062,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PromoCodeId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BookingId = table.Column<int>(type: "int", nullable: false),
                     UsedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -1084,53 +1095,36 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     BookingId = table.Column<int>(type: "int", nullable: false),
-                    ReviewerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RevieweeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ReviewerId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    RevieweeId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReviewType = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Reviews", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Reviews_AspNetUsers_RevieweeId",
+                        column: x => x.RevieweeId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reviews_AspNetUsers_ReviewerId",
+                        column: x => x.ReviewerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Reviews_Bookings_BookingId",
                         column: x => x.BookingId,
                         principalTable: "Bookings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SupportTickets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    BookingId = table.Column<int>(type: "int", nullable: true),
-                    Subject = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SupportTickets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SupportTickets_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_SupportTickets_Bookings_BookingId",
-                        column: x => x.BookingId,
-                        principalTable: "Bookings",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -1164,6 +1158,54 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SupportTickets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    BookingId = table.Column<int>(type: "int", nullable: true),
+                    Subject = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(3000)", maxLength: 3000, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PromoCodeUsageId = table.Column<int>(type: "int", nullable: true),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    BookingId1 = table.Column<int>(type: "int", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SupportTickets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SupportTickets_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SupportTickets_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SupportTickets_Bookings_BookingId",
+                        column: x => x.BookingId,
+                        principalTable: "Bookings",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SupportTickets_Bookings_BookingId1",
+                        column: x => x.BookingId1,
+                        principalTable: "Bookings",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SupportTickets_PromoCodeUsages_PromoCodeUsageId",
+                        column: x => x.PromoCodeUsageId,
+                        principalTable: "PromoCodeUsages",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ReviewAnalyses",
                 columns: table => new
                 {
@@ -1193,13 +1235,13 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TicketId = table.Column<int>(type: "int", nullable: false),
-                    SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SenderId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     Message = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
                     Channel = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReadAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1207,6 +1249,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_SupportMessages_AspNetUsers_ApplicationUserId",
                         column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SupportMessages_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -1260,11 +1307,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 column: "RefferalCode",
                 unique: true,
                 filter: "[RefferalCode] IS NOT NULL AND [RefferalCode] <> ''");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_StaffId",
-                table: "AspNetUsers",
-                column: "StaffId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUsers_WalletId",
@@ -1333,9 +1375,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 filter: "[ServiceRequestId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bookings_TechnicianId",
+                name: "IX_Bookings_TechnicianId_ScheduledAt",
                 table: "Bookings",
-                column: "TechnicianId");
+                columns: new[] { "TechnicianId", "ScheduledAt" },
+                unique: true,
+                filter: "[Status] != 'Cancelled'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Conversations_BookingId",
@@ -1361,9 +1405,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Disputes_RaisedBy",
+                name: "IX_Disputes_RaisedByUserId",
                 table: "Disputes",
-                column: "RaisedBy");
+                column: "RaisedByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Disputes_ResolvedByStaffId",
@@ -1469,6 +1513,12 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PromoCodes_Code",
+                table: "PromoCodes",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PromoCodeUsages_ApplicationUserId",
                 table: "PromoCodeUsages",
                 column: "ApplicationUserId");
@@ -1480,9 +1530,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PromoCodeUsages_PromoCodeId",
+                name: "IX_PromoCodeUsages_PromoCodeId_UserId",
                 table: "PromoCodeUsages",
-                column: "PromoCodeId");
+                columns: new[] { "PromoCodeId", "UserId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RecurringBookings_CustomerId",
@@ -1516,9 +1567,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 column: "Sentiment");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_BookingId_ReviewerId",
+                name: "IX_Reviews_BookingId_ReviewerId_RevieweeId",
                 table: "Reviews",
-                columns: new[] { "BookingId", "ReviewerId" },
+                columns: new[] { "BookingId", "ReviewerId", "RevieweeId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -1601,9 +1652,19 @@ namespace Neighborhood.Services.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_SupportTickets_BookingId",
                 table: "SupportTickets",
-                column: "BookingId",
+                column: "BookingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_BookingId1",
+                table: "SupportTickets",
+                column: "BookingId1",
                 unique: true,
-                filter: "[BookingId] IS NOT NULL");
+                filter: "[BookingId1] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupportTickets_PromoCodeUsageId",
+                table: "SupportTickets",
+                column: "PromoCodeUsageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SupportTickets_Status",
@@ -1642,9 +1703,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 column: "ProblemTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TechnicianPricings_TechnicianId",
+                name: "IX_TechnicianPricings_TechnicianId_ProblemTypeId",
                 table: "TechnicianPricings",
-                column: "TechnicianId");
+                columns: new[] { "TechnicianId", "ProblemTypeId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Technicians_ApplicationUserId",
@@ -1662,6 +1724,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 name: "IX_Transactions_FromWalletId",
                 table: "Transactions",
                 column: "FromWalletId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_OriginalTransactionId",
+                table: "Transactions",
+                column: "OriginalTransactionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_PaymentMethodId",
@@ -1715,8 +1782,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 table: "AspNetUsers",
                 column: "WalletId",
                 principalTable: "Wallets",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
@@ -1784,9 +1850,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "PromoCodeUsages");
-
-            migrationBuilder.DropTable(
                 name: "ReviewAnalyses");
 
             migrationBuilder.DropTable(
@@ -1820,10 +1883,16 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 name: "Reviews");
 
             migrationBuilder.DropTable(
+                name: "Staffs");
+
+            migrationBuilder.DropTable(
                 name: "SupportTickets");
 
             migrationBuilder.DropTable(
                 name: "PaymentMethods");
+
+            migrationBuilder.DropTable(
+                name: "PromoCodeUsages");
 
             migrationBuilder.DropTable(
                 name: "Bookings");
@@ -1854,9 +1923,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Staffs");
 
             migrationBuilder.DropTable(
                 name: "Wallets");

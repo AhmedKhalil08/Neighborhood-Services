@@ -13,8 +13,8 @@ using NetTopologySuite.Geometries;
 namespace Neighborhood.Services.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260603142616_TechnicianPricings")]
-    partial class TechnicianPricings
+    [Migration("20260605215319_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -331,9 +331,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StaffId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -362,8 +359,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasIndex("RefferalCode")
                         .IsUnique()
                         .HasFilter("[RefferalCode] IS NOT NULL AND [RefferalCode] <> ''");
-
-                    b.HasIndex("StaffId");
 
                     b.HasIndex("WalletId");
 
@@ -766,8 +761,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("RaisedBy")
-                        .HasColumnType("int");
+                    b.Property<string>("RaisedByUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Reason")
                         .IsRequired()
@@ -794,8 +791,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Disputes_BookingId");
 
-                    b.HasIndex("RaisedBy")
-                        .HasDatabaseName("IX_Disputes_RaisedBy");
+                    b.HasIndex("RaisedByUserId")
+                        .HasDatabaseName("IX_Disputes_RaisedByUserId");
 
                     b.HasIndex("ResolvedByStaffId")
                         .HasDatabaseName("IX_Disputes_ResolvedByStaffId");
@@ -1382,13 +1379,19 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasDefaultValue(false);
 
                     b.Property<int>("Rating")
-                        .HasColumnType("int")
-                        .HasAnnotation("Range", new[] { 1, 5 });
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReviewType")
+                        .HasColumnType("int");
 
                     b.Property<string>("RevieweeId")
+                        .IsRequired()
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ReviewerId")
+                        .IsRequired()
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Status")
@@ -1406,9 +1409,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Reviews_Status");
 
-                    b.HasIndex("BookingId", "ReviewerId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Reviews_BookingId_ReviewerId");
+                    b.HasIndex("BookingId", "ReviewerId", "RevieweeId")
+                        .IsUnique();
 
                     b.ToTable("Reviews", (string)null);
                 });
@@ -1548,7 +1550,6 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -1562,8 +1563,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasDatabaseName("IX_Staffs_Role");
 
                     b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Staffs_UserId");
+                        .IsUnique();
 
                     b.ToTable("Staffs", (string)null);
                 });
@@ -1625,6 +1625,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("TicketId")
@@ -1657,11 +1659,22 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<int?>("BookingId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("BookingId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("PromoCodeUsageId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1685,9 +1698,13 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("BookingId")
+                        .HasDatabaseName("IX_SupportTickets_BookingId");
+
+                    b.HasIndex("BookingId1")
                         .IsUnique()
-                        .HasDatabaseName("IX_SupportTickets_BookingId")
-                        .HasFilter("[BookingId] IS NOT NULL");
+                        .HasFilter("[BookingId1] IS NOT NULL");
+
+                    b.HasIndex("PromoCodeUsageId");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_SupportTickets_Status");
@@ -2103,15 +2120,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", b =>
                 {
-                    b.HasOne("Neighborhood.Services.Domain.Staffs.Staff", "Staff")
-                        .WithMany()
-                        .HasForeignKey("StaffId");
-
                     b.HasOne("Neighborhood.Services.Domain.Wallets.Wallet", "Wallet")
                         .WithMany()
                         .HasForeignKey("WalletId");
-
-                    b.Navigation("Staff");
 
                     b.Navigation("Wallet");
                 });
@@ -2241,16 +2252,28 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Disputes.Dispute", b =>
                 {
-                    b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", null)
+                    b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", "Booking")
                         .WithOne("Dispute")
                         .HasForeignKey("Neighborhood.Services.Domain.Disputes.Dispute", "BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Neighborhood.Services.Domain.Staffs.Staff", null)
+                    b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", "RaisedByUser")
                         .WithMany()
+                        .HasForeignKey("RaisedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Neighborhood.Services.Domain.Staffs.Staff", "ResolvedByStaff")
+                        .WithMany("ResolvedDisputes")
                         .HasForeignKey("ResolvedByStaffId")
                         .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("RaisedByUser");
+
+                    b.Navigation("ResolvedByStaff");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Escrows.Escrow", b =>
@@ -2445,11 +2468,29 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Reviews.Review", b =>
                 {
-                    b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", null)
+                    b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", "Booking")
                         .WithMany("Reviews")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", "Reviewee")
+                        .WithMany()
+                        .HasForeignKey("RevieweeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", "Reviewer")
+                        .WithMany()
+                        .HasForeignKey("ReviewerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Reviewee");
+
+                    b.Navigation("Reviewer");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Reviews.ReviewAnalysis", b =>
@@ -2492,10 +2533,20 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Staffs.Staff", b =>
                 {
-                    b.HasOne("Neighborhood.Services.Domain.Staffs.Staff", null)
-                        .WithMany()
+                    b.HasOne("Neighborhood.Services.Domain.Staffs.Staff", "CreatedByStaff")
+                        .WithMany("CreatedStaffs")
                         .HasForeignKey("CreatedByStaffId")
                         .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", "User")
+                        .WithOne("Staff")
+                        .HasForeignKey("Neighborhood.Services.Domain.Staffs.Staff", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByStaff");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Staffs.StaffPermission", b =>
@@ -2515,11 +2566,19 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .WithMany("SupportMessages")
                         .HasForeignKey("ApplicationUserId");
 
+                    b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Neighborhood.Services.Domain.SupportTickets.SupportTicket", "Ticket")
                         .WithMany("Messages")
                         .HasForeignKey("TicketId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Sender");
 
                     b.Navigation("Ticket");
                 });
@@ -2530,9 +2589,30 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .WithMany("SupportTickets")
                         .HasForeignKey("ApplicationUserId");
 
+                    b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", null)
                         .WithOne("SupportTicket")
-                        .HasForeignKey("Neighborhood.Services.Domain.SupportTickets.SupportTicket", "BookingId");
+                        .HasForeignKey("Neighborhood.Services.Domain.SupportTickets.SupportTicket", "BookingId1");
+
+                    b.HasOne("Neighborhood.Services.Domain.PromoCodes.PromoCodeUsage", "PromoCodeUsage")
+                        .WithMany()
+                        .HasForeignKey("PromoCodeUsageId");
+
+                    b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("PromoCodeUsage");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.TechnicianCategories.TechnicianCategory", b =>
@@ -2673,6 +2753,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.Navigation("PromoCodeUsages");
 
+                    b.Navigation("Staff");
+
                     b.Navigation("SupportMessages");
 
                     b.Navigation("SupportTickets");
@@ -2761,8 +2843,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Reviews.Review", b =>
                 {
-                    b.Navigation("Analysis")
-                        .IsRequired();
+                    b.Navigation("Analysis");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.ServiceRequests.ServiceRequest", b =>
@@ -2774,7 +2855,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Staffs.Staff", b =>
                 {
+                    b.Navigation("CreatedStaffs");
+
                     b.Navigation("Permissions");
+
+                    b.Navigation("ResolvedDisputes");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.SupportTickets.SupportTicket", b =>
