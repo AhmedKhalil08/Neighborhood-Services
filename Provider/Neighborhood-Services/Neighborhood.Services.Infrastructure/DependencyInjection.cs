@@ -10,6 +10,7 @@ using Neighborhood.Services.Application.AiAnalysises.Interface;
 using Neighborhood.Services.Application.AvilabilitiesException.Interfaces;
 using Neighborhood.Services.Application.BookingImages.Interface;
 using Neighborhood.Services.Application.Bookings.Interface;
+using Neighborhood.Services.Application.Cache;
 using Neighborhood.Services.Application.CancellationPolicies.Interfaces;
 using Neighborhood.Services.Application.Categories.Interfaces;
 using Neighborhood.Services.Application.Conversations;
@@ -44,6 +45,7 @@ using Neighborhood.Services.Application.Transactions.Interfaces;
 using Neighborhood.Services.Application.Users.Interfaces;
 using Neighborhood.Services.Application.Wallets.Interfaces;
 using Neighborhood.Services.Domain.ApplicationUsers;
+using Neighborhood.Services.Infrastructure.Cache;
 using Neighborhood.Services.Infrastructure.Persistence.AgentLogs;
 using Neighborhood.Services.Infrastructure.Persistence.AiAnalysises;
 using Neighborhood.Services.Infrastructure.Persistence.AvilabilitiesException;
@@ -122,8 +124,8 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 
+            services.AddScoped<ITechnicianCategoryRepository, TechnicianCategoryRepository>();
             services.AddScoped<ITechnicianRepository, TechnicianRepository>();
-
             services.AddScoped<ITechnicianAvailabilityRepository, TechnitianAvailabilityRepository>();
             services.AddScoped<IAvailabilityExceptionRepository, AvailabilityExceptionRepository>();
             services.AddScoped<ITechnicianPricingRepository, TechnicianPricingRepository>();
@@ -155,6 +157,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<INotificationService, NotificationService>();
             
 
+            services.AddSingleton<IResponseCacheService, ResponseCacheService>();
 
             services.Configure<EmailConfiguration>(configuration.GetSection("EmailSettings"));
             //End of Arwa's
