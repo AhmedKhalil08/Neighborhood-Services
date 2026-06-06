@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
+using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
 using StackExchange.Redis;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
 using Neighborhood.Services.Infrastructure.Services;
@@ -35,6 +37,21 @@ namespace Neighborhood.Services.API
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Frontend", policy =>
+                {
+                    var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+                    if (allowedOrigins.Length > 0)
+                    {
+                        policy.WithOrigins(allowedOrigins)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                    }
+                });
+            });
 
 
             builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -73,9 +90,30 @@ namespace Neighborhood.Services.API
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
                         ValidAudience = builder.Configuration["Jwt:Audience"],
+                        NameClaimType = System.Security.Claims.ClaimTypes.NameIdentifier,
+                        RoleClaimType = System.Security.Claims.ClaimTypes.Role,
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
                     };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var authorizationHeader = context.Request.Headers.Authorization.ToString();
+                            if (string.IsNullOrWhiteSpace(authorizationHeader) ||
+                                !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Token = context.Request.Cookies["access_token"];
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                })
+                .AddGoogle(options =>
+                {
+                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
                 });
 
             builder.Services.AddAuthorization();
@@ -105,6 +143,7 @@ namespace Neighborhood.Services.API
             {
                 await DbSeeder.SeedAsync(scope.ServiceProvider);
 
+
                 // Seed Qdrant knowledge base from the DB (catalog) + Faqs.json.
                 // If OpenAI/Qdrant is unavailable (bad key, no quota, network down) we log
                 // and continue — the app stays up; only the AI endpoints will fail per-call.
@@ -118,6 +157,7 @@ namespace Neighborhood.Services.API
                     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                     logger.LogWarning(ex, "KnowledgeSeeder failed at startup — AI endpoints may not work until this is fixed. App will continue to run.");
                 }
+
             }
 
 
@@ -130,6 +170,7 @@ namespace Neighborhood.Services.API
 
             app.UseHttpsRedirection();
             app.UseExceptionHandler();
+            app.UseCors("Frontend");
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard("/hangfire");

@@ -167,11 +167,14 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<ISupportMessageRepository, SupportMessageRepository>();
 
 
+            services.AddHttpClient();
+
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IInvoicePdfService, InvoicePdfService>();
             services.AddHttpClient<IPaymentGatewayService, PaymentGatewayService>();
             services.Configure<PaymentGatewayOptions>(configuration.GetSection("PaymentGateway"));
+            services.AddScoped<IGeocodingService, GeocodingService>();
 
 
             services.AddScoped<ITechnicianCategoryRepository, TechnicianCategoryRepository>();
