@@ -126,8 +126,10 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
             services.AddScoped<ISupportMessageRepository, SupportMessageRepository>();
 
+            services.AddHttpClient();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IGeocodingService, GeocodingService>();
 
             return services;
         }
