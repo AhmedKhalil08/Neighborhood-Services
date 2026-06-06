@@ -7,7 +7,7 @@ using NetTopologySuite.Geometries;
 namespace Neighborhood.Services.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreation : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,6 +25,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     ReferenceType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ReferenceId = table.Column<int>(type: "int", nullable: true),
+                    TokensUsed = table.Column<int>(type: "int", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -618,6 +619,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Location = table.Column<Point>(type: "geography", nullable: false),
                     Pattern = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DayOfWeek = table.Column<int>(type: "int", nullable: true),
                     DayOfMonth = table.Column<int>(type: "int", nullable: true),
