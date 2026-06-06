@@ -7,19 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="NewFolder\**" />
-    <Compile Remove="Newsletter\**" />
-    <EmbeddedResource Remove="NewFolder\**" />
-    <EmbeddedResource Remove="Newsletter\**" />
-    <None Remove="NewFolder\**" />
-    <None Remove="Newsletter\**" />
-  </ItemGroup>
 
-  <ItemGroup>
+    <PackageReference Include="Mapster" Version="10.0.7" />
     <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.10" />
     <!--<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.10" />-->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.77.0" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
@@ -31,8 +26,6 @@
     <Folder Include="AgentLogs\Commands\" />
     <Folder Include="AgentLogs\DTOs\" />
     <Folder Include="AgentLogs\Queries\" />
-    <Folder Include="AiAnalysises\Commands\" />
-    <Folder Include="AiAnalysises\DTOs\" />
     <Folder Include="AiAnalysises\Queries\" />
     <Folder Include="BookingImages\Commands\" />
     <Folder Include="BookingImages\DTOs\" />
@@ -40,7 +33,11 @@
     <Folder Include="CancellationPolicies\DTOs\" />
     <Folder Include="CancellationPolicies\Queries\" />
     <Folder Include="Messages\Queries\" />
-    <Folder Include="Notifications\Commands\" />
+    <Folder Include="NewFolder\" />
+    <Folder Include="NewFolder\" />
+    <Folder Include="NewFolder\" />
+    <Folder Include="Newsletter\DTOs\" />
+    <Folder Include="Newsletter\NewFolder\" />
     <Folder Include="Notifications\DTOs\" />
     <Folder Include="Notifications\Queries\" />
     <Folder Include="Offers\DTOs\" />
@@ -48,6 +45,7 @@
     <Folder Include="RecurringBookings\DTOs\" />
     <Folder Include="RecurringBookings\Queries\" />
     <Folder Include="ServiceRequests\Queries\" />
+    <Folder Include="TechnitianCategory\DTOs\" />
     <Folder Include="Users\Services\" />
   </ItemGroup>
 

@@ -194,6 +194,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TokensUsed")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("AgentLogs");
@@ -207,7 +210,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BookingId")
+                    b.Property<int?>("BookingId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("ConfidenceScore")
@@ -236,7 +239,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BookingId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[BookingId] IS NOT NULL");
 
                     b.ToTable("AiAnalyses");
                 });
@@ -616,7 +620,12 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NameEn")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -624,6 +633,66 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Neighborhood.Services.Domain.Chatbot.ChatbotMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChatbotSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatbotSessionId");
+
+                    b.ToTable("ChatbotMessages");
+                });
+
+            modelBuilder.Entity("Neighborhood.Services.Domain.Chatbot.ChatbotSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChatbotSessions");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Conversation.Conversation", b =>
@@ -1166,7 +1235,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("DescriptionAr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DescriptionEn")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1181,10 +1254,15 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<decimal>("MinPrice")
                         .HasColumnType("DECIMAL(18,2)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameAr")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
 
@@ -1322,6 +1400,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<Point>("Location")
+                        .IsRequired()
+                        .HasColumnType("geography");
 
                     b.Property<string>("Pattern")
                         .IsRequired()
@@ -1543,8 +1625,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -1609,9 +1693,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -1658,9 +1740,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1674,8 +1754,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -1900,7 +1982,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.HasIndex("ProblemTypeId");
 
-                    b.HasIndex("TechnicianId");
+                    b.HasIndex("TechnicianId", "ProblemTypeId")
+                        .IsUnique();
 
                     b.ToTable("TechnicianPricings");
                 });
@@ -2091,8 +2174,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", "Booking")
                         .WithOne("AiAnalysis")
                         .HasForeignKey("Neighborhood.Services.Domain.AiAnalyses.AiAnalysis", "BookingId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Booking");
                 });
@@ -2202,6 +2284,17 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Navigation("ServiceRequest");
 
                     b.Navigation("Technician");
+                });
+
+            modelBuilder.Entity("Neighborhood.Services.Domain.Chatbot.ChatbotMessage", b =>
+                {
+                    b.HasOne("Neighborhood.Services.Domain.Chatbot.ChatbotSession", "ChatbotSession")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatbotSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChatbotSession");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Conversation.Conversation", b =>
@@ -2707,6 +2800,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     b.Navigation("ServiceRequests");
 
                     b.Navigation("TechnicianCategories");
+                });
+
+            modelBuilder.Entity("Neighborhood.Services.Domain.Chatbot.ChatbotSession", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Neighborhood.Services.Domain.Conversation.Conversation", b =>

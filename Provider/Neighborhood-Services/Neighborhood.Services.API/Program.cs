@@ -1,12 +1,21 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
+using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Neighborhood.Services.API.Middlewares;
 using Neighborhood.Services.Application;
+using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Infrastructure;
+using Neighborhood.Services.Infrastructure.Persistence.Context;
+using Neighborhood.Services.Infrastructure.Persistence.Seeding;
+using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
+using StackExchange.Redis;
+using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
+using Neighborhood.Services.Infrastructure.Services;
 
 using System.Text;
-using Neighborhood.Services.Infrastructure.Persistence.Seeding;
 
 
 namespace Neighborhood.Services.API
@@ -24,7 +33,8 @@ namespace Neighborhood.Services.API
                     options.JsonSerializerOptions.Converters.Add(
                         new System.Text.Json.Serialization.JsonStringEnumConverter()));
             builder.Services.AddSignalR();
-
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddCors(options =>
@@ -42,6 +52,33 @@ namespace Neighborhood.Services.API
                     }
                 });
             });
+
+
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = (actionContext =>
+                {
+                    var errors = actionContext.ModelState.Where(M => M.Value.Errors.Count() > 0)
+                             .SelectMany(M => M.Value.Errors)
+                             .Select(E => !(string.IsNullOrEmpty(E.Exception?.Message)) ?  E.Exception.Message  : E.ErrorMessage )
+                             .ToArray();
+                    return new BadRequestObjectResult(new
+                    {
+                        StatusCod = 400 ,
+                        Errors = errors
+                    });
+                });
+            });
+
+
+
+            builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
+            {
+                var connection =   builder.Configuration.GetConnectionString("Redis");
+                return ConnectionMultiplexer.Connect(connection);
+            });
+
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -78,25 +115,54 @@ namespace Neighborhood.Services.API
                     options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
                     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
                 });
+
             builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
-
             builder.Services.AddHttpContextAccessor();
+
+
+
 
 
             var app = builder.Build();
 
+
+            //Arwa///
+
+            //Mapping Notification Hub
+            app.MapHub<Neighborhood.Services.Infrastructure.Services.NotificationService.NotificationHub>("/notificationHub");
+            //app.MapHub<ChatHub>("/chattt");
+            //app.MapHub<NotificationHub>("/notf");
+
+            //END OF ARWA
             // Seed dev/test data on startup (migrates + seeds if empty)
             using (var scope = app.Services.CreateScope())
             {
                 await DbSeeder.SeedAsync(scope.ServiceProvider);
+
+
+                // Seed Qdrant knowledge base from the DB (catalog) + Faqs.json.
+                // If OpenAI/Qdrant is unavailable (bad key, no quota, network down) we log
+                // and continue — the app stays up; only the AI endpoints will fail per-call.
+                try
+                {
+                    var knowledgeSeeder = scope.ServiceProvider.GetRequiredService<KnowledgeSeeder>();
+                    await knowledgeSeeder.SeedAsync();
+                }
+                catch (Exception ex)
+                {
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogWarning(ex, "KnowledgeSeeder failed at startup — AI endpoints may not work until this is fixed. App will continue to run.");
+                }
+
             }
 
+
             // Configure the HTTP request pipeline.
-            if(app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
@@ -107,9 +173,15 @@ namespace Neighborhood.Services.API
             app.UseCors("Frontend");
             app.UseAuthentication();
             app.UseAuthorization();
-
-            //app.MapHub<ChatHub>("/chattt");
-            //app.MapHub<NotificationHub>("/notf");
+            app.UseHangfireDashboard("/hangfire");
+            RecurringJob.AddOrUpdate<RecurringBookingGeneratorService>(
+                "recurring-booking-generator",
+                service => service.GenerateBookings(),
+                Cron.Daily);
+            RecurringJob.AddOrUpdate<ServiceRequestExpiryService>(
+                "service_request_expiry",
+                service => service.ExpireOpenRequestAndOffer(),
+                Cron.Daily);
 
             app.MapControllers();
 
