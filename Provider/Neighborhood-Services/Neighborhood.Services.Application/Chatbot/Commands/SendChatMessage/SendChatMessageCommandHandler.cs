@@ -34,21 +34,23 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
 
         public async Task<ChatReplyDto> Handle(SendChatMessageCommand request, CancellationToken cancellationToken)
         {
-            // 1. Who is chatting
-            var userId = _currentUserService.UserId
-                ?? throw new UnauthorizedException("User is not authenticated.");
-            ChatbotSession session;
+            // 1. Who is chatting (null = guest, not logged in)
+            var userId = _currentUserService.UserId;
+
+            // 2. Load/create a session ONLY for logged-in users
+            ChatbotSession? session = null;
             if (request.SessionId.HasValue)
             {
+                // Continuing a saved session — must be logged in and own it
                 session = await _chatbotRepository.GetSessionWithMessagesAsync(request.SessionId.Value)
                     ?? throw new NotFoundException(nameof(ChatbotSession), request.SessionId.Value);
 
-                // Make sure this session belongs to the current user
                 if (session.UserId != userId)
                     throw new ForbiddenException("You don't have access to this chat session.");
             }
-            else
+            else if (userId is not null)
             {
+                // New session for a logged-in user
                 session = new ChatbotSession
                 {
                     UserId = userId,
@@ -57,6 +59,7 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
                 };
                 await _chatbotRepository.AddAsync(session);
             }
+            // Guest (userId == null, no SessionId) → session stays null, nothing persisted
             // SYSTEM PROMPT 
             // 3. Pull relevant knowledge from Qdrant for the user's message
             // 3. Pull relevant knowledge from Qdrant for the user's message
@@ -65,49 +68,60 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
 
             // 4. Build the system prompt with the retrieved context
             var systemPrompt = $"""
-                  You are a helpful assistant for "Neighborhood Services", a home services marketplace in Egypt.
-                  Answer the user's questions using the context below when relevant.
-                  If the context doesn't contain the answer, say you're not sure and suggest contacting support.
-                  If the user writes in Arabic, reply in Arabic. If in English, reply in English.
+                  You are the booking assistant for "Neighborhood Services", a home services marketplace in Egypt.
+                  Your job is to help customers understand the services, prices, and HOW to book.
+
+                  Guidelines:
+                  - Answer using the context below when relevant. If it doesn't contain the answer, say you're not sure and suggest contacting support.
+                  - When a user wants to book, GUIDE them step by step (choose a service, pick a technician, choose a time, confirm) and tell them to use the booking page to complete it. Do NOT claim you booked anything yourself.
+                  - If a user who is not logged in wants to book or do account actions, tell them they need to log in first.
+                  - When asked about prices, give the range/estimate from the context.
+                  - If the user writes in Arabic, reply in Arabic. If in English, reply in English. Keep replies concise and friendly.
 
                   Context:
                   {context}
                   """;
 
-            // 5. Build ChatHistory from the session's past messages
+            // 5. Build ChatHistory from the session's past messages (only logged-in users have a session)
             var history = new ChatHistory();
-            foreach (var msg in session.Messages.OrderBy(m => m.CreatedAt))
+            if (session is not null)
             {
-                if (msg.Role == ChatbotRole.User)
-                    history.AddUserMessage(msg.Content);
-                else
-                    history.AddAssistantMessage(msg.Content);
+                foreach (var msg in session.Messages.OrderBy(m => m.CreatedAt))
+                {
+                    if (msg.Role == ChatbotRole.User)
+                        history.AddUserMessage(msg.Content);
+                    else
+                        history.AddAssistantMessage(msg.Content);
+                }
             }
             // add the new user message
             history.AddUserMessage(request.Message);
             // 6. Call the AI
             var reply = await _aiClient.ChatAsync(history, systemPrompt);
 
-            // 7. Save the user message and the assistant reply
-            session.Messages.Add(new ChatbotMessage
+            // 7. Save both messages — only if this is a logged-in user's session
+            if (session is not null)
             {
-                Role = ChatbotRole.User,
-                Content = request.Message,
-                CreatedAt = DateTime.UtcNow
-            });
-            session.Messages.Add(new ChatbotMessage
-            {
-                Role = ChatbotRole.Assistant,
-                Content = reply,
-                CreatedAt = DateTime.UtcNow
-            });
+                session.Messages.Add(new ChatbotMessage
+                {
+                    Role = ChatbotRole.User,
+                    Content = request.Message,
+                    CreatedAt = DateTime.UtcNow
+                });
+                session.Messages.Add(new ChatbotMessage
+                {
+                    Role = ChatbotRole.Assistant,
+                    Content = reply,
+                    CreatedAt = DateTime.UtcNow
+                });
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
 
-            // 8. Return the reply + session id
+            // 8. Return the reply + session id (0 = guest, nothing saved)
             return new ChatReplyDto
             {
-                SessionId = session.Id,
+                SessionId = session?.Id ?? 0,
                 Reply = reply
             };
         }
