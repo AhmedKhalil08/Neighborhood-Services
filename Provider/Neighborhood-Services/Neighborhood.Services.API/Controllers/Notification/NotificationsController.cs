@@ -1,10 +1,15 @@
-﻿using MediatR;
+﻿using Mapster.Utils;
+using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Neighborhood.Services.Application.Notifications.Push_inApp.Commands;
 using Neighborhood.Services.Application.Notifications.Push_inApp.DTOs;
 using Neighborhood.Services.Application.Notifications.Push_inApp.Queries;
 using Neighborhood.Services.Application.Notifications.Services;
+using Neighborhood.Services.Domain.ApplicationUsers;
 using Neighborhood.Services.Infrastructure.Services.NotificationService;
+using System.Drawing;
+using System.Net.NetworkInformation;
 
 namespace Neighborhood.Services.API.Controllers.Notification
 {
@@ -29,10 +34,37 @@ namespace Neighborhood.Services.API.Controllers.Notification
         }
 
         [HttpPost("SendingToAll")]
-        public async Task<ActionResult> CreateNotification(string mssg)
+        public async Task<ActionResult> CreateNotificationToAll(string mssg)
         {
             var result = await _service.SendNotificationAsync(mssg);
             return Ok(result);
+        }
+
+        [HttpPost("SendingToAUserById")]
+        public async Task<ActionResult> CreateNotificationToUser(string userId,string mssg)
+        {
+            var result = await _service.SendNotificationToUser(userId, mssg);
+            return Ok(result);
+        }
+
+        [HttpPost("SendingBasedOnRole")]
+        public async Task<ActionResult> CreateNotificationToGroup(string message, string? userRole=null, string? userId = null)
+        {
+            if (userId != null)
+            {
+                var result = await _service.SendRoleBasedNotificationAsync(message, ApplicationUserRole.Customer, userId);
+                return Ok(result);
+
+            }
+            else if (userRole!=null&& Enum.TryParse<ApplicationUserRole>(userRole, out ApplicationUserRole role))
+            { 
+                var result = await _service.SendRoleBasedNotificationAsync(message, role, userId);
+                return Ok(result);
+            }
+            else
+            {
+                var result = await _service.SendRoleBasedNotificationAsync(message, ApplicationUserRole.Customer, userId);
+                return Ok("Enum Value Not Valid or No userId entered!"); }
         }
 
         [HttpPut("MarkAllAsRead")]

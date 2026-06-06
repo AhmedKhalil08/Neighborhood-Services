@@ -6,6 +6,7 @@ using Neighborhood.Services.Application.Notifications;
 using Neighborhood.Services.Application.Notifications.Push_inApp.DTOs;
 using Neighborhood.Services.Application.Notifications.Services;
 using Neighborhood.Services.Application.Shared;
+using Neighborhood.Services.Domain.ApplicationUsers;
 using Neighborhood.Services.Domain.Message;
 using Neighborhood.Services.Domain.Notifications;
 using System.Threading.Channels;
@@ -204,23 +205,38 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
 
         }
 
-        public async Task<PushNotificationDto> SendRoleBasedNotificationAsync(string mssg, string role, string? recipientUserId = null)
+        //Customer,
+        //Technician,
+        //Staff
+
+        public async Task<PushNotificationDto> SendRoleBasedNotificationAsync(string mssg,ApplicationUserRole userRole ,string? recipientUserId = null)
         {
-            switch (role)
+
+            if (recipientUserId != null) {
+                await SendNotificationToUser(recipientUserId, mssg);  
+            }
+
+            else if (Enum.IsDefined(userRole))
             {
-                case "Staff":
-                    await SendNotificationToAdmin(mssg);
-                    break;
+                switch (userRole)
+                {
+                    case (ApplicationUserRole.Staff):
+                        await SendNotificationToAdmin(mssg);
+                        break;
 
-                case "Technician":
-                case "Customer":
-                    if (!string.IsNullOrEmpty(recipientUserId))
-                        await SendNotificationToUser(recipientUserId, mssg);
-                    break;
+                    case (ApplicationUserRole.Customer):
+                        // if (!string.IsNullOrEmpty(recipientUserId))
+                        await SendNotificationToCustomer(mssg);
+                        break;
+                    case (ApplicationUserRole.Technician):
+                        // if (!string.IsNullOrEmpty(recipientUserId))
+                        await SendNotificationToTechnician(mssg);
+                        break;
 
-                default:
-                    await SendNotificationAsync(mssg);
-                    break;
+                    default:
+
+                        break;
+                }
             }
             var notf = new Notification()
             {
@@ -229,11 +245,11 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
                 message = mssg,
                 IsDeleted = false,
                 isRead = false,
-                UserId = _current.UserId,
+                UserId = _current.UserId??"1",
                 type = Domain.Notifications.NotificationTypes.general
             };
-            await _notificationsRepository.AddAsync(notf);
-            await _unitOfWork.SaveChangesAsync();
+          //  await _notificationsRepository.AddAsync(notf);
+          //  await _unitOfWork.SaveChangesAsync();
 
             return new PushNotificationDto()
             {
