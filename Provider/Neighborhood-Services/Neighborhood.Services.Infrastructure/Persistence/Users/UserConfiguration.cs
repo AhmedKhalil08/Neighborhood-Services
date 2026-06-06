@@ -52,5 +52,6 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Users
     .HasForeignKey<Staff>(s => s.UserId)
     .OnDelete(DeleteBehavior.Cascade);
         }
+
     }
 }

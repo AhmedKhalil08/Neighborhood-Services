@@ -1,4 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Mvc;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Neighborhood.Services.API.Middlewares;
@@ -6,9 +10,17 @@ using Neighborhood.Services.Application;
 using Neighborhood.Services.Application.Authorization;
 using Neighborhood.Services.Application.Cloudinary;
 using Neighborhood.Services.Domain.Staffs;
+using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
+using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
+using StackExchange.Redis;
+
+using Neighborhood.Services.Infrastructure.Services;
+using Neighborhood.Services.Infrastructure.Services.EmailService;
+
+
 using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
 using System.Text;
 
@@ -22,7 +34,8 @@ namespace Neighborhood.Services.API
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            //Email config: Moved to Infra
+           //builder.Services.Configure<EmailConfiguration>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                     options.JsonSerializerOptions.Converters.Add(
@@ -32,6 +45,47 @@ namespace Neighborhood.Services.API
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Frontend", policy =>
+                {
+                    var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+                    if (allowedOrigins.Length > 0)
+                    {
+                        policy.WithOrigins(allowedOrigins)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                    }
+                });
+            });
+
+
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = (actionContext =>
+                {
+                    var errors = actionContext.ModelState.Where(M => M.Value.Errors.Count() > 0)
+                             .SelectMany(M => M.Value.Errors)
+                             .Select(E => !(string.IsNullOrEmpty(E.Exception?.Message)) ?  E.Exception.Message  : E.ErrorMessage )
+                             .ToArray();
+                    return new BadRequestObjectResult(new
+                    {
+                        StatusCod = 400 ,
+                        Errors = errors
+                    });
+                });
+            });
+
+
+
+            builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
+            {
+                var connection =   builder.Configuration.GetConnectionString("Redis");
+                return ConnectionMultiplexer.Connect(connection);
+            });
+
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -44,9 +98,30 @@ namespace Neighborhood.Services.API
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
                         ValidAudience = builder.Configuration["Jwt:Audience"],
+                        NameClaimType = System.Security.Claims.ClaimTypes.NameIdentifier,
+                        RoleClaimType = System.Security.Claims.ClaimTypes.Role,
                         IssuerSigningKey = new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
                     };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var authorizationHeader = context.Request.Headers.Authorization.ToString();
+                            if (string.IsNullOrWhiteSpace(authorizationHeader) ||
+                                !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                            {
+                                context.Token = context.Request.Cookies["access_token"];
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                })
+                .AddGoogle(options =>
+                {
+                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
                 });
             // Add authorization policies for each permission type (Amira)
             builder.Services.AddAuthorization(options =>
@@ -68,11 +143,11 @@ namespace Neighborhood.Services.API
             // end of Amira
             builder.Services.AddAuthorization();
 
+            builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
-
             builder.Services.AddHttpContextAccessor();
 
 
@@ -94,6 +169,22 @@ namespace Neighborhood.Services.API
             using (var scope = app.Services.CreateScope())
             {
                 await DbSeeder.SeedAsync(scope.ServiceProvider);
+
+
+                // Seed Qdrant knowledge base from the DB (catalog) + Faqs.json.
+                // If OpenAI/Qdrant is unavailable (bad key, no quota, network down) we log
+                // and continue — the app stays up; only the AI endpoints will fail per-call.
+                try
+                {
+                    var knowledgeSeeder = scope.ServiceProvider.GetRequiredService<KnowledgeSeeder>();
+                    await knowledgeSeeder.SeedAsync();
+                }
+                catch (Exception ex)
+                {
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogWarning(ex, "KnowledgeSeeder failed at startup — AI endpoints may not work until this is fixed. App will continue to run.");
+                }
+
             }
 
 
@@ -103,13 +194,21 @@ namespace Neighborhood.Services.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors("AllowJS");
             app.UseHttpsRedirection();
             app.UseExceptionHandler();
+            app.UseCors("Frontend");
             app.UseAuthentication();
             app.UseAuthorization();
-
-           
+            app.UseHangfireDashboard("/hangfire");
+            RecurringJob.AddOrUpdate<RecurringBookingGeneratorService>(
+                "recurring-booking-generator",
+                service => service.GenerateBookings(),
+                Cron.Daily);
+            RecurringJob.AddOrUpdate<ServiceRequestExpiryService>(
+                "service_request_expiry",
+                service => service.ExpireOpenRequestAndOffer(),
+                Cron.Daily);
 
             app.MapControllers();
 

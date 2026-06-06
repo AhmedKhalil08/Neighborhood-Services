@@ -3,6 +3,7 @@ using Neighborhood.Services.Domain.Customers;
 using Neighborhood.Services.Domain.ProblemTypes;
 using Neighborhood.Services.Domain.Shared;
 using Neighborhood.Services.Domain.Technicians;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Neighborhood.Services.Domain.RecurringBookings
     {
         //------------------------ Self Prop 
         public string Address { get; set; } = string.Empty;
+        public Point Location { get; set; } = null!;
         public RecurringPattern Pattern { get; set; }
         public DayOfWeek? DayOfWeek { get; set; }
         public int? DayOfMonth { get; set; }

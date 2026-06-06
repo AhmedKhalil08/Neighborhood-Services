@@ -4,12 +4,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>767f7b51-2f4b-42d0-b078-4115414d3828</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CloudinaryDotNet" Version="1.29.1" />
     <PackageReference Include="jose-jwt" Version="5.3.0" />
     <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
