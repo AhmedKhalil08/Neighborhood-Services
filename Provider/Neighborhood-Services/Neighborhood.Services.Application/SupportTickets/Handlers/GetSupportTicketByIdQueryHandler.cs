@@ -17,7 +17,7 @@ namespace Neighborhood.Services.Application.SupportTickets.Handlers
 
         public async Task<SupportTicketDto> Handle(GetSupportTicketByIdQuery request, CancellationToken cancellationToken)
         {
-            var ticket = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            var ticket = await _repository.GetByIdAsync(request.Id);
             if (ticket is null)
                 throw new Exception($"SupportTicket with id {request.Id} not found.");
 

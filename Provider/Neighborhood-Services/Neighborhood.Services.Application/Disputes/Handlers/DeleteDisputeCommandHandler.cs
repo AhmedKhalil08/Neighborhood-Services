@@ -5,25 +5,30 @@ using Neighborhood.Services.Application.Shared;
 
 namespace Neighborhood.Services.Application.Disputes.Handlers
 {
-    public class DeleteDisputeCommandHandler : IRequestHandler<DeleteDisputeCommand, bool>
+    public class DeleteDisputeCommandHandler: IRequestHandler<DeleteDisputeCommand, bool>
     {
         private readonly IDisputeRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public DeleteDisputeCommandHandler(IDisputeRepository repository, IUnitOfWork unitOfWork)
+        public DeleteDisputeCommandHandler(
+            IDisputeRepository repository,
+            IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> Handle(DeleteDisputeCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(
+            DeleteDisputeCommand request,
+            CancellationToken cancellationToken)
         {
-            var dispute = await _repository.GetByIdAsync(request.Id, cancellationToken);
-            if (dispute is null)
-                throw new Exception($"Dispute with id {request.Id} not found.");
+            var dispute = await _repository.GetByIdAsync(request.Id);
 
-            dispute.IsDeleted = true;
-            await _repository.UpdateAsync(dispute);
+            if (dispute is null)
+                return false;
+
+            await _repository.DeleteAsync(request.Id);
+
             await _unitOfWork.SaveChangesAsync();
 
             return true;

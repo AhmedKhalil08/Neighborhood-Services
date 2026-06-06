@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using Neighborhood.Services.Application.Bookings.Interface;
 using Neighborhood.Services.Application.Cache;
 using Neighborhood.Services.Application.CancellationPolicies.Interfaces;
 using Neighborhood.Services.Application.Categories.Interfaces;
+using Neighborhood.Services.Application.Cloudinary;
 using Neighborhood.Services.Application.Chatbot.Interfaces;
 using Neighborhood.Services.Application.Conversations;
 using Neighborhood.Services.Application.CustomerAddresses.Interfaces;
@@ -92,6 +94,8 @@ using Neighborhood.Services.Infrastructure.Services.EmailService;
 using Neighborhood.Services.Infrastructure.Services.Invoices;
 using Neighborhood.Services.Infrastructure.Services.Payments;
 using Neighborhood.Services.Infrastructure.Services.AI;
+using Neighborhood.Services.Infrastructure.Services.Authorization;
+using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
 using Neighborhood.Services.Infrastructure.Shared;
 using Neighborhood.Services.Infrastructure.Services.NotificationService;
 using Qdrant.Client;
@@ -138,6 +142,7 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IAvailabilityExceptionRepository, AvailabilityExceptionRepository>();
             services.AddScoped<ITechnicianPricingRepository, TechnicianPricingRepository>();
             services.AddScoped<ITechnicianPhotoRepository, TechnicianPhotoRepository>();
+            services.AddScoped<ITechnicianCategoryRepository,TechnicianCategoryRepository>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
             services.AddScoped<IStaffRepository, StaffRepository>();
@@ -170,7 +175,7 @@ namespace Neighborhood.Services.Infrastructure
             services.Configure<EmailConfiguration>(configuration.GetSection("EmailSettings"));
             //End of Arwa's
 
-
+           
             services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
             services.AddScoped<ISupportMessageRepository, SupportMessageRepository>();
 
@@ -223,6 +228,10 @@ namespace Neighborhood.Services.Infrastructure
             services.AddScoped<IVectorMemory, QdrantMemoryService>();
             // Chatbot
             services.AddScoped<IChatbotRepository, ChatbotRepository>();
+            //Amira
+            services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+            services.AddScoped<ICloudinaryService,CloudinaryService>();
+            //end Amira
             return services;
         }
     }

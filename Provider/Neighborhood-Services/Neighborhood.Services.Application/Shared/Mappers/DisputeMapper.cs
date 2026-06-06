@@ -9,7 +9,7 @@ namespace Neighborhood.Services.Application.Shared.Mappers
         {
             Id = dispute.Id,
             BookingId = dispute.BookingId,
-            RaisedBy = dispute.RaisedBy,
+            RaisedByUserId = dispute.RaisedByUserId,
             ResolvedByStaffId = dispute.ResolvedByStaffId,
             DisputeType = dispute.DisputeType.ToString(),
             Reason = dispute.Reason,

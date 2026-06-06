@@ -7,7 +7,7 @@ namespace Neighborhood.Services.Application.Disputes.Commands
     public class CreateDisputeCommand : IRequest<DisputeDto>
     {
         public int BookingId { get; set; }
-        public int RaisedBy { get; set; }
+        public string RaisedByUserId { get; set; }
         public DisputeType DisputeType { get; set; }
         public string Reason { get; set; }
     }

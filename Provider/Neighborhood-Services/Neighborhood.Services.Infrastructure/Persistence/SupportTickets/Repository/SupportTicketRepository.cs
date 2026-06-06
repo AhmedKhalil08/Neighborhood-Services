@@ -17,25 +17,21 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Reposi
 
         // ── Queries ──────────────────────────────────────────────────────────
 
-        public async Task<SupportTicket?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-        {
-            return await _context.SupportTickets
-                .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
-        }
 
-        public async Task<SupportTicket?> GetByIdWithMessagesAsync(int id, CancellationToken cancellationToken = default)
+
+        public async Task<SupportTicket?> GetByIdWithMessagesAsync(
+      int id,
+      CancellationToken cancellationToken = default)
         {
             return await _context.SupportTickets
                 .Include(t => t.Messages)
-                .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+                .ThenInclude(m => m.Sender)
+                .FirstOrDefaultAsync(
+                    t => t.Id == id,
+                    cancellationToken);
         }
 
-        public async Task<IReadOnlyList<SupportTicket>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            return await _context.SupportTickets
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-        }
+       
 
         public async Task<IReadOnlyList<SupportTicket>> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default)
         {
@@ -66,19 +62,21 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Reposi
         public async Task AddAsync(SupportTicket ticket, CancellationToken cancellationToken = default)
         {
             await _context.SupportTickets.AddAsync(ticket, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+           
         }
 
-        public async Task UpdateAsync(SupportTicket ticket, CancellationToken cancellationToken = default)
+        public  Task UpdateAsync(SupportTicket ticket, CancellationToken cancellationToken = default)
         {
             _context.SupportTickets.Update(ticket);
-            await _context.SaveChangesAsync(cancellationToken);
+          return Task.CompletedTask;
         }
 
-        public async Task DeleteAsync(SupportTicket ticket, CancellationToken cancellationToken = default)
+        public  Task DeleteAsync(SupportTicket ticket, CancellationToken cancellationToken = default)
         {
-            _context.SupportTickets.Remove(ticket);
-            await _context.SaveChangesAsync(cancellationToken);
+            ticket.IsDeleted=true;
+            _context.SupportTickets.Update(ticket);
+            return Task.CompletedTask;
+
         }
     }
 }

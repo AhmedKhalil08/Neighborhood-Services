@@ -13,6 +13,7 @@ namespace Neighborhood.Services.Domain.Staffs
         ApproveTechnicians = 5,
         FlagReviews = 6,
         ManageUsers = 7,
-        FullAccess = 8
+        ManageBookings=8,
+        FullAccess = 9
     }
 }

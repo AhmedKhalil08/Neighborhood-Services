@@ -9,13 +9,9 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository
 {
     public class ReviewRepository : GenericRepository<Review, int>, IReviewRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public ReviewRepository(ApplicationDbContext context) : base(context)
         
-            {
-                _context = context;
-            }
+
+        public ReviewRepository(ApplicationDbContext context) : base(context){}
 
         // ── Queries ────────────────────────────────────────────────────────────
 
@@ -32,14 +28,8 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository
                 .Include(r => r.Analysis)
                 .FirstOrDefaultAsync(r => r.BookingId == bookingId, cancellationToken);
         }
-        public async Task<IReadOnlyList<Review>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            return await _context.Reviews
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<IReadOnlyList<Review>> GetByReviewerIdAsync(int reviewerId, CancellationToken cancellationToken = default)
+       
+        public async Task<IReadOnlyList<Review>> GetByReviewerIdAsync(string reviewerId, CancellationToken cancellationToken = default)
         {
             return await _context.Reviews
                 .Include(r => r.Analysis)
@@ -48,7 +38,7 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Review>> GetByRevieweeIdAsync(int revieweeId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<Review>> GetByRevieweeIdAsync(string revieweeId, CancellationToken cancellationToken = default)
         {
             return await _context.Reviews
                 .Include(r => r.Analysis)
@@ -77,33 +67,23 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> ExistsByBookingIdAsync(int bookingId, CancellationToken cancellationToken = default)
-        {
-            return await _context.Reviews
-                .AnyAsync(r => r.BookingId == bookingId, cancellationToken);
-        }
+        //public async Task<bool> ExistsByBookingIdAsync(int bookingId, CancellationToken cancellationToken = default)
+        //{
+        //    return await _context.Reviews
+        //        .AnyAsync(r => r.BookingId == bookingId, cancellationToken);
+        //}
 
         // ── Commands ───────────────────────────────────────────────────────────
 
-        public async Task AddAsync(Review review, CancellationToken cancellationToken = default)
-        {
-            await _context.Reviews.AddAsync(review, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
 
-        public async Task UpdateAsync(Review review, CancellationToken cancellationToken = default)
-        {
-            _context.Reviews.Update(review);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
 
-        // Hard delete — soft delete is handled via IsDeleted flag on the domain side
-        public async Task DeleteAsync(Review review, CancellationToken cancellationToken = default)
+     
+        public async Task<bool> ExistsByDirectionAsync(int bookingId,ReviewType direction,CancellationToken cancellationToken = default)
         {
-            _context.Reviews.Remove(review);
-            await _context.SaveChangesAsync(cancellationToken);
+            return await _context.Reviews.AnyAsync(r =>
+                r.BookingId == bookingId &&
+                r.ReviewType == direction,
+                cancellationToken);
         }
-
-      
     }
 }

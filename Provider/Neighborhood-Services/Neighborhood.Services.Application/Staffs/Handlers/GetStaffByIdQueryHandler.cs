@@ -16,7 +16,7 @@ namespace Neighborhood.Services.Application.Staffs.Handlers
 
         public async Task<StaffDto> Handle(GetStaffByIdQuery request, CancellationToken cancellationToken)
         {
-            var staff = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            var staff = await _repository.GetByIdAsync(request.Id);
             if (staff is null)
                 throw new Exception($"Staff with id {request.Id} not found.");
 

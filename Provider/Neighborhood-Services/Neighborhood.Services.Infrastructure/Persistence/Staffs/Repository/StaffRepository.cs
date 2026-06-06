@@ -8,21 +8,21 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Staffs.Repository
 {
     public class StaffRepository : GenericRepository<Staff, int>, IStaffRepository
     {
-        private readonly ApplicationDbContext _context;
+      
 
         public StaffRepository(ApplicationDbContext context) : base(context)
         {
-            _context = context;
+          
         }
 
         // ── Queries ────────────────────────────────────────────────────────────
-
         public async Task<Staff?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Staffs
                 .Include(s => s.Permissions)
                 .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         }
+
 
         public async Task<Staff?> GetByUserIdAsync(string userId, CancellationToken cancellationToken = default)
         {
@@ -75,24 +75,32 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Staffs.Repository
 
         // ── Commands ───────────────────────────────────────────────────────────
 
-        public async Task AddAsync(Staff staff, CancellationToken cancellationToken = default)
+
+        public async Task ReplacePermissionsAsync(
+     int staffId,
+     IEnumerable<PermissionType> permissions,
+     CancellationToken cancellationToken = default)
         {
-            await _context.Staffs.AddAsync(staff, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            var existingPermissions = await _context.StaffPermissions
+                .Where(x => x.StaffId == staffId && !x.IsDeleted)
+                .ToListAsync(cancellationToken);
+
+            foreach (var permission in existingPermissions)
+            {
+                permission.IsDeleted = true;
+            }
+
+            foreach (var permission in permissions.Distinct())
+            {
+                await _context.StaffPermissions.AddAsync(
+                    new StaffPermission
+                    {
+                        StaffId = staffId,
+                        Permission = permission
+                    },
+                    cancellationToken);
+            }
         }
 
-        public async Task UpdateAsync(Staff staff, CancellationToken cancellationToken = default)
-        {
-            _context.Staffs.Update(staff);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task DeleteAsync(Staff staff, CancellationToken cancellationToken = default)
-        {
-            _context.Staffs.Remove(staff);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        
     }
 }

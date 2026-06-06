@@ -15,9 +15,7 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Staffs.Configurations
             builder.Property(s => s.Id)
                 .UseIdentityColumn();
 
-            builder.Property(s => s.UserId)
-             .IsRequired()
-             .HasMaxLength(450); // ← add this — 450 is the standard Identity FK length
+           
 
             builder.Property(s => s.Role)
                 .IsRequired()
@@ -34,26 +32,43 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Staffs.Configurations
                 .IsRequired();
 
             // Self-referencing FK: the staff member who created this staff
-            builder.HasOne<Staff>()
-                .WithMany()
-                .HasForeignKey(s => s.CreatedByStaffId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired(false);
+            //builder.HasOne<Staff>()
+            //    .WithMany()
+            //    .HasForeignKey(s => s.CreatedByStaffId)
+            //    .OnDelete(DeleteBehavior.NoAction)
+            //    .IsRequired(false);
 
             builder.HasMany(s => s.Permissions)
                 .WithOne(p => p.Staff)
                 .HasForeignKey(p => p.StaffId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasIndex(s => s.UserId)
-                .IsUnique()
-                .HasDatabaseName("IX_Staffs_UserId");
+            builder.HasOne(s => s.User)
+             .WithOne(u => u.Staff)
+             .HasForeignKey<Staff>(s => s.UserId)
+             .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(s => s.CreatedByStaff)
+            .WithMany(s => s.CreatedStaffs)
+            .HasForeignKey(s => s.CreatedByStaffId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasMany(s => s.ResolvedDisputes)
+            .WithOne(d => d.ResolvedByStaff)
+            .HasForeignKey(d => d.ResolvedByStaffId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasQueryFilter(r => !r.IsDeleted);
 
             builder.HasIndex(s => s.Role)
                 .HasDatabaseName("IX_Staffs_Role");
 
             builder.HasIndex(s => s.IsActive)
                 .HasDatabaseName("IX_Staffs_IsActive");
+
+            builder.HasIndex(s => s.UserId)
+           .IsUnique();
+
         }
     }
 }

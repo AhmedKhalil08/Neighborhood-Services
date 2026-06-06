@@ -1,43 +1,34 @@
-﻿using Neighborhood.Services.Domain.Shared;
+﻿using Neighborhood.Services.Domain.ApplicationUsers;
+using Neighborhood.Services.Domain.Bookings;
+using Neighborhood.Services.Domain.Customers;
+using Neighborhood.Services.Domain.Shared;
+using Neighborhood.Services.Domain.Technicians;
 
 namespace Neighborhood.Services.Domain.Reviews
 {
     public class Review : BaseEntity<int>
     {
-
         public int BookingId { get; set; }
-        public int ReviewerId { get; set; }
-        public int RevieweeId { get; set; }
+
+        public string ReviewerId { get; set; } = null!;
+
+        public string RevieweeId { get; set; } = null!;
+
         public int Rating { get; set; }
-        public string Comment { get; set; }
+
+        public string Comment { get; set; } = null!;
+
         public ReviewStatus Status { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
-        // Navigation Property
-        public ReviewAnalysis Analysis { get; set; }
+        public ReviewType ReviewType { get; set; }
+        public ApplicationUser Reviewer { get; set; } = null!;
 
-        // Empty Constructor For EF Core
-        public Review() { }
+        public ApplicationUser Reviewee { get; set; } = null!;
 
-        // Main Constructor — pure data, no defaults
-        public Review(
-            int bookingId,
-            int reviewerId,
-            int revieweeId,
-            int rating,
-            string comment,
-            ReviewStatus status,
-            DateTime createdAt,
-            bool isDeleted)
-        {
-            BookingId = bookingId;
-            ReviewerId = reviewerId;
-            RevieweeId = revieweeId;
-            Rating = rating;
-            Comment = comment;
-            Status = status;
-            CreatedAt = createdAt;
-            IsDeleted = isDeleted;
-        }
+        public Booking Booking { get; set; } = null!;
+
+        public ReviewAnalysis? Analysis { get; set; }
     }
 }

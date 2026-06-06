@@ -7,16 +7,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Neighborhood.Services.API.Middlewares;
 using Neighborhood.Services.Application;
+using Neighborhood.Services.Application.Authorization;
+using Neighborhood.Services.Application.Cloudinary;
+using Neighborhood.Services.Domain.Staffs;
 using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
 using StackExchange.Redis;
-using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
+
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Services.EmailService;
 
+
+using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
 using System.Text;
 
 
@@ -118,6 +123,25 @@ namespace Neighborhood.Services.API
                     options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
                     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
                 });
+            // Add authorization policies for each permission type (Amira)
+            builder.Services.AddAuthorization(options =>
+            {
+                foreach (PermissionType permission in Enum.GetValues(typeof(PermissionType)))
+                {
+                    options.AddPolicy(
+                        $"Permission:{permission}",
+                        policy => policy.Requirements.Add(
+                            new PermissionRequirement(permission)));
+                }
+            });
+
+            builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("Cloudinary"));
+
+            builder.Services.AddScoped<ICloudinaryService,
+                CloudinaryService>();
+            // end of Amira
+            builder.Services.AddAuthorization();
 
             builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
