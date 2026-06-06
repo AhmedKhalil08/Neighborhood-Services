@@ -7,7 +7,11 @@ using NetTopologySuite.Geometries;
 namespace Neighborhood.Services.Infrastructure.Migrations
 {
     /// <inheritdoc />
+<<<<<<<< HEAD:Provider/Neighborhood-Services/Neighborhood.Services.Infrastructure/Migrations/20260606050419_InitialCreate.cs
     public partial class InitialCreate : Migration
+========
+    public partial class init : Migration
+>>>>>>>> f656d79d4080b644b09fa21e5b01aee00359f9aa:Provider/Neighborhood-Services/Neighborhood.Services.Infrastructure/Migrations/20260606004322_init.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -79,6 +83,22 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChatbotSessions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatbotSessions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -187,6 +207,29 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChatbotMessages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ChatbotSessionId = table.Column<int>(type: "int", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatbotMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChatbotMessages_ChatbotSessions_ChatbotSessionId",
+                        column: x => x.ChatbotSessionId,
+                        principalTable: "ChatbotSessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StaffPermissions",
                 columns: table => new
                 {
@@ -241,7 +284,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                     EstimatedMaxPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SeverityLevel = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     GeneratedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    BookingId = table.Column<int>(type: "int", nullable: false),
+                    BookingId = table.Column<int>(type: "int", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -1232,7 +1275,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 name: "IX_AiAnalyses_BookingId",
                 table: "AiAnalyses",
                 column: "BookingId",
-                unique: true);
+                unique: true,
+                filter: "[BookingId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -1350,6 +1394,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 columns: new[] { "TechnicianId", "ScheduledAt" },
                 unique: true,
                 filter: "[Status] != 'Cancelled'");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatbotMessages_ChatbotSessionId",
+                table: "ChatbotMessages",
+                column: "ChatbotSessionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Conversations_BookingId",
@@ -1783,6 +1832,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                 name: "CancellationPolicies");
 
             migrationBuilder.DropTable(
+                name: "ChatbotMessages");
+
+            migrationBuilder.DropTable(
                 name: "CustomerAddresses");
 
             migrationBuilder.DropTable(
@@ -1835,6 +1887,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "ChatbotSessions");
 
             migrationBuilder.DropTable(
                 name: "Transactions");
