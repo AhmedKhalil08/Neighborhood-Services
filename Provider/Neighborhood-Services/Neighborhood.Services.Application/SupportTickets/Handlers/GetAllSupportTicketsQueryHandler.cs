@@ -17,7 +17,7 @@ namespace Neighborhood.Services.Application.SupportTickets.Handlers
 
         public async Task<IReadOnlyList<SupportTicketDto>> Handle(GetAllSupportTicketsQuery request, CancellationToken cancellationToken)
         {
-            var tickets = await _repository.GetAllAsync(cancellationToken);
+            var tickets = await _repository.GetAllAsync();
             return tickets.Select(SupportMapper.MapTicketToDto).ToList();
         }
     }

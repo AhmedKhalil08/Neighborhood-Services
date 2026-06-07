@@ -43,8 +43,20 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Config
                 .HasForeignKey(m => m.TicketId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            builder.HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(t => t.Booking)
+                .WithMany()
+                .HasForeignKey(t => t.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
             // Soft delete filter
             builder.HasQueryFilter(t => !t.IsDeleted);
+
+            builder.Property(t => t.Description)
+    .IsRequired()
+    .HasMaxLength(3000);
 
             builder.HasIndex(t => t.UserId)
                 .HasDatabaseName("IX_SupportTickets_UserId");

@@ -1,9 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Neighborhood.Services.Domain.Disputes;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Neighborhood.Services.Infrastructure.Persistence.Disputes.Configuration
 {
@@ -21,8 +18,9 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Disputes.Configuratio
             builder.Property(d => d.BookingId)
                 .IsRequired();
 
-            builder.Property(d => d.RaisedBy)
-                .IsRequired();
+            builder.Property(d => d.RaisedByUserId)
+                .IsRequired()
+                .HasMaxLength(450);
 
             builder.Property(d => d.ResolvedByStaffId)
                 .IsRequired(false);
@@ -36,8 +34,8 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Disputes.Configuratio
                 .HasMaxLength(1000);
 
             builder.Property(d => d.Resolution)
-                .IsRequired(false)
-                .HasMaxLength(1000);
+                .HasMaxLength(1000)
+                .IsRequired(false);
 
             builder.Property(d => d.Status)
                 .IsRequired()
@@ -49,18 +47,33 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Disputes.Configuratio
             builder.Property(d => d.ResolvedAt)
                 .IsRequired(false);
 
-            // FK to Staff who resolved the dispute
-            builder.HasOne<Domain.Staffs.Staff>()
+            builder.HasQueryFilter(d => !d.IsDeleted);
+            // Booking <-> Dispute (1:1)
+            builder.HasOne(d => d.Booking)
+                .WithOne(b => b.Dispute)
+                .HasForeignKey<Dispute>(d => d.BookingId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // User who raised dispute
+            builder.HasOne(d => d.RaisedByUser)
                 .WithMany()
+                .HasForeignKey(d => d.RaisedByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Staff who resolved dispute
+            builder.HasOne(d => d.ResolvedByStaff)
+                .WithMany(s => s.ResolvedDisputes)
                 .HasForeignKey(d => d.ResolvedByStaffId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired(false);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasQueryFilter(r => !r.IsDeleted);
 
             builder.HasIndex(d => d.BookingId)
+                .IsUnique()
                 .HasDatabaseName("IX_Disputes_BookingId");
 
-            builder.HasIndex(d => d.RaisedBy)
-                .HasDatabaseName("IX_Disputes_RaisedBy");
+            builder.HasIndex(d => d.RaisedByUserId)
+                .HasDatabaseName("IX_Disputes_RaisedByUserId");
 
             builder.HasIndex(d => d.Status)
                 .HasDatabaseName("IX_Disputes_Status");

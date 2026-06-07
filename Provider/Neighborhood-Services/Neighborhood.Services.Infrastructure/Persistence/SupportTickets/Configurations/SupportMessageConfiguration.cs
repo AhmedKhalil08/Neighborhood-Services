@@ -19,7 +19,8 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Config
                 .IsRequired();
 
             builder.Property(m => m.SenderId)
-                .IsRequired();
+                 .IsRequired()
+                 .HasMaxLength(450);
 
             builder.Property(m => m.Message)
                 .IsRequired()
@@ -29,13 +30,15 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Config
                 .IsRequired()
                 .HasConversion<string>();
 
-            
+
 
             builder.Property(m => m.ReadAt)
                 .IsRequired(false);
 
             builder.Property(m => m.CreatedAt)
                 .IsRequired();
+
+
 
             // Soft delete filter
             builder.HasQueryFilter(m => !m.IsDeleted);
@@ -45,6 +48,11 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Config
 
             builder.HasIndex(m => m.SenderId)
                 .HasDatabaseName("IX_SupportMessages_SenderId");
+            builder.HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
         }
     }
 }

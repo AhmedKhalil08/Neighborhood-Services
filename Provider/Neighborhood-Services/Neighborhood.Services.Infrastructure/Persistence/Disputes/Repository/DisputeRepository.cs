@@ -8,27 +8,15 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Disputes.Repository
 {
     public class DisputeRepository : GenericRepository<Dispute, int>, IDisputeRepository
     {
-        private readonly ApplicationDbContext _context;
+        
 
         public DisputeRepository(ApplicationDbContext context) : base(context)
         {
-            _context = context;
+           
         }
 
         // ── Queries ────────────────────────────────────────────────────────────
-
-        public async Task<Dispute?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Disputes
-                .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
-        }
-
-        public async Task<IReadOnlyList<Dispute>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            return await _context.Disputes
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-        }
+        // the rest of CRUD operations are inherited from GenericRepository
 
         public async Task<IReadOnlyList<Dispute>> GetByStatusAsync(DisputeStatus status, CancellationToken cancellationToken = default)
         {
@@ -38,18 +26,18 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Disputes.Repository
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<Dispute>> GetByBookingIdAsync(int bookingId, CancellationToken cancellationToken = default)
+       
+        public async Task<Dispute?> GetByBookingIdAsync(int bookingId, CancellationToken cancellationToken)
         {
             return await _context.Disputes
-                .Where(d => d.BookingId == bookingId)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+          .FirstOrDefaultAsync(d => d.BookingId == bookingId);
         }
-
-        public async Task<IReadOnlyList<Dispute>> GetByRaisedByAsync(int userId, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<Dispute>> GetByRaisedByAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
         {
             return await _context.Disputes
-                .Where(d => d.RaisedBy == userId)
+                .Where(d => d.RaisedByUserId == userId)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -76,24 +64,6 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Disputes.Repository
                 .AnyAsync(d => d.BookingId == bookingId, cancellationToken);
         }
 
-        // ── Commands ───────────────────────────────────────────────────────────
 
-        public async Task AddAsync(Dispute dispute, CancellationToken cancellationToken = default)
-        {
-            await _context.Disputes.AddAsync(dispute, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task UpdateAsync(Dispute dispute, CancellationToken cancellationToken = default)
-        {
-            _context.Disputes.Update(dispute);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task DeleteAsync(Dispute dispute, CancellationToken cancellationToken = default)
-        {
-            _context.Disputes.Remove(dispute);
-            await _context.SaveChangesAsync(cancellationToken);
-        }
     }
 }

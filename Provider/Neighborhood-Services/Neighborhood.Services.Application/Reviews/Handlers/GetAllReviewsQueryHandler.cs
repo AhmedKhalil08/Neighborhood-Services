@@ -18,7 +18,7 @@ namespace Neighborhood.Services.Application.Reviews.Handlers
 
         public async Task<IReadOnlyList<ReviewDto>> Handle(GetAllReviewsQuery request, CancellationToken cancellationToken)
         {
-            var reviews = await _repository.GetAllAsync(cancellationToken);
+            var reviews = await _repository.GetAllAsync();
             return reviews.Select(ReviewMapper.MapToDto).ToList();
         }
     }

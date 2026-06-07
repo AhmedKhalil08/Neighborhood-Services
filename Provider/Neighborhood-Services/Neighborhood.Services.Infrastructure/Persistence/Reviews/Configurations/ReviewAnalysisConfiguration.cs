@@ -35,7 +35,7 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Configuration
 
             builder.Property(a => a.CreatedAt)
                 .IsRequired();
-
+            builder.HasQueryFilter(r => !r.IsDeleted);
             builder.HasIndex(a => a.ReviewId)
                 .IsUnique()
                 .HasDatabaseName("IX_ReviewAnalyses_ReviewId");

@@ -1,4 +1,5 @@
-﻿using Neighborhood.Services.Domain.Shared;
+﻿using Neighborhood.Services.Domain.ApplicationUsers;
+using Neighborhood.Services.Domain.Shared;
 
 namespace Neighborhood.Services.Domain.SupportTickets
 {
@@ -10,7 +11,7 @@ namespace Neighborhood.Services.Domain.SupportTickets
 
         public int TicketId { get; set; }
 
-        public int SenderId { get; set; }
+        public string SenderId { get; set; }
 
         public string Message { get; set; }
 
@@ -22,8 +23,9 @@ namespace Neighborhood.Services.Domain.SupportTickets
 
 
         // Navigation Property
-        public SupportTicket Ticket { get; set; }
+        public SupportTicket Ticket { get; set; } = null!;
 
+        public ApplicationUser Sender { get; set; } = null!;
 
         // Empty Constructor For EF
         public SupportMessage()
@@ -31,25 +33,8 @@ namespace Neighborhood.Services.Domain.SupportTickets
         }
 
 
-        // Main Constructor
-        public SupportMessage(
-            int ticketId,
-            int senderId,
-            string message,
-            MessageChannel channel)
-        {
-            TicketId = ticketId;
-
-            SenderId = senderId;
-
-            Message = message;
-
-            Channel = channel;
-
-            CreatedAt = DateTime.UtcNow;
-
-            IsDeleted = false;
-        }
+   
+       
 
 
 

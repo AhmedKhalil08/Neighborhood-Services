@@ -19,7 +19,7 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Messages
 
              public async Task<Message> GetByUserId(string userId)
         {
-            return _context.Messages.FirstOrDefault(e => e.SenderId.ToString() == userId);
+            return _context.Messages.FirstOrDefault(e => e.SenderId == userId);
         }
 
         public async Task<Message> GetBConversationId(string convId)
