@@ -10,8 +10,12 @@ import { ServicesComponent } from './features/public/pages/services/services.com
 import { AboutComponent } from './features/public/pages/about/about.component';
 import { ContactComponent } from './features/public/pages/contact/contact.component';
 import { CustomerDashboardComponent } from './features/customer/pages/dashboard/customer-dashboard.component';
+import { CustomerWalletComponent } from './features/customer/pages/wallet/customer-wallet.component';
 import { TechnicianDashboardComponent } from './features/technician/pages/dashboard/technician-dashboard.component';
+import { TechnicianWalletComponent } from './features/technician/pages/wallet/technician-wallet.component';
+import { TechnicianEarningsComponent } from './features/technician/pages/earnings/technician-earnings.component';
 import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
+import { StaffPromoCodesComponent } from './features/staff/pages/promo-codes/staff-promo-codes.component';
 
 export const routes: Routes = [
   // PUBLIC (navbar + footer)
@@ -33,6 +37,7 @@ export const routes: Routes = [
     // canActivate: [authGuard, roleGuard], data: { role: 'Customer' }  ← add when auth exists
     children: [
       { path: '', component: CustomerDashboardComponent },
+      { path: 'wallet', component: CustomerWalletComponent },
     ],
   },
 
@@ -42,6 +47,8 @@ export const routes: Routes = [
     component: TechnicianLayoutComponent,
     children: [
       { path: '', component: TechnicianDashboardComponent },
+      { path: 'wallet', component: TechnicianWalletComponent },
+      { path: 'earnings', component: TechnicianEarningsComponent },
     ],
   },
 
@@ -51,6 +58,7 @@ export const routes: Routes = [
     component: StaffLayoutComponent,
     children: [
       { path: '', component: StaffDashboardComponent },
+      { path: 'promo-codes', component: StaffPromoCodesComponent },
     ],
   },
 
