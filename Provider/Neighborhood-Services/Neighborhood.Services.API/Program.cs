@@ -135,9 +135,9 @@ namespace Neighborhood.Services.API
             builder.Services.AddScoped<ICloudinaryService,
                 CloudinaryService>();
             // end of Amira
-            builder.Services.AddAuthorization();
+            //builder.Services.AddAuthorization();
 
-            builder.Services.AddAuthorization();
+            //builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -192,7 +192,7 @@ namespace Neighborhood.Services.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseCors("AllowJS");
+            //app.UseCors("AllowJS");
             app.UseHttpsRedirection();
             app.UseExceptionHandler();
             app.UseCors("Frontend");

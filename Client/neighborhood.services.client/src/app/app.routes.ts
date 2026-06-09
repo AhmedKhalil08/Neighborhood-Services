@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
 import { CustomerLayoutComponent } from './layouts/customer-layout/customer-layout.component';
 import { TechnicianLayoutComponent } from './layouts/technician-layout/technician-layout.component';
@@ -9,17 +11,19 @@ import { HomeComponent } from './features/public/pages/home/home.component';
 import { ServicesComponent } from './features/public/pages/services/services.component';
 import { AboutComponent } from './features/public/pages/about/about.component';
 import { ContactComponent } from './features/public/pages/contact/contact.component';
+import { LoginComponent } from './features/auth/pages/login/login.component';
+import { RegisterComponent } from './features/auth/pages/register/register.component';
 import { CustomerDashboardComponent } from './features/customer/pages/dashboard/customer-dashboard.component';
 import { BookingsComponent } from './features/customer/pages/bookings/bookings.component';
 import { ServiceRequestsComponent } from './features/customer/pages/service-requests/service-requests.component';
 import { ServiceRequestDetailsComponent } from './features/customer/pages/service-requests/service-request-details.component';
 import { RecurringBookingsComponent } from './features/customer/pages/recurring-bookings/recurring-bookings.component';
 import { FindTechnicianComponent } from './features/customer/pages/find-technician/find-technician.component';
+import { CustomerPlaceholderComponent } from './features/customer/pages/customer-placeholder/customer-placeholder.component';
 import { TechnicianDashboardComponent } from './features/technician/pages/dashboard/technician-dashboard.component';
 import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
 
 export const routes: Routes = [
-  // PUBLIC (navbar + footer)
   {
     path: '',
     component: PublicLayoutComponent,
@@ -28,14 +32,16 @@ export const routes: Routes = [
       { path: 'services', component: ServicesComponent },
       { path: 'about', component: AboutComponent },
       { path: 'contact', component: ContactComponent },
+      { path: 'auth/login', component: LoginComponent },
+      { path: 'auth/register', component: RegisterComponent },
     ],
   },
-
-  // CUSTOMER dashboard
   {
     path: 'customer',
     component: CustomerLayoutComponent,
-    // canActivate: [authGuard, roleGuard], data: { role: 'Customer' }  ← add when auth exists
+    canActivate: [authGuard, roleGuard],
+    canActivateChild: [authGuard, roleGuard],
+    data: { roles: ['Customer'] },
     children: [
       { path: '', component: CustomerDashboardComponent },
       { path: 'bookings', component: BookingsComponent },
@@ -43,27 +49,32 @@ export const routes: Routes = [
       { path: 'service-requests/:id', component: ServiceRequestDetailsComponent },
       { path: 'find-technician', component: FindTechnicianComponent },
       { path: 'recurring-bookings', component: RecurringBookingsComponent },
+      { path: 'favorites', component: CustomerPlaceholderComponent, data: { title: 'Favorites' } },
+      { path: 'wallet', component: CustomerPlaceholderComponent, data: { title: 'Wallet' } },
+      { path: 'chat', component: CustomerPlaceholderComponent, data: { title: 'Chat' } },
+      { path: 'chats', redirectTo: 'chat', pathMatch: 'full' },
+      { path: 'notifications', component: CustomerPlaceholderComponent, data: { title: 'Notifications' } },
+      { path: 'profile', component: CustomerPlaceholderComponent, data: { title: 'Profile' } },
+      { path: '**', redirectTo: '' },
     ],
   },
-
-  // TECHNICIAN dashboard
   {
     path: 'technician',
     component: TechnicianLayoutComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Technician'] },
     children: [
       { path: '', component: TechnicianDashboardComponent },
     ],
   },
-
-  // STAFF dashboard
   {
     path: 'staff',
     component: StaffLayoutComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
     children: [
       { path: '', component: StaffDashboardComponent },
     ],
   },
-
-  // Unknown URL → home
   { path: '**', redirectTo: '' },
 ];
