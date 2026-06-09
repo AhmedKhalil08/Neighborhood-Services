@@ -15,7 +15,6 @@ import { LoginComponent } from './features/auth/pages/login/login.component';
 import { RegisterComponent } from './features/auth/pages/register/register.component';
 import { CustomerDashboardComponent } from './features/customer/pages/dashboard/customer-dashboard.component';
 import { CustomerPlaceholderComponent } from './features/customer/pages/customer-placeholder/customer-placeholder.component';
-import { CustomerPlaceholderComponent } from './features/customer/pages/customer-placeholder/customer-placeholder.component';
 import { CustomerWalletComponent } from './features/customer/pages/wallet/customer-wallet.component';
 import { TechnicianDashboardComponent } from './features/technician/pages/dashboard/technician-dashboard.component';
 import { TechnicianWalletComponent } from './features/technician/pages/wallet/technician-wallet.component';
@@ -44,6 +43,7 @@ export const routes: Routes = [
     data: { roles: ['Customer'] },
     children: [
       { path: '', component: CustomerDashboardComponent },
+      { path: 'wallet', component: CustomerWalletComponent },
     ],
   },
   {
