@@ -8,7 +8,7 @@ using Neighborhood.Services.Application.Technicians.Interfaces;
 
 namespace Neighborhood.Services.Application.Bookings.Queries.GetMyBookingsQuery
 {
-    public class GetMyBookingsQueryHandler : IRequestHandler<GetMyBookingsQuery, PagedResult<BookingSummaryDto>>
+    public class GetMyBookingsQueryHandler : IRequestHandler<GetMyBookingsQuery, PagedResult<MyBookingSummaryDto>>
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly ICustomerRepository _customerRepository;
@@ -27,7 +27,7 @@ namespace Neighborhood.Services.Application.Bookings.Queries.GetMyBookingsQuery
             _currentUserService = currentUserService;
         }
 
-        public async Task<PagedResult<BookingSummaryDto>> Handle(GetMyBookingsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<MyBookingSummaryDto>> Handle(GetMyBookingsQuery request, CancellationToken cancellationToken)
         {
             var userId = _currentUserService.UserId
                 ?? throw new UnauthorizedException("User is not authenticated.");
@@ -55,9 +55,9 @@ namespace Neighborhood.Services.Application.Bookings.Queries.GetMyBookingsQuery
             throw new ForbiddenException("User is not a customer or technician.");
         }
 
-        private static PagedResult<BookingSummaryDto> MapToDto(PagedResult<Domain.Bookings.Booking> source) =>
-            new PagedResult<BookingSummaryDto>(
-                source.Items.Select(b => new BookingSummaryDto
+        private static PagedResult<MyBookingSummaryDto> MapToDto(PagedResult<Domain.Bookings.Booking> source) =>
+            new PagedResult<MyBookingSummaryDto>(
+                source.Items.Select(b => new MyBookingSummaryDto
                 {
                     Id = b.Id,
                     BookingType = b.BookingType,
@@ -65,8 +65,15 @@ namespace Neighborhood.Services.Application.Bookings.Queries.GetMyBookingsQuery
                     Address = b.Address,
                     ScheduledAt = b.ScheduledAt,
                     EstimatedPrice = b.EstimatedPrice,
+                    FinalPrice = b.FinalPrice,
+                    DurationMinutes = b.DurationMinutes,
                     Status = b.Status,
-                    CreatedAt = b.CreatedAt
+                    ClientConfirmed = b.ClientConfirmed,
+                    CreatedAt = b.CreatedAt,
+                    TechnicianId = b.TechnicianId,
+                    ProblemTypeId = b.ProblemTypeId,
+                    Latitude = b.Location?.Y ?? 0,
+                    Longitude = b.Location?.X ?? 0
                 }).ToList(),
                 source.TotalCount,
                 source.Page,

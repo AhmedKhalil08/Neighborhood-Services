@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Neighborhood.Services.Application.BookingImages.Commands;
 using Neighborhood.Services.Application.BookingImages.Queries.GetBookingImagesByTypeQuery;
 using Neighborhood.Services.Application.BookingImages.Queries.GetBookingImagesQuery;
-using Neighborhood.Services.Application.Bookings.Commands.AcceptBookingCommands;
+using Neighborhood.Services.Application.Bookings.Commands.AcceptQuoteCommands;
 using Neighborhood.Services.Application.Bookings.Commands.CancelBookingCommands;
 using Neighborhood.Services.Application.Bookings.Commands.CompleteBookingCommands;
 using Neighborhood.Services.Application.Bookings.Commands.ConfirmBookingCommands;
 using Neighborhood.Services.Application.Bookings.Commands.CreateBookingCommands;
+using Neighborhood.Services.Application.Bookings.Commands.QuoteBookingCommands;
+using Neighborhood.Services.Application.Bookings.Commands.RejectQuoteCommands;
 using Neighborhood.Services.Application.Bookings.Queries.GetAllBookingsQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingByIdQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetMyBookingsQuery;
@@ -16,6 +18,7 @@ using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByCustomerQu
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByRecurringQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByStatusQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByTechnicianQuery;
+using Neighborhood.Services.Application.Bookings.Queries.GetTechnicianPricingRangeQuery;
 using Neighborhood.Services.Domain.BookingImages;
 using Neighborhood.Services.Domain.Bookings;
 
@@ -42,12 +45,28 @@ namespace Neighborhood.Services.API.Bookings
             return CreatedAtAction(nameof(GetById), new { id }, new { id });
         }
 
-        // POST /api/bookings/{id}/accept  (technician accepts, provides duration)
-        [HttpPost("{id:int}/accept")]
-        public async Task<IActionResult> Accept(int id, [FromBody] AcceptBookingCommand command)
+        // POST /api/bookings/{id}/quote  (technician quotes FinalPrice + DurationMinutes)
+        [HttpPost("{id:int}/quote")]
+        public async Task<IActionResult> Quote(int id, [FromBody] QuoteBookingCommand command)
         {
             command.BookingId = id;
             await _mediator.Send(command);
+            return NoContent();
+        }
+
+        // POST /api/bookings/{id}/accept-quote  (customer accepts the quote -> escrow held -> Confirmed)
+        [HttpPost("{id:int}/accept-quote")]
+        public async Task<IActionResult> AcceptQuote(int id)
+        {
+            await _mediator.Send(new AcceptQuoteCommand { BookingId = id });
+            return NoContent();
+        }
+
+        // POST /api/bookings/{id}/reject-quote  (customer rejects -> back to Pending so tech can re-quote)
+        [HttpPost("{id:int}/reject-quote")]
+        public async Task<IActionResult> RejectQuote(int id)
+        {
+            await _mediator.Send(new RejectQuoteCommand { BookingId = id });
             return NoContent();
         }
 
@@ -132,6 +151,22 @@ namespace Neighborhood.Services.API.Bookings
         public async Task<IActionResult> GetByRecurring(int recurringBookingId)
         {
             var result = await _mediator.Send(new GetBookingsByRecurringQuery { RecurringBookingId = recurringBookingId });
+            return Ok(result);
+        }
+
+        // GET /api/bookings/tech-pricing-range?technicianId=X&problemTypeId=Y
+        // Returns the tech's MinPrice/MaxPrice for a single problem type, or 404 if not set.
+        // Powers the booking UI: customer sees the tech's range before submitting, tech
+        // sees + is constrained to it when quoting.
+        [HttpGet("tech-pricing-range")]
+        public async Task<IActionResult> GetTechPricingRange([FromQuery] int technicianId, [FromQuery] int problemTypeId)
+        {
+            var result = await _mediator.Send(new GetTechnicianPricingRangeQuery
+            {
+                TechnicianId = technicianId,
+                ProblemTypeId = problemTypeId
+            });
+            if (result is null) return NotFound();
             return Ok(result);
         }
 

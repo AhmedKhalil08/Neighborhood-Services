@@ -111,6 +111,19 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CreateBookingComma
                 UpdatedAt = DateTime.UtcNow
             };
 
+            // Attach the customer's "Before" photo (if provided) so it's inserted atomically
+            // with the booking — the technician sees it when quoting.
+            if (!string.IsNullOrWhiteSpace(request.BeforeImageUrl))
+            {
+                booking.BookingImages.Add(new Domain.BookingImages.BookingImage
+                {
+                    ImageUrl = request.BeforeImageUrl,
+                    Type = Domain.BookingImages.BookingImageType.Before,
+                    UploadedBy = userId,
+                    UploadedAt = DateTime.UtcNow
+                });
+            }
+
             await _bookingRepository.AddAsync(booking);
             // Increment promo code usage
             if (request.PromoCodeId.HasValue)

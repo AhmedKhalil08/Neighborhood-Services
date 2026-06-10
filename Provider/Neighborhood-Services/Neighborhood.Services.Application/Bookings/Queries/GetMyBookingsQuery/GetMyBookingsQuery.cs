@@ -6,7 +6,7 @@ using Neighborhood.Services.Domain.Bookings;
 namespace Neighborhood.Services.Application.Bookings.Queries.GetMyBookingsQuery
 {
     // Returns the authenticated user's bookings — works for both customers and technicians.
-    public class GetMyBookingsQuery : IRequest<PagedResult<BookingSummaryDto>>
+    public class GetMyBookingsQuery : IRequest<PagedResult<MyBookingSummaryDto>>
     {
         public BookingStatus? Status { get; set; }   // optional filter
         public string? Search { get; set; }           // matches description, address, or exact id

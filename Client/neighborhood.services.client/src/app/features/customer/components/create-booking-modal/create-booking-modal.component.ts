@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -7,21 +7,24 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { BookingService } from '../../services/booking.service';
 import { CatalogService } from '../../../../shared/services/catalog.service';
 import { TechnicianService } from '../../../../shared/services/technician.service';
+import { UploadService } from '../../../../shared/services/upload.service';
 import { Category, ProblemType } from '../../../../core/models/catalog.model';
 import { TechnicianAvailabilitySlot } from '../../../../core/models/technician-availability.model';
-import { CreateBooking } from '../../models/booking.model';
+import { TechnicianCardCategory } from '../../../../core/models/technician-card.model';
+import { CreateBooking, TechnicianPricingRange } from '../../models/booking.model';
 
 @Component({
   selector: 'app-create-booking-modal',
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './create-booking-modal.component.html',
 })
-export class CreateBookingModalComponent implements OnInit {
+export class CreateBookingModalComponent {
   private readonly fb = inject(FormBuilder);
   private readonly activeModal = inject(NgbActiveModal);
   private readonly service = inject(BookingService);
   private readonly catalog = inject(CatalogService);
   private readonly tech = inject(TechnicianService);
+  private readonly uploadService = inject(UploadService);
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
 
@@ -35,9 +38,21 @@ export class CreateBookingModalComponent implements OnInit {
   estimatedPrice = signal<number | null>(null);
   estimating = signal(false);
 
+  // Tech's own MinPrice/MaxPrice for the currently selected problem type — null if
+  // the tech hasn't priced this problem type yet.
+  techPricing = signal<TechnicianPricingRange | null>(null);
+  techPricingLoaded = signal(false);
+
   lat = signal<number | null>(null);
   lng = signal<number | null>(null);
   locating = signal(false);
+
+  // Optional "Before" photo of the problem — uploaded to Cloudinary, sent with the booking.
+  beforeImageUrl = signal<string | null>(null);
+  uploadingPhoto = signal(false);
+
+  // Set once the user tries to submit, so the (required) location error can show inline.
+  submitAttempted = signal(false);
 
   // Earliest selectable datetime (local "now") for the min attribute — "yyyy-MM-ddTHH:mm".
   readonly minDateTime = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
@@ -69,21 +84,40 @@ export class CreateBookingModalComponent implements OnInit {
     return this._technicianId;
   }
 
-  ngOnInit() {
-    this.catalog.getCategories().subscribe({ next: (c) => this.categories.set(c) });
+  // Only the categories this technician actually works in (passed from the Find Technician card),
+  // so the customer can't pick a category the technician doesn't serve.
+  set technicianCategories(cats: TechnicianCardCategory[]) {
+    const ar = (this.translate.currentLang || 'en') === 'ar';
+    this.categories.set((cats ?? []).map((c) => ({ id: c.id, name: ar ? c.nameAr : c.nameEn, icon: c.icon })));
   }
 
   onCategoryChange() {
     this.form.controls.problemTypeId.setValue(null);
     this.problemTypes.set([]);
     this.estimatedPrice.set(null);
+    this.techPricing.set(null);
+    this.techPricingLoaded.set(false);
     const categoryId = this.form.controls.categoryId.value;
     if (categoryId == null) return;
-    this.catalog.getCategory(categoryId).subscribe({ next: (d) => this.problemTypes.set(d.problemTypes) });
+    const lang = this.translate.currentLang || 'en';
+    this.catalog.getCategory(categoryId, lang).subscribe({ next: (d) => this.problemTypes.set(d.problemTypes) });
   }
 
   onProblemTypeChange() {
     this.estimatedPrice.set(null); // stale once the problem type changes
+    this.techPricing.set(null);
+    this.techPricingLoaded.set(false);
+
+    const problemTypeId = this.form.controls.problemTypeId.value;
+    if (problemTypeId == null || !this._technicianId) return;
+
+    this.service.getTechPricingRange(this._technicianId, problemTypeId).subscribe({
+      next: (range) => {
+        this.techPricing.set(range);
+        this.techPricingLoaded.set(true);
+      },
+      error: () => this.techPricingLoaded.set(true),
+    });
   }
 
   getEstimate() {
@@ -114,6 +148,24 @@ export class CreateBookingModalComponent implements OnInit {
     return null;
   }
 
+  onPhotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.uploadingPhoto.set(true);
+    this.uploadService.upload(file).subscribe({
+      next: (url) => {
+        this.beforeImageUrl.set(url);
+        this.uploadingPhoto.set(false);
+      },
+      error: () => {
+        this.uploadingPhoto.set(false);
+        this.toastr.error(this.translate.instant('bookings.bookNow.photoFailed'));
+      },
+    });
+  }
+
   useMyLocation() {
     if (!navigator.geolocation) {
       this.toastr.error(this.translate.instant('common.geoUnsupported'));
@@ -135,6 +187,7 @@ export class CreateBookingModalComponent implements OnInit {
   }
 
   submit() {
+    this.submitAttempted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -155,6 +208,7 @@ export class CreateBookingModalComponent implements OnInit {
       scheduledAt: `${v.scheduledAt}:00`,
       region: null,
       promoCodeId: null, // TODO: resolve v.promoCode → id once wiring is decided
+      beforeImageUrl: this.beforeImageUrl(),
     };
 
     this.submitting.set(true);

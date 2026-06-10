@@ -42,7 +42,7 @@
     </button>
     @for (c of categories(); track c.id) {
       <button class="badge rounded-pill border" [class.text-bg-dark]="selectedCategory() === c.id" [class.text-bg-light]="selectedCategory() !== c.id" (click)="selectCategory(c.id)">
-        @if (c.icon) { <i class="bi {{ c.icon }} me-1"></i> }{{ c.nameEn }}
+        @if (c.icon) { <i class="bi {{ c.icon }} me-1"></i> }{{ categoryName(c) }}
       </button>
     }
   </div>
@@ -115,7 +115,7 @@
               @if (tech.categories.length) {
                 <div class="d-flex flex-wrap gap-1 mb-2">
                   @for (c of tech.categories; track c.id) {
-                    <span class="badge text-bg-light border">@if (c.icon) { <i class="bi {{ c.icon }} me-1"></i> }{{ c.nameEn }}</span>
+                    <span class="badge text-bg-light border">@if (c.icon) { <i class="bi {{ c.icon }} me-1"></i> }{{ categoryName(c) }}</span>
                   }
                 </div>
               }

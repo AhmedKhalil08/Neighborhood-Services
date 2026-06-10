@@ -52,6 +52,9 @@
         @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
           <div class="text-danger small mt-1">{{ 'bookings.bookNow.errCategory' | translate }}</div>
         }
+        @if (categories().length === 0) {
+          <div class="text-muted small mt-1">{{ 'bookings.bookNow.noCategories' | translate }}</div>
+        }
       </div>
 
       <!-- Problem type -->
@@ -88,6 +91,23 @@
         <div class="form-text">{{ 'bookings.bookNow.estimateNote' | translate }}</div>
       </div>
 
+      <!-- Tech's own range for the selected problem type -->
+      @if (form.controls.problemTypeId.value != null) {
+        <div class="col-12">
+          @if (!techPricingLoaded()) {
+            <div class="text-muted small"><span class="spinner-border spinner-border-sm me-1"></span></div>
+          } @else if (techPricing(); as r) {
+            <div class="alert alert-success py-2 px-3 small mb-0">
+              <i class="bi bi-cash-coin me-1"></i>{{ 'bookings.bookNow.techRange' | translate: { min: r.minPrice, max: r.maxPrice } }}
+            </div>
+          } @else {
+            <div class="alert alert-warning py-2 px-3 small mb-0">
+              <i class="bi bi-exclamation-triangle me-1"></i>{{ 'bookings.bookNow.techNoPricing' | translate }}
+            </div>
+          }
+        </div>
+      }
+
       <!-- Description -->
       <div class="col-12">
         <label class="form-label">{{ 'bookings.bookNow.description' | translate }}</label>
@@ -108,15 +128,37 @@
         }
       </div>
 
-      <!-- Location -->
+      <!-- Problem photo (optional) — shown to the technician before they quote -->
       <div class="col-12">
-        <label class="form-label d-block">{{ 'common.location' | translate }}</label>
+        <label class="form-label">{{ 'bookings.bookNow.photo' | translate }} <span class="text-muted">{{ 'common.optional' | translate }}</span></label>
+        <input type="file" class="form-control" accept="image/*"
+               (change)="onPhotoSelected($event)" [disabled]="uploadingPhoto()" />
+        <div class="form-text">{{ 'bookings.bookNow.photoHint' | translate }}</div>
+        @if (uploadingPhoto()) {
+          <div class="text-muted small mt-1">
+            <span class="spinner-border spinner-border-sm me-1"></span>{{ 'serviceRequests.form.uploading' | translate }}
+          </div>
+        }
+        @if (beforeImageUrl() && !uploadingPhoto()) {
+          <div class="mt-2">
+            <img [src]="beforeImageUrl()" alt="problem" class="rounded" style="height: 80px; object-fit: cover;" />
+            <span class="text-success small ms-2"><i class="bi bi-check-circle"></i> {{ 'serviceRequests.form.uploaded' | translate }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Location (required) -->
+      <div class="col-12">
+        <label class="form-label d-block">{{ 'common.location' | translate }} <span class="text-danger">*</span></label>
         <button type="button" class="btn btn-outline-secondary btn-sm" (click)="useMyLocation()" [disabled]="locating()">
           <i class="bi bi-geo-alt"></i>
           {{ (locating() ? 'common.locating' : 'common.useMyLocation') | translate }}
         </button>
         @if (lat() != null && lng() != null) {
           <span class="text-success small ms-2"><i class="bi bi-check-circle"></i> {{ 'common.captured' | translate }}</span>
+        }
+        @if (submitAttempted() && (lat() == null || lng() == null)) {
+          <div class="text-danger small mt-1">{{ 'common.locationRequired' | translate }}</div>
         }
       </div>
 
@@ -139,7 +181,7 @@
 
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">{{ 'common.cancel' | translate }}</button>
-    <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+    <button type="submit" class="btn btn-primary" [disabled]="submitting() || uploadingPhoto()">
       {{ (submitting() ? 'common.creating' : 'bookings.bookNow.submit') | translate }}
     </button>
   </div>

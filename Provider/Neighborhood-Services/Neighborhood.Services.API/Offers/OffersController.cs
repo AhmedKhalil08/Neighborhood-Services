@@ -7,6 +7,7 @@ using Neighborhood.Services.Application.Offers.Commands.Withdraw;
 using Neighborhood.Services.Application.Offers.Queries.GetOfferById;
 using Neighborhood.Services.Application.Offers.Queries.GetOffersByServiceRequest;
 using Neighborhood.Services.Application.Offers.Queries.GetTechnicianOffers;
+using Neighborhood.Services.Domain.Offers;
 
 namespace Neighborhood.Services.API.Offers
 {
@@ -76,12 +77,20 @@ namespace Neighborhood.Services.API.Offers
             return Ok(result);
         }
 
-        // GET /api/offers/mine
-        // Authenticated technician sees their own offers
+        // GET /api/offers/mine?status=Pending&page=1&pageSize=10
+        // Authenticated technician sees their own offers (paged + optional status filter)
         [HttpGet("mine")]
-        public async Task<IActionResult> GetMine()
+        public async Task<IActionResult> GetMine(
+            [FromQuery] OfferStatus? status,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var result = await _mediator.Send(new GetTechnicianOffersQuery());
+            var result = await _mediator.Send(new GetTechnicianOffersQuery
+            {
+                Status = status,
+                Page = page,
+                PageSize = pageSize
+            });
             return Ok(result);
         }
     }

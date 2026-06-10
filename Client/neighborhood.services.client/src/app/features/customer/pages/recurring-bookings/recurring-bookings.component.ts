@@ -14,6 +14,7 @@ import { CancelBookingModalComponent } from '../../components/cancel-booking-mod
 import { EditRecurringBookingModalComponent } from '../../components/edit-recurring-booking-modal/edit-recurring-booking-modal.component';
 import { RecurringBookingDetailsModalComponent } from '../../components/recurring-booking-details-modal/recurring-booking-details-modal.component';
 import { nextOccurrence } from '../../utils/recurrence.util';
+import { ConfirmService } from '../../../../shared/services/confirm.service';
 
 interface Tab {
   value: 'All' | RecurringBookingStatus;
@@ -31,6 +32,7 @@ export class RecurringBookingsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
+  private readonly confirm = inject(ConfirmService);
 
   readonly tabs: Tab[] = [
     { value: 'All', label: 'All' },
@@ -126,13 +128,30 @@ export class RecurringBookingsComponent implements OnInit {
 
   approve(rb: RecurringBooking) {
     const price = `EGP ${rb.agreedPrice ?? 0}`;
-    if (!confirm(this.translate.instant('recurring.approvePrompt', { price }))) return;
-    this.run(rb.id, this.service.approve(rb.id), this.translate.instant('recurring.approved'));
+    this.confirm
+      .confirm({
+        messageKey: 'recurring.approvePrompt',
+        messageParams: { price },
+        confirmKey: 'recurring.approve',
+        variant: 'success',
+      })
+      .then((ok) => {
+        if (!ok) return;
+        this.run(rb.id, this.service.approve(rb.id), this.translate.instant('recurring.approved'));
+      });
   }
 
   rejectPrice(rb: RecurringBooking) {
-    if (!confirm(this.translate.instant('recurring.rejectPrompt'))) return;
-    this.run(rb.id, this.service.rejectPrice(rb.id), this.translate.instant('recurring.rejected'));
+    this.confirm
+      .confirm({
+        messageKey: 'recurring.rejectPrompt',
+        confirmKey: 'recurring.rejectPrice',
+        variant: 'danger',
+      })
+      .then((ok) => {
+        if (!ok) return;
+        this.run(rb.id, this.service.rejectPrice(rb.id), this.translate.instant('recurring.rejected'));
+      });
   }
 
   pause(rb: RecurringBooking) {

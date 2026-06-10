@@ -7,9 +7,9 @@ using Neighborhood.Services.Application.Shared;
 using Neighborhood.Services.Application.Wallets.Interfaces;
 using Neighborhood.Services.Domain.Bookings;
 
-namespace Neighborhood.Services.Application.Bookings.Commands.AcceptBookingCommands
+namespace Neighborhood.Services.Application.Bookings.Commands.AcceptQuoteCommands
 {
-    public class AcceptBookingCommandHandler : IRequestHandler<AcceptBookingCommand, bool>
+    public class AcceptQuoteCommandHandler : IRequestHandler<AcceptQuoteCommand, bool>
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly IWalletRepository _walletRepository;
@@ -17,7 +17,7 @@ namespace Neighborhood.Services.Application.Bookings.Commands.AcceptBookingComma
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
 
-        public AcceptBookingCommandHandler(
+        public AcceptQuoteCommandHandler(
             IBookingRepository bookingRepository,
             IWalletRepository walletRepository,
             IMediator mediator,
@@ -31,11 +31,8 @@ namespace Neighborhood.Services.Application.Bookings.Commands.AcceptBookingComma
             _currentUserService = currentUserService;
         }
 
-        public async Task<bool> Handle(AcceptBookingCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(AcceptQuoteCommand request, CancellationToken cancellationToken)
         {
-            if (request.DurationMinutes <= 0)
-                throw new ValidationException("Duration must be greater than zero.");
-
             var userId = _currentUserService.UserId
                 ?? throw new UnauthorizedException("User is not authenticated.");
 
@@ -44,27 +41,28 @@ namespace Neighborhood.Services.Application.Bookings.Commands.AcceptBookingComma
             if (booking is null)
                 throw new NotFoundException(nameof(Booking), request.BookingId);
 
-            // Only the assigned technician can accept this booking
-            if (booking.Technician.ApplicationUserId != userId)
+            // Only the customer who owns this booking can accept the quote
+            if (booking.Customer.ApplicationUserId != userId)
                 throw new ForbiddenException("You don't have access to this booking.");
 
-            if (booking.Status != BookingStatus.Pending)
-                throw new BadRequestException($"Only a pending booking can be accepted. Current status: {booking.Status}.");
+            if (booking.Status != BookingStatus.Quoted)
+                throw new BadRequestException($"Only a quoted booking can be accepted. Current status: {booking.Status}.");
 
+            if (booking.FinalPrice <= 0)
+                throw new BadRequestException("Booking has no quoted price.");
+
+            // Make sure the tech is still free for the quoted duration
             var start = booking.ScheduledAt;
-            var end = start.AddMinutes(request.DurationMinutes);
-
+            var end = start.AddMinutes(booking.DurationMinutes ?? 0);
             var hasOverlap = await _bookingRepository.HasOverlappingConfirmedBookingAsync(
                 booking.TechnicianId, start, end, booking.Id);
-
             if (hasOverlap)
                 throw new ConflictException("Technician already has a confirmed booking that overlaps this time.");
 
-            booking.DurationMinutes = request.DurationMinutes;
             booking.Status = BookingStatus.Confirmed;
             booking.UpdatedAt = DateTime.UtcNow;
 
-            // Hold the customer's payment in escrow now that the booking is confirmed
+            // Hold the customer's payment in escrow at the quoted FinalPrice
             var customerWallet = await _walletRepository.GetByUserIdAsync(booking.Customer.ApplicationUserId)
                 ?? throw new NotFoundException("Wallet", booking.Customer.ApplicationUserId);
 
@@ -72,12 +70,12 @@ namespace Neighborhood.Services.Application.Bookings.Commands.AcceptBookingComma
             {
                 BookingId = booking.Id,
                 WalletId = customerWallet.Id,
-                Amount = booking.EstimatedPrice
+                Amount = booking.FinalPrice
             }, cancellationToken);
 
             await _bookingRepository.UpdateAsync(booking);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
-            await _mediator.Send(new CreateConversationCommandDTO { BookingId=booking.Id}, cancellationToken);
+            await _mediator.Send(new CreateConversationCommandDTO { BookingId = booking.Id }, cancellationToken);
             return true;
         }
     }

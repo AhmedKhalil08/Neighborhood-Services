@@ -20,7 +20,14 @@
       <dd class="col-sm-8">{{ d.description }}</dd>
 
       <dt class="col-sm-4">{{ 'bookings.detailsModal.address' | translate }}</dt>
-      <dd class="col-sm-8">{{ d.address }}</dd>
+      <dd class="col-sm-8">
+        {{ d.address }}
+        @if (mapsUrl(d.latitude, d.longitude); as url) {
+          <a [href]="url" target="_blank" rel="noopener" class="ms-2 small text-decoration-none">
+            <i class="bi bi-geo-alt-fill me-1"></i>{{ 'common.openInMaps' | translate }}
+          </a>
+        }
+      </dd>
 
       <dt class="col-sm-4">{{ 'bookings.detailsModal.scheduled' | translate }}</dt>
       <dd class="col-sm-8">{{ d.scheduledAt | date: 'medium' }}</dd>
@@ -42,6 +49,20 @@
       <dt class="col-sm-4">{{ 'bookings.detailsModal.created' | translate }}</dt>
       <dd class="col-sm-8">{{ d.createdAt | date: 'medium' }}</dd>
     </dl>
+
+    @if (images().length) {
+      <hr />
+      <h6 class="mb-2">{{ 'bookings.detailsModal.photos' | translate }}</h6>
+      <div class="d-flex flex-wrap gap-3">
+        @for (img of images(); track img.id) {
+          <a [href]="img.imageUrl" target="_blank" rel="noopener" class="text-center text-decoration-none">
+            <img [src]="img.imageUrl" [alt]="img.type" class="rounded d-block"
+                 style="width: 100px; height: 100px; object-fit: cover;" />
+            <span class="small text-muted">{{ ('bookings.detailsModal.photoType.' + img.type) | translate }}</span>
+          </a>
+        }
+      </div>
+    }
   } @else {
     <p class="text-muted mb-0">{{ 'bookings.detailsModal.loadError' | translate }}</p>
   }

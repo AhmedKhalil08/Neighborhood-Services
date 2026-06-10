@@ -1,4 +1,21 @@
 {
+    "chatbot": {
+        "title": "المساعد",
+        "placeholder": "اسأل عن الخدمات أو الأسعار أو الحجز…",
+        "empty": "مرحبًا! اسألني عن الخدمات أو الأسعار أو كيفية الحجز.",
+        "error": "عذرًا، حدث خطأ ما. حاول مرة أخرى.",
+        "newChat": "محادثة جديدة",
+        "history": "المحادثات السابقة",
+        "noHistory": "لا توجد محادثات سابقة بعد.",
+        "untitled": "محادثة بدون عنوان",
+        "back": "رجوع",
+        "guestNudge": "سجّل الدخول لحفظ محادثاتك.",
+        "shareLocation": "مشاركة موقعي",
+        "locationShared": "📍 حصلت على موقعك. الآن اسألني عن السعر (مثل \"كم تكلفة إصلاح الحوض؟\") وسأقدّر لك السعر حسب منطقتك.",
+        "locationDenied": "لا مشكلة — أخبرني بمدينتك (مثل القاهرة، الإسكندرية) للحصول على تقدير محلي.",
+        "locationAttached": "تم إرفاق الموقع",
+        "removeLocation": "إزالة الموقع"
+    },
     "navbar": {
         "home": "الرئيسية",
         "services": "خدماتنا",
@@ -33,7 +50,10 @@
         "locationRequired": "يرجى تحديد موقعك أولاً.",
         "locationCaptured": "تم تحديد الموقع.",
         "locationFailed": "تعذّر تحديد موقعك.",
-        "geoUnsupported": "المتصفح لا يدعم تحديد الموقع."
+        "geoUnsupported": "المتصفح لا يدعم تحديد الموقع.",
+        "openInMaps": "فتح في الخرائط",
+        "confirm": "تأكيد",
+        "confirmTitle": "يرجى التأكيد"
     },
     "cancelDialog": {
         "title": "إلغاء الحجز",
@@ -52,6 +72,7 @@
         "cancelBooking": "إلغاء الحجز",
         "confirmPrompt": "هل تؤكد اكتمال هذا الحجز؟ سيؤدي ذلك إلى تحرير الدفعة للفني.",
         "confirmed": "تم تأكيد الحجز.",
+        "youConfirmed": "لقد أكّدت",
         "cancelled": "تم إلغاء الحجز.",
         "requested": "تم إرسال طلب الحجز — في انتظار تأكيد الفني.",
         "bookNow": {
@@ -81,15 +102,31 @@
             "notWorkingDay": "الفني لا يعمل في هذا اليوم.",
             "outsideHours": "هذا الوقت خارج ساعات عمل الفني.",
             "promo": "كود الخصم",
-            "promoPlaceholder": "أدخل الكود"
+            "promoPlaceholder": "أدخل الكود",
+            "noCategories": "هذا الفني لم يحدد أي فئات خدمة.",
+            "techRange": "نطاق هذا الفني لهذه المشكلة: {{min}} – {{max}} جنيه",
+            "techNoPricing": "لم يحدد هذا الفني نطاق سعر لهذه المشكلة بعد.",
+            "photo": "صورة للمشكلة",
+            "photoHint": "اختياري — يساعد الفني على تقييم المهمة وتقديم سعر دقيق.",
+            "photoFailed": "فشل رفع الصورة. حاول مرة أخرى."
         },
         "status": {
             "Pending": "قيد الانتظار",
+            "Quoted": "بانتظار قرارك",
             "Confirmed": "مؤكد",
             "Completed": "مكتمل",
             "Cancelled": "ملغى",
             "Disputed": "متنازع عليه"
         },
+        "min": "دقيقة",
+        "awaitingTechnician": "بانتظار عرض السعر من الفني.",
+        "quotedCallout": "حدد الفني السعر: {{price}}",
+        "acceptQuote": "قبول",
+        "rejectQuote": "رفض",
+        "acceptQuotePrompt": "قبول العرض بقيمة {{price}} جنيه؟ سيتم حجز المبلغ في الضمان حتى تأكيد المهمة.",
+        "rejectQuotePrompt": "رفض هذا العرض؟ سيُطلب من الفني إرسال سعر جديد.",
+        "quoteAccepted": "تم قبول العرض — تم تأكيد الحجز.",
+        "quoteRejected": "تم رفض العرض — بانتظار سعر جديد.",
         "bookingType": {
             "Direct": "مباشر",
             "Bidding": "مزايدة",
@@ -107,7 +144,12 @@
             "clientConfirmed": "تأكيد العميل",
             "cancellationReason": "سبب الإلغاء",
             "created": "تاريخ الإنشاء",
-            "loadError": "تعذر تحميل تفاصيل الحجز."
+            "loadError": "تعذر تحميل تفاصيل الحجز.",
+            "photos": "الصور",
+            "photoType": {
+                "Before": "قبل",
+                "After": "بعد"
+            }
         }
     },
     "serviceRequests": {
@@ -280,7 +322,8 @@
             "errTime": "الوقت مطلوب.",
             "errDuration": "أدخل 15 دقيقة على الأقل.",
             "errStartDate": "تاريخ البدء مطلوب.",
-            "errAddress": "العنوان مطلوب."
+            "errAddress": "العنوان مطلوب.",
+            "noCategories": "هذا الفني لم يحدد أي فئات خدمة."
         }
     },
     "findTech": {
@@ -303,5 +346,120 @@
         "setupRecurring": "إنشاء زيارة متكررة",
         "unnamed": "فني رقم {{id}}",
         "comingSoon": "قريبًا — يتم تجهيز هذه الخطوة."
+    },
+    "technician": {
+        "jobs": {
+            "title": "مهامي",
+            "search": "ابحث بالوصف أو العنوان أو الرقم",
+            "empty": "لا توجد مهام هنا بعد.",
+            "estimated": "السعر التقديري",
+            "yourPrice": "سعرك",
+            "min": "دقيقة",
+            "setPrice": "تحديد السعر",
+            "editQuote": "تعديل العرض",
+            "complete": "تحديد كمكتملة",
+            "quoted": "تم إرسال السعر — بانتظار موافقة العميل.",
+            "awaitingCustomer": "بانتظار قبول العميل أو رفضه للعرض.",
+            "completed": "تم تحديد المهمة كمكتملة.",
+            "completePrompt": "تحديد هذه المهمة كمكتملة؟ سيتم إخطار العميل للتأكيد.",
+            "completeTitle": "إتمام المهمة",
+            "afterPhoto": "صورة العمل المنجز",
+            "afterPhotoHint": "ارفع صورة توضح العمل بعد الانتهاء — سيراها العميل قبل التأكيد.",
+            "photoRequired": "الصورة مطلوبة لتحديد المهمة كمكتملة.",
+            "photoFailed": "فشل رفع الصورة. حاول مرة أخرى.",
+            "quote": {
+                "title": "تسعير المهمة",
+                "price": "سعرك",
+                "pricePlaceholder": "مثال: 250",
+                "errPrice": "أدخل سعرًا أكبر من صفر.",
+                "duration": "المدة المقدّرة (بالدقائق)",
+                "durationPlaceholder": "مثال: 60",
+                "errDuration": "أدخل 15 دقيقة على الأقل.",
+                "rangeInfo": "نطاقك المحدد لهذه المشكلة: {{min}} – {{max}} جنيه",
+                "outOfRange": "يجب أن يكون السعر بين {{min}} و {{max}}.",
+                "noPricing": "لم تحدد نطاق سعر لهذه المشكلة بعد.",
+                "problemPhotos": "صور العميل للمشكلة",
+                "submit": "إرسال العرض"
+            },
+            "tabs": {
+                "all": "الكل",
+                "Pending": "قيد الانتظار",
+                "Quoted": "بانتظار العميل",
+                "Confirmed": "مؤكدة",
+                "Completed": "مكتملة",
+                "Cancelled": "ملغاة"
+            }
+        },
+        "offers": {
+            "title": "عروضي",
+            "empty": "لم تقدّم أي عروض بعد.",
+            "request": "طلب",
+            "min": "دقيقة",
+            "withdraw": "سحب",
+            "withdrawPrompt": "سحب هذا العرض؟",
+            "withdrawn": "تم سحب العرض.",
+            "tabs": {
+                "all": "الكل",
+                "Pending": "قيد الانتظار",
+                "Accepted": "مقبول",
+                "Rejected": "مرفوض",
+                "Withdrawn": "مسحوب",
+                "Expired": "منتهي"
+            }
+        },
+        "browse": {
+            "title": "تصفّح الطلبات",
+            "refresh": "تحديث",
+            "within": "ضمن",
+            "km": "كم",
+            "results": "{{count}} طلب مفتوح",
+            "empty": "لا توجد طلبات مفتوحة بالقرب منك حاليًا.",
+            "budget": "الميزانية",
+            "offers": "{{count}} عرض",
+            "makeOffer": "تقديم عرض",
+            "locationError": "نحتاج إلى موقعك للعثور على الطلبات القريبة.",
+            "retry": "إعادة المحاولة",
+            "offerSent": "تم إرسال العرض.",
+            "offerTitle": "تقديم عرض",
+            "price": "سعرك (ج.م)",
+            "pricePlaceholder": "مثال: 250",
+            "duration": "المدة المقدّرة (بالدقائق)",
+            "durationPlaceholder": "مثال: 60",
+            "scheduledAt": "التاريخ والوقت المقترح",
+            "message": "رسالة",
+            "messagePlaceholder": "ملاحظة قصيرة للعميل…",
+            "submitOffer": "إرسال العرض",
+            "errPrice": "أدخل سعرًا أكبر من 0.",
+            "errDuration": "أدخل 15 دقيقة على الأقل.",
+            "errScheduledAt": "اختر التاريخ والوقت."
+        },
+        "recurring": {
+            "title": "المهام المتكررة",
+            "search": "ابحث بالعنوان أو الرقم",
+            "empty": "لا توجد مهام متكررة هنا بعد.",
+            "min": "دقيقة",
+            "setPrice": "تحديد السعر",
+            "cancel": "إلغاء",
+            "needsPrice": "بانتظار تحديد سعرك — حدّد السعر لإرساله إلى العميل.",
+            "awaitingCustomer": "اقترحت {{price}} — بانتظار موافقة العميل.",
+            "agreedPrice": "السعر المتفق عليه: {{price}}",
+            "setPriceTitle": "تحديد سعر التكرار",
+            "price": "السعر لكل زيارة",
+            "pricePlaceholder": "مثال: 150",
+            "priceHint": "السعر الذي يدفعه العميل لكل زيارة.",
+            "priceError": "أدخل سعرًا أكبر من 0.",
+            "submitPrice": "إرسال السعر",
+            "priceSent": "تم إرسال السعر — بانتظار موافقة العميل.",
+            "cancelPrompt": "إلغاء هذا الترتيب المتكرر؟",
+            "cancelled": "تم إلغاء الترتيب.",
+            "tabs": {
+                "all": "الكل",
+                "PendingApproval": "بحاجة لسعر",
+                "PendingCustomerApproval": "بانتظار العميل",
+                "Active": "نشطة",
+                "Paused": "متوقفة",
+                "Cancelled": "ملغاة"
+            }
+        }
     }
 }

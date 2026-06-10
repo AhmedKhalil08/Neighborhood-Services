@@ -66,6 +66,7 @@ export class RecurringBookingDetailsModalComponent {
       case 'Confirmed': return 'text-bg-primary';
       case 'Cancelled': return 'text-bg-danger';
       case 'Disputed': return 'text-bg-warning';
+      case 'Quoted': return 'text-bg-info';
       case 'Pending': return 'text-bg-secondary';
     }
   }

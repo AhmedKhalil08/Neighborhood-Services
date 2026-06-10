@@ -115,6 +115,7 @@ export class FindTechnicianComponent implements OnInit {
     const ref = this.modal.open(CreateRecurringBookingModalComponent, { size: 'lg' });
     ref.componentInstance.technicianId = tech.id;
     ref.componentInstance.technicianName = this.displayName(tech);
+    ref.componentInstance.technicianCategories = tech.categories;
     ref.result.then(
       () => {
         this.toastr.success(this.translate.instant('recurring.created'));
@@ -128,6 +129,7 @@ export class FindTechnicianComponent implements OnInit {
     const ref = this.modal.open(CreateBookingModalComponent, { size: 'lg' });
     ref.componentInstance.technicianId = tech.id;
     ref.componentInstance.technicianName = this.displayName(tech);
+    ref.componentInstance.technicianCategories = tech.categories;
     ref.result.then(
       () => {
         this.toastr.success(this.translate.instant('bookings.requested'));
@@ -156,5 +158,10 @@ export class FindTechnicianComponent implements OnInit {
 
   isVerified(tech: TechnicianCard): boolean {
     return tech.verificationStatus === 'Approved';
+  }
+
+  /** Category label in the active language (falls back to English). */
+  categoryName(c: TechnicianCardCategory): string {
+    return (this.translate.currentLang || 'en') === 'ar' ? c.nameAr || c.nameEn : c.nameEn;
   }
 }

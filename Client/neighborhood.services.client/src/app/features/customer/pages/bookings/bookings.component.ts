@@ -8,9 +8,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { BookingService } from '../../services/booking.service';
 import { PagedResult } from '../../../../core/models/paged-result.model';
-import { BookingSummary, BookingStatus } from '../../models/booking.model';
+import { MyBookingSummary, BookingStatus } from '../../models/booking.model';
 import { BookingDetailsModalComponent } from '../../components/booking-details-modal/booking-details-modal.component';
 import { CancelBookingModalComponent } from '../../components/cancel-booking-modal/cancel-booking-modal.component';
+import { googleMapsUrl } from '../../../../core/utils/maps.util';
+import { ConfirmService } from '../../../../shared/services/confirm.service';
 
 type StatusTab = 'All' | BookingStatus;
 
@@ -25,15 +27,19 @@ export class BookingsComponent implements OnInit {
   private readonly modal = inject(NgbModal);
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
+  private readonly confirmDialog = inject(ConfirmService);
 
-  readonly tabs: StatusTab[] = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled', 'Disputed'];
+  readonly tabs: StatusTab[] = ['All', 'Pending', 'Quoted', 'Confirmed', 'Completed', 'Cancelled', 'Disputed'];
   readonly pageSize = 10;
 
   loading = signal(false);
-  result = signal<PagedResult<BookingSummary> | null>(null);
+  result = signal<PagedResult<MyBookingSummary> | null>(null);
   activeTab = signal<StatusTab>('All');
   searchTerm = signal('');
   page = signal(1);
+  busyId = signal<number | null>(null);
+
+  protected readonly mapsUrl = googleMapsUrl;
 
   private readonly search$ = new Subject<string>();
 
@@ -90,17 +96,72 @@ export class BookingsComponent implements OnInit {
     ref.componentInstance.bookingId = id;
   }
 
-  confirm(b: BookingSummary) {
-    if (!confirm(this.translate.instant('bookings.confirmPrompt'))) return;
-    this.bookingService.confirm(b.id).subscribe({
-      next: () => {
-        this.toastr.success(this.translate.instant('bookings.confirmed'));
-        this.load();
-      },
-    });
+  confirm(b: MyBookingSummary) {
+    if (this.busyId() === b.id || b.clientConfirmed) return;
+    this.confirmDialog
+      .confirm({
+        messageKey: 'bookings.confirmPrompt',
+        confirmKey: 'bookings.confirmCompleted',
+        variant: 'success',
+      })
+      .then((ok) => {
+        if (!ok) return;
+        this.busyId.set(b.id);
+        this.bookingService.confirm(b.id).subscribe({
+          next: () => {
+            this.busyId.set(null);
+            this.toastr.success(this.translate.instant('bookings.confirmed'));
+            this.load();
+          },
+          error: () => this.busyId.set(null),
+        });
+      });
   }
 
-  cancel(b: BookingSummary) {
+  acceptQuote(b: MyBookingSummary) {
+    this.confirmDialog
+      .confirm({
+        messageKey: 'bookings.acceptQuotePrompt',
+        messageParams: { price: b.finalPrice },
+        confirmKey: 'bookings.acceptQuote',
+        variant: 'success',
+      })
+      .then((ok) => {
+        if (!ok) return;
+        this.busyId.set(b.id);
+        this.bookingService.acceptQuote(b.id).subscribe({
+          next: () => {
+            this.busyId.set(null);
+            this.toastr.success(this.translate.instant('bookings.quoteAccepted'));
+            this.load();
+          },
+          error: () => this.busyId.set(null),
+        });
+      });
+  }
+
+  rejectQuote(b: MyBookingSummary) {
+    this.confirmDialog
+      .confirm({
+        messageKey: 'bookings.rejectQuotePrompt',
+        confirmKey: 'bookings.rejectQuote',
+        variant: 'danger',
+      })
+      .then((ok) => {
+        if (!ok) return;
+        this.busyId.set(b.id);
+        this.bookingService.rejectQuote(b.id).subscribe({
+          next: () => {
+            this.busyId.set(null);
+            this.toastr.success(this.translate.instant('bookings.quoteRejected'));
+            this.load();
+          },
+          error: () => this.busyId.set(null),
+        });
+      });
+  }
+
+  cancel(b: MyBookingSummary) {
     const ref = this.modal.open(CancelBookingModalComponent);
     ref.result.then(
       (reason: string) => {
@@ -120,6 +181,7 @@ export class BookingsComponent implements OnInit {
   badgeClass(status: BookingStatus): string {
     switch (status) {
       case 'Pending': return 'text-bg-warning';
+      case 'Quoted': return 'text-bg-info';
       case 'Confirmed': return 'text-bg-primary';
       case 'Completed': return 'text-bg-success';
       case 'Cancelled': return 'text-bg-danger';
@@ -128,14 +190,19 @@ export class BookingsComponent implements OnInit {
   }
 
   canCancel(status: BookingStatus): boolean {
-    return status === 'Pending' || status === 'Confirmed';
+    return status === 'Pending' || status === 'Quoted' || status === 'Confirmed';
   }
 
-  canConfirm(status: BookingStatus): boolean {
-    return status === 'Completed';
+  // Only when the tech has marked it Completed AND the customer hasn't confirmed yet.
+  canConfirm(b: MyBookingSummary): boolean {
+    return b.status === 'Completed' && !b.clientConfirmed;
   }
 
-  hasActions(status: BookingStatus): boolean {
-    return this.canCancel(status) || this.canConfirm(status);
+  canRespondToQuote(status: BookingStatus): boolean {
+    return status === 'Quoted';
+  }
+
+  hasActions(b: MyBookingSummary): boolean {
+    return this.canCancel(b.status) || this.canConfirm(b) || this.canRespondToQuote(b.status);
   }
 }

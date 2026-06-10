@@ -1,8 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from '../../../core/services/api.service';
 import { PagedResult } from '../../../core/models/paged-result.model';
-import { BookingSummary, BookingDetails, BookingStatus, CreateBooking } from '../models/booking.model';
+import {
+  BookingSummary,
+  BookingDetails,
+  BookingStatus,
+  CreateBooking,
+  BookingImage,
+  MyBookingSummary,
+  TechnicianPricingRange,
+} from '../models/booking.model';
 
 export interface GetMyBookingsParams {
   status?: BookingStatus;
@@ -18,14 +27,14 @@ export class BookingService {
   private readonly api = inject(ApiService);
 
   /** GET /api/bookings/mine — current user's bookings, paged + optional status filter */
-  getMyBookings(params: GetMyBookingsParams = {}): Observable<PagedResult<BookingSummary>> {
+  getMyBookings(params: GetMyBookingsParams = {}): Observable<PagedResult<MyBookingSummary>> {
     const query = new URLSearchParams();
     if (params.status) query.set('status', params.status);
     if (params.search?.trim()) query.set('search', params.search.trim());
     query.set('page', String(params.page ?? 1));
     query.set('pageSize', String(params.pageSize ?? 10));
 
-    return this.api.get<PagedResult<BookingSummary>>(`/api/bookings/mine?${query.toString()}`);
+    return this.api.get<PagedResult<MyBookingSummary>>(`/api/bookings/mine?${query.toString()}`);
   }
 
   /** GET /api/bookings/{id} — full details for one booking */
@@ -57,5 +66,34 @@ export class BookingService {
   /** POST /api/bookings/{id}/confirm — customer confirms job done (releases escrow) */
   confirm(id: number): Observable<void> {
     return this.api.post<void>(`/api/bookings/${id}/confirm`, {});
+  }
+
+  /** GET /api/bookings/{id}/images — Before/After photos for this booking */
+  getImages(id: number): Observable<BookingImage[]> {
+    return this.api.get<BookingImage[]>(`/api/bookings/${id}/images`);
+  }
+
+  /**
+   * GET /api/bookings/tech-pricing-range — the tech's MinPrice/MaxPrice for one problem type.
+   * Returns null when the tech hasn't priced this problem type yet (server returns 404).
+   */
+  getTechPricingRange(technicianId: number, problemTypeId: number): Observable<TechnicianPricingRange | null> {
+    return this.api
+      .get<TechnicianPricingRange>(
+        `/api/bookings/tech-pricing-range?technicianId=${technicianId}&problemTypeId=${problemTypeId}`,
+      )
+      .pipe(
+        catchError((err: HttpErrorResponse) => (err.status === 404 ? of(null) : (() => { throw err; })())),
+      );
+  }
+
+  /** POST /api/bookings/{id}/accept-quote — customer accepts the tech's quote (holds escrow). */
+  acceptQuote(id: number): Observable<void> {
+    return this.api.post<void>(`/api/bookings/${id}/accept-quote`, {});
+  }
+
+  /** POST /api/bookings/{id}/reject-quote — customer rejects; booking goes back to Pending. */
+  rejectQuote(id: number): Observable<void> {
+    return this.api.post<void>(`/api/bookings/${id}/reject-quote`, {});
   }
 }

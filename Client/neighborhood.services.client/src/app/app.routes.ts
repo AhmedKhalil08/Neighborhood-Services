@@ -21,6 +21,10 @@ import { RecurringBookingsComponent } from './features/customer/pages/recurring-
 import { FindTechnicianComponent } from './features/customer/pages/find-technician/find-technician.component';
 import { CustomerPlaceholderComponent } from './features/customer/pages/customer-placeholder/customer-placeholder.component';
 import { TechnicianDashboardComponent } from './features/technician/pages/dashboard/technician-dashboard.component';
+import { TechnicianJobsComponent } from './features/technician/pages/jobs/technician-jobs.component';
+import { TechnicianOffersComponent } from './features/technician/pages/offers/technician-offers.component';
+import { TechnicianBrowseRequestsComponent } from './features/technician/pages/browse-requests/technician-browse-requests.component';
+import { TechnicianRecurringJobsComponent } from './features/technician/pages/recurring-jobs/technician-recurring-jobs.component';
 import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
 
 export const routes: Routes = [
@@ -65,6 +69,10 @@ export const routes: Routes = [
     data: { roles: ['Technician'] },
     children: [
       { path: '', component: TechnicianDashboardComponent },
+      { path: 'jobs', component: TechnicianJobsComponent },
+      { path: 'browse-requests', component: TechnicianBrowseRequestsComponent },
+      { path: 'offers', component: TechnicianOffersComponent },
+      { path: 'recurring-jobs', component: TechnicianRecurringJobsComponent },
     ],
   },
   {

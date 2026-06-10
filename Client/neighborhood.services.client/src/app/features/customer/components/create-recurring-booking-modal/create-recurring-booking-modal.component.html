@@ -28,6 +28,9 @@
         @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
           <div class="text-danger small mt-1">{{ 'recurring.form.errCategory' | translate }}</div>
         }
+        @if (categories().length === 0) {
+          <div class="text-muted small mt-1">{{ 'recurring.form.noCategories' | translate }}</div>
+        }
       </div>
 
       <!-- Problem type -->
@@ -127,15 +130,18 @@
         }
       </div>
 
-      <!-- Location -->
+      <!-- Location (required) -->
       <div class="col-12">
-        <label class="form-label d-block">{{ 'common.location' | translate }}</label>
+        <label class="form-label d-block">{{ 'common.location' | translate }} <span class="text-danger">*</span></label>
         <button type="button" class="btn btn-outline-secondary btn-sm" (click)="useMyLocation()" [disabled]="locating()">
           <i class="bi bi-geo-alt"></i>
           {{ (locating() ? 'common.locating' : 'common.useMyLocation') | translate }}
         </button>
         @if (lat() != null && lng() != null) {
           <span class="text-success small ms-2"><i class="bi bi-check-circle"></i> {{ 'common.captured' | translate }}</span>
+        }
+        @if (submitAttempted() && (lat() == null || lng() == null)) {
+          <div class="text-danger small mt-1">{{ 'common.locationRequired' | translate }}</div>
         }
       </div>
 

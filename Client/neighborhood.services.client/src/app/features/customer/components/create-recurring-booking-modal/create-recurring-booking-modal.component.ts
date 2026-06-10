@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RecurringBookingService } from '../../services/recurring-booking.service';
 import { CatalogService } from '../../../../shared/services/catalog.service';
 import { Category, ProblemType } from '../../../../core/models/catalog.model';
+import { TechnicianCardCategory } from '../../../../core/models/technician-card.model';
 import { CreateRecurringBooking, RecurringPattern } from '../../models/recurring-booking.model';
 
 @Component({
@@ -14,7 +15,7 @@ import { CreateRecurringBooking, RecurringPattern } from '../../models/recurring
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './create-recurring-booking-modal.component.html',
 })
-export class CreateRecurringBookingModalComponent implements OnInit {
+export class CreateRecurringBookingModalComponent {
   private readonly fb = inject(FormBuilder);
   private readonly activeModal = inject(NgbActiveModal);
   private readonly service = inject(RecurringBookingService);
@@ -32,6 +33,9 @@ export class CreateRecurringBookingModalComponent implements OnInit {
   lat = signal<number | null>(null);
   lng = signal<number | null>(null);
   locating = signal(false);
+
+  // Set once the user tries to submit, so the (required) location error can show inline.
+  submitAttempted = signal(false);
 
   form = this.fb.group({
     technicianId: this.fb.control<number | null>(null, Validators.required),
@@ -59,8 +63,10 @@ export class CreateRecurringBookingModalComponent implements OnInit {
     return this._technicianId;
   }
 
-  ngOnInit() {
-    this.catalog.getCategories().subscribe({ next: (c) => this.categories.set(c) });
+  // Only the categories this technician actually works in (passed from the Find Technician card).
+  set technicianCategories(cats: TechnicianCardCategory[]) {
+    const ar = (this.translate.currentLang || 'en') === 'ar';
+    this.categories.set((cats ?? []).map((c) => ({ id: c.id, name: ar ? c.nameAr : c.nameEn, icon: c.icon })));
   }
 
   onCategoryChange() {
@@ -68,7 +74,8 @@ export class CreateRecurringBookingModalComponent implements OnInit {
     this.form.controls.problemTypeId.setValue(null);
     this.problemTypes.set([]);
     if (categoryId == null) return;
-    this.catalog.getCategory(categoryId).subscribe({ next: (d) => this.problemTypes.set(d.problemTypes) });
+    const lang = this.translate.currentLang || 'en';
+    this.catalog.getCategory(categoryId, lang).subscribe({ next: (d) => this.problemTypes.set(d.problemTypes) });
   }
 
   onPatternChange() {
@@ -109,6 +116,7 @@ export class CreateRecurringBookingModalComponent implements OnInit {
   }
 
   submit() {
+    this.submitAttempted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

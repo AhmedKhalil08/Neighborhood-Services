@@ -3,7 +3,8 @@ import { DatePipe, CurrencyPipe } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BookingService } from '../../services/booking.service';
-import { BookingDetails } from '../../models/booking.model';
+import { BookingDetails, BookingImage } from '../../models/booking.model';
+import { googleMapsUrl } from '../../../../core/utils/maps.util';
 
 @Component({
   selector: 'app-booking-details-modal',
@@ -19,6 +20,9 @@ export class BookingDetailsModalComponent implements OnInit {
 
   loading = signal(true);
   details = signal<BookingDetails | null>(null);
+  images = signal<BookingImage[]>([]);
+
+  protected readonly mapsUrl = googleMapsUrl;
 
   ngOnInit() {
     this.bookingService.getById(this.bookingId).subscribe({
@@ -27,6 +31,10 @@ export class BookingDetailsModalComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
+    });
+
+    this.bookingService.getImages(this.bookingId).subscribe({
+      next: (images) => this.images.set(images ?? []),
     });
   }
 

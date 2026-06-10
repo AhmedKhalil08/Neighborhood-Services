@@ -1,4 +1,21 @@
 {
+    "chatbot": {
+        "title": "Assistant",
+        "placeholder": "Ask about services, prices, booking…",
+        "empty": "Hi! Ask me about services, prices, or how to book.",
+        "error": "Sorry, something went wrong. Please try again.",
+        "newChat": "New chat",
+        "history": "Previous chats",
+        "noHistory": "No previous chats yet.",
+        "untitled": "Untitled chat",
+        "back": "Back",
+        "guestNudge": "Log in to save your chats.",
+        "shareLocation": "Share my location",
+        "locationShared": "📍 Got your location. Now ask me about a price (e.g. \"how much to fix a sink?\") and I'll estimate it for your area.",
+        "locationDenied": "No problem — just tell me your city (e.g. Cairo, Alexandria) for a local estimate.",
+        "locationAttached": "Location attached",
+        "removeLocation": "Remove location"
+    },
     "navbar": {
         "home": "Home",
         "services": "Our Services",
@@ -33,7 +50,10 @@
         "locationRequired": "Please capture your location first.",
         "locationCaptured": "Location captured.",
         "locationFailed": "Could not get your location.",
-        "geoUnsupported": "Geolocation is not supported by your browser."
+        "geoUnsupported": "Geolocation is not supported by your browser.",
+        "openInMaps": "Open in Maps",
+        "confirm": "Confirm",
+        "confirmTitle": "Please confirm"
     },
     "cancelDialog": {
         "title": "Cancel Booking",
@@ -52,6 +72,7 @@
         "cancelBooking": "Cancel booking",
         "confirmPrompt": "Confirm this booking is completed? This releases payment to the technician.",
         "confirmed": "Booking confirmed.",
+        "youConfirmed": "You confirmed",
         "cancelled": "Booking cancelled.",
         "requested": "Booking requested — awaiting the technician's confirmation.",
         "bookNow": {
@@ -81,15 +102,31 @@
             "notWorkingDay": "The technician doesn't work on this day.",
             "outsideHours": "This time is outside the technician's working hours.",
             "promo": "Promo code",
-            "promoPlaceholder": "Enter a code"
+            "promoPlaceholder": "Enter a code",
+            "noCategories": "This technician hasn't listed any service categories.",
+            "techRange": "This technician's range for this problem: EGP {{min}} – {{max}}",
+            "techNoPricing": "This technician hasn't set a price range for this problem type yet.",
+            "photo": "Photo of the problem",
+            "photoHint": "Optional — helps the technician assess the job and give an accurate price.",
+            "photoFailed": "Photo upload failed. Please try again."
         },
         "status": {
             "Pending": "Pending",
+            "Quoted": "Quoted",
             "Confirmed": "Confirmed",
             "Completed": "Completed",
             "Cancelled": "Cancelled",
             "Disputed": "Disputed"
         },
+        "min": "min",
+        "awaitingTechnician": "Awaiting the technician's price quote.",
+        "quotedCallout": "Technician quoted {{price}}",
+        "acceptQuote": "Accept",
+        "rejectQuote": "Reject",
+        "acceptQuotePrompt": "Accept the quote of EGP {{price}}? This holds the amount in escrow until the job is confirmed.",
+        "rejectQuotePrompt": "Reject this quote? The technician will be asked to re-quote.",
+        "quoteAccepted": "Quote accepted — booking confirmed.",
+        "quoteRejected": "Quote rejected — awaiting a new price.",
         "bookingType": {
             "Direct": "Direct",
             "Bidding": "Bidding",
@@ -107,7 +144,12 @@
             "clientConfirmed": "Client Confirmed",
             "cancellationReason": "Cancellation Reason",
             "created": "Created",
-            "loadError": "Could not load booking details."
+            "loadError": "Could not load booking details.",
+            "photos": "Photos",
+            "photoType": {
+                "Before": "Before",
+                "After": "After"
+            }
         }
     },
     "serviceRequests": {
@@ -280,7 +322,8 @@
             "errTime": "Time is required.",
             "errDuration": "Enter at least 15 minutes.",
             "errStartDate": "Start date is required.",
-            "errAddress": "Address is required."
+            "errAddress": "Address is required.",
+            "noCategories": "This technician hasn't listed any service categories."
         }
     },
     "findTech": {
@@ -303,5 +346,120 @@
         "setupRecurring": "Set up Recurring",
         "unnamed": "Technician #{{id}}",
         "comingSoon": "Coming soon — this flow is being wired up."
+    },
+    "technician": {
+        "jobs": {
+            "title": "My Jobs",
+            "search": "Search description, address, or id",
+            "empty": "No jobs here yet.",
+            "estimated": "Estimated",
+            "yourPrice": "Your price",
+            "min": "min",
+            "setPrice": "Set Price",
+            "editQuote": "Edit Quote",
+            "complete": "Mark completed",
+            "quoted": "Price sent — awaiting the customer's approval.",
+            "awaitingCustomer": "Awaiting the customer's accept / reject of your quote.",
+            "completed": "Job marked as completed.",
+            "completePrompt": "Mark this job as completed? This notifies the customer to confirm.",
+            "completeTitle": "Complete Job",
+            "afterPhoto": "Photo of completed work",
+            "afterPhotoHint": "Upload a photo showing the finished job — the customer will see this before confirming.",
+            "photoRequired": "A photo is required to mark this job as complete.",
+            "photoFailed": "Photo upload failed. Please try again.",
+            "quote": {
+                "title": "Quote This Job",
+                "price": "Your price",
+                "pricePlaceholder": "e.g. 250",
+                "errPrice": "Enter a price greater than 0.",
+                "duration": "Estimated duration (minutes)",
+                "durationPlaceholder": "e.g. 60",
+                "errDuration": "Enter at least 15 minutes.",
+                "rangeInfo": "Your configured range for this problem: EGP {{min}} – {{max}}",
+                "outOfRange": "Price must be between {{min}} and {{max}}.",
+                "noPricing": "You haven't set a price range for this problem type yet.",
+                "problemPhotos": "Customer's photos of the problem",
+                "submit": "Send Quote"
+            },
+            "tabs": {
+                "all": "All",
+                "Pending": "Pending",
+                "Quoted": "Quoted",
+                "Confirmed": "Confirmed",
+                "Completed": "Completed",
+                "Cancelled": "Cancelled"
+            }
+        },
+        "offers": {
+            "title": "My Offers",
+            "empty": "You haven't made any offers yet.",
+            "request": "Request",
+            "min": "min",
+            "withdraw": "Withdraw",
+            "withdrawPrompt": "Withdraw this offer?",
+            "withdrawn": "Offer withdrawn.",
+            "tabs": {
+                "all": "All",
+                "Pending": "Pending",
+                "Accepted": "Accepted",
+                "Rejected": "Rejected",
+                "Withdrawn": "Withdrawn",
+                "Expired": "Expired"
+            }
+        },
+        "browse": {
+            "title": "Browse Requests",
+            "refresh": "Refresh",
+            "within": "Within",
+            "km": "km",
+            "results": "{{count}} open request(s)",
+            "empty": "No open requests near you right now.",
+            "budget": "Budget",
+            "offers": "{{count}} offer(s)",
+            "makeOffer": "Make Offer",
+            "locationError": "We need your location to find nearby requests.",
+            "retry": "Retry",
+            "offerSent": "Offer sent.",
+            "offerTitle": "Make an Offer",
+            "price": "Your price (EGP)",
+            "pricePlaceholder": "e.g. 250",
+            "duration": "Estimated duration (minutes)",
+            "durationPlaceholder": "e.g. 60",
+            "scheduledAt": "Proposed date & time",
+            "message": "Message",
+            "messagePlaceholder": "A short note to the customer…",
+            "submitOffer": "Send Offer",
+            "errPrice": "Enter a price greater than 0.",
+            "errDuration": "Enter at least 15 minutes.",
+            "errScheduledAt": "Pick a date and time."
+        },
+        "recurring": {
+            "title": "Recurring Jobs",
+            "search": "Search address or id",
+            "empty": "No recurring jobs here yet.",
+            "min": "min",
+            "setPrice": "Set Price",
+            "cancel": "Cancel",
+            "needsPrice": "Awaiting your price quote — set a price to send it to the customer.",
+            "awaitingCustomer": "You proposed {{price}} — awaiting the customer's approval.",
+            "agreedPrice": "Agreed price: {{price}}",
+            "setPriceTitle": "Set Recurring Price",
+            "price": "Price per visit",
+            "pricePlaceholder": "e.g. 150",
+            "priceHint": "The price the customer pays for each visit.",
+            "priceError": "Enter a price greater than 0.",
+            "submitPrice": "Send Price",
+            "priceSent": "Price sent — awaiting the customer's approval.",
+            "cancelPrompt": "Cancel this recurring arrangement?",
+            "cancelled": "Arrangement cancelled.",
+            "tabs": {
+                "all": "All",
+                "PendingApproval": "Needs Price",
+                "PendingCustomerApproval": "Awaiting Customer",
+                "Active": "Active",
+                "Paused": "Paused",
+                "Cancelled": "Cancelled"
+            }
+        }
     }
 }
