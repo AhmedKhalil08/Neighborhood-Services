@@ -26,6 +26,7 @@ import { TechnicianOffersComponent } from './features/technician/pages/offers/te
 import { TechnicianBrowseRequestsComponent } from './features/technician/pages/browse-requests/technician-browse-requests.component';
 import { TechnicianRecurringJobsComponent } from './features/technician/pages/recurring-jobs/technician-recurring-jobs.component';
 import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
+import { FlaggedRequestsComponent } from './features/staff/pages/flagged-requests/flagged-requests.component';
 
 export const routes: Routes = [
   {
@@ -82,6 +83,7 @@ export const routes: Routes = [
     data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
     children: [
       { path: '', component: StaffDashboardComponent },
+      { path: 'flagged-requests', component: FlaggedRequestsComponent },
     ],
   },
   { path: '**', redirectTo: '' },

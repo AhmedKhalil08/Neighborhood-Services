@@ -161,11 +161,15 @@
         "budget": "Budget: {{value}}",
         "offers": "{{count}} offer(s)",
         "viewOffers": "View Offers",
-        "posted": "Service request posted.",
+        "posted": "Service request posted. It will be reviewed before going live.",
+        "underReview": "Your request is being reviewed and will go live shortly.",
+        "flaggedNotice": "This request was held for review. Our team will take a look.",
         "status": {
             "Open": "Open",
             "Closed": "Closed",
-            "Expired": "Expired"
+            "Expired": "Expired",
+            "PendingReview": "Under review",
+            "Flagged": "Held for review"
         },
         "offerStatus": {
             "Pending": "Pending",

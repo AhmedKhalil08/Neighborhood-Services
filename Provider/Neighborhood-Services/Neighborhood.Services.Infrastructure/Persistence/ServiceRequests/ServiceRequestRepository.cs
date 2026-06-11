@@ -79,5 +79,21 @@ namespace Neighborhood.Services.Infrastructure.Persistence.ServiceRequests
                     .ThenInclude(o => o.Technician)
                 .FirstOrDefaultAsync(sr => sr.Id == serviceRequestId && !sr.IsDeleted);
         }
+
+        public async Task<PagedResult<ServiceRequest>> GetByStatusPagedAsync(ServiceRequestStatus status, int page, int pageSize)
+        {
+            var query = _context.ServiceRequests
+                .Where(sr => sr.Status == status && !sr.IsDeleted);
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(sr => sr.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ServiceRequest>(items, total, page, pageSize);
+        }
     }
 }

@@ -108,6 +108,8 @@ export class ServiceRequestsComponent implements OnInit {
       case 'Open': return 'text-bg-primary';
       case 'Closed': return 'text-bg-secondary';
       case 'Expired': return 'text-bg-warning';
+      case 'PendingReview': return 'text-bg-info';
+      case 'Flagged': return 'text-bg-danger';
     }
   }
 }

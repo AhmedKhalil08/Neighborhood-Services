@@ -1,4 +1,4 @@
-export type ServiceRequestStatus = 'Open' | 'Closed' | 'Expired';
+export type ServiceRequestStatus = 'Open' | 'Closed' | 'Expired' | 'PendingReview' | 'Flagged';
 export type OfferStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Expired' | 'Withdrawn';
 
 // Mirrors ServiceRequestSummaryDto (GET /api/servicerequests/mine)

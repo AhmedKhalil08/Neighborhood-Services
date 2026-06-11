@@ -16,5 +16,8 @@ namespace Neighborhood.Services.Application.ServiceRequests.Interfaces
         Task<PagedResult<ServiceRequest>> GetCustomerServiceRequestsPagedAsync(int customerId, ServiceRequestStatus? status, string? search, int page, int pageSize);
         Task<IEnumerable<ServiceRequest>> GetOpenServiceRequestsAsync(double latitude, double longitude, double radiusInMeters);
         Task<ServiceRequest?> GetServiceRequestWithOffersAsync(int serviceRequestId);
+
+        // Paged list of requests in a given status — used by the staff moderation queue (Flagged).
+        Task<PagedResult<ServiceRequest>> GetByStatusPagedAsync(ServiceRequestStatus status, int page, int pageSize);
     }
 }

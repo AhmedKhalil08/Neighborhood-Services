@@ -200,6 +200,8 @@
                 services.AddHangfireServer();
                 services.AddScoped<RecurringBookingGeneratorService>();
                 services.AddScoped<ServiceRequestExpiryService>();
+                services.AddScoped<ServiceRequestModerationJob>();
+                services.AddScoped<IBackgroundJobScheduler, BackgroundJobScheduler>();
                 services.AddScoped<IKnowledgeIndexer, KnowledgeSeeder>();
                 //Kernl
                 services.AddSingleton(sp => {
