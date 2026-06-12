@@ -14,12 +14,25 @@ import { ContactComponent } from './features/public/pages/contact/contact.compon
 import { LoginComponent } from './features/auth/pages/login/login.component';
 import { RegisterComponent } from './features/auth/pages/register/register.component';
 import { CustomerDashboardComponent } from './features/customer/pages/dashboard/customer-dashboard.component';
+import { BookingsComponent } from './features/customer/pages/bookings/bookings.component';
+import { ServiceRequestsComponent } from './features/customer/pages/service-requests/service-requests.component';
+import { ServiceRequestDetailsComponent } from './features/customer/pages/service-requests/service-request-details.component';
+import { RecurringBookingsComponent } from './features/customer/pages/recurring-bookings/recurring-bookings.component';
+import { FindTechnicianComponent } from './features/customer/pages/find-technician/find-technician.component';
 import { CustomerPlaceholderComponent } from './features/customer/pages/customer-placeholder/customer-placeholder.component';
 import { CustomerProfileComponent } from './features/customer/pages/profile/customer-profile.component';
 import { TechnicianDashboardComponent } from './features/technician/pages/dashboard/technician-dashboard.component';
+import { TechnicianJobsComponent } from './features/technician/pages/jobs/technician-jobs.component';
+import { TechnicianOffersComponent } from './features/technician/pages/offers/technician-offers.component';
+import { TechnicianBrowseRequestsComponent } from './features/technician/pages/browse-requests/technician-browse-requests.component';
+import { TechnicianRecurringJobsComponent } from './features/technician/pages/recurring-jobs/technician-recurring-jobs.component';
+import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
+import { FlaggedRequestsComponent } from './features/staff/pages/flagged-requests/flagged-requests.component';
+import { StaffBookingsComponent } from './features/staff/pages/bookings/staff-bookings.component';
 import { TechnicianProfileComponent } from './features/technician/pages/profile/technician-profile.component';
 import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
 import { StaffUsersComponent } from './features/staff/pages/users/staff-users.component';
+
 
 export const routes: Routes = [
   {
@@ -42,10 +55,11 @@ export const routes: Routes = [
     data: { roles: ['Customer'] },
     children: [
       { path: '', component: CustomerDashboardComponent },
-      { path: 'bookings', component: CustomerPlaceholderComponent, data: { title: 'My Bookings' } },
-      { path: 'service-requests', component: CustomerPlaceholderComponent, data: { title: 'Service Requests' } },
-      { path: 'find-technician', component: CustomerPlaceholderComponent, data: { title: 'Find Technician' } },
-      { path: 'recurring-bookings', component: CustomerPlaceholderComponent, data: { title: 'Recurring Bookings' } },
+      { path: 'bookings', component: BookingsComponent },
+      { path: 'service-requests', component: ServiceRequestsComponent },
+      { path: 'service-requests/:id', component: ServiceRequestDetailsComponent },
+      { path: 'find-technician', component: FindTechnicianComponent },
+      { path: 'recurring-bookings', component: RecurringBookingsComponent },
       { path: 'favorites', component: CustomerPlaceholderComponent, data: { title: 'Favorites' } },
       { path: 'wallet', component: CustomerPlaceholderComponent, data: { title: 'Wallet' } },
       { path: 'chat', component: CustomerPlaceholderComponent, data: { title: 'Chat' } },
@@ -63,6 +77,10 @@ export const routes: Routes = [
     data: { roles: ['Technician'] },
     children: [
       { path: '', component: TechnicianDashboardComponent },
+      { path: 'jobs', component: TechnicianJobsComponent },
+      { path: 'browse-requests', component: TechnicianBrowseRequestsComponent },
+      { path: 'offers', component: TechnicianOffersComponent },
+      { path: 'recurring-jobs', component: TechnicianRecurringJobsComponent },
       { path: 'profile', component: TechnicianProfileComponent },
     ],
   },
@@ -74,6 +92,8 @@ export const routes: Routes = [
     data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
     children: [
       { path: '', component: StaffDashboardComponent },
+      { path: 'bookings', component: StaffBookingsComponent },
+      { path: 'flagged-requests', component: FlaggedRequestsComponent },
       { path: 'users', component: StaffUsersComponent },
     ],
   },
