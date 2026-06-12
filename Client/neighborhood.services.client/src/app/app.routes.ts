@@ -15,11 +15,14 @@ import { LoginComponent } from './features/auth/pages/login/login.component';
 import { RegisterComponent } from './features/auth/pages/register/register.component';
 import { CustomerDashboardComponent } from './features/customer/pages/dashboard/customer-dashboard.component';
 import { CustomerPlaceholderComponent } from './features/customer/pages/customer-placeholder/customer-placeholder.component';
+import { CustomerProfileComponent } from './features/customer/pages/profile/customer-profile.component';
 import { CustomerWalletComponent } from './features/customer/pages/wallet/customer-wallet.component';
 import { TechnicianDashboardComponent } from './features/technician/pages/dashboard/technician-dashboard.component';
+import { TechnicianProfileComponent } from './features/technician/pages/profile/technician-profile.component';
 import { TechnicianWalletComponent } from './features/technician/pages/wallet/technician-wallet.component';
 import { TechnicianEarningsComponent } from './features/technician/pages/earnings/technician-earnings.component';
 import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
+import { StaffUsersComponent } from './features/staff/pages/users/staff-users.component';
 import { StaffPromoCodesComponent } from './features/staff/pages/promo-codes/staff-promo-codes.component';
 
 export const routes: Routes = [
@@ -43,6 +46,17 @@ export const routes: Routes = [
     data: { roles: ['Customer'] },
     children: [
       { path: '', component: CustomerDashboardComponent },
+      { path: 'bookings', component: CustomerPlaceholderComponent, data: { title: 'My Bookings' } },
+      { path: 'service-requests', component: CustomerPlaceholderComponent, data: { title: 'Service Requests' } },
+      { path: 'find-technician', component: CustomerPlaceholderComponent, data: { title: 'Find Technician' } },
+      { path: 'recurring-bookings', component: CustomerPlaceholderComponent, data: { title: 'Recurring Bookings' } },
+      { path: 'favorites', component: CustomerPlaceholderComponent, data: { title: 'Favorites' } },
+      { path: 'wallet', component: CustomerPlaceholderComponent, data: { title: 'Wallet' } },
+      { path: 'chat', component: CustomerPlaceholderComponent, data: { title: 'Chat' } },
+      { path: 'chats', redirectTo: 'chat', pathMatch: 'full' },
+      { path: 'notifications', component: CustomerPlaceholderComponent, data: { title: 'Notifications' } },
+      { path: 'profile', component: CustomerProfileComponent },
+      { path: '**', redirectTo: '' },
       { path: 'wallet', component: CustomerWalletComponent },
     ],
   },
@@ -50,9 +64,11 @@ export const routes: Routes = [
     path: 'technician',
     component: TechnicianLayoutComponent,
     canActivate: [authGuard, roleGuard],
+    canActivateChild: [authGuard, roleGuard],
     data: { roles: ['Technician'] },
     children: [
       { path: '', component: TechnicianDashboardComponent },
+      { path: 'profile', component: TechnicianProfileComponent },
       { path: 'wallet', component: TechnicianWalletComponent },
       { path: 'earnings', component: TechnicianEarningsComponent },
     ],
@@ -61,9 +77,11 @@ export const routes: Routes = [
     path: 'staff',
     component: StaffLayoutComponent,
     canActivate: [authGuard, roleGuard],
+    canActivateChild: [authGuard, roleGuard],
     data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
     children: [
       { path: '', component: StaffDashboardComponent },
+      { path: 'users', component: StaffUsersComponent },
       { path: 'promo-codes', component: StaffPromoCodesComponent },
     ],
   },
