@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { ApplicationUserRole, RegisterRequest } from '../../models/auth.models';
 import { AuthService } from '../../services/auth.service';
 
@@ -17,17 +18,37 @@ export class RegisterComponent {
 
   readonly isSubmitting = signal(false);
   readonly apiError = signal<string | null>(null);
-  readonly roleOptions: ApplicationUserRole[] = ['Customer', 'Technician', 'Staff'];
+  readonly selectedRole = signal<Extract<ApplicationUserRole, 'Customer' | 'Technician'>>('Customer');
 
   readonly form = this.formBuilder.nonNullable.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    age: [18, [Validators.required, Validators.min(13), Validators.max(120)]],
+    age: [0, [Validators.required, Validators.min(13), Validators.max(120)]],
     applicationUserRole: ['Customer' as ApplicationUserRole, [Validators.required]],
-    latitude: [30.0444, [Validators.required, Validators.min(-90), Validators.max(90)]],
-    longitude: [31.2357, [Validators.required, Validators.min(-180), Validators.max(180)]],
+    address: ['', [Validators.required, Validators.minLength(3)]],
+    nationalId: [''],
+    experience: [''],
+    maxTravelDistance: [0],
   });
+
+  setRole(role: Extract<ApplicationUserRole, 'Customer' | 'Technician'>): void {
+    this.selectedRole.set(role);
+    this.form.controls.applicationUserRole.setValue(role);
+    this.form.controls.nationalId.clearValidators();
+    this.form.controls.experience.clearValidators();
+    this.form.controls.maxTravelDistance.clearValidators();
+
+    if (role === 'Technician') {
+      this.form.controls.nationalId.setValidators([Validators.required, Validators.minLength(8)]);
+      this.form.controls.experience.setValidators([Validators.required, Validators.minLength(10)]);
+      this.form.controls.maxTravelDistance.setValidators([Validators.required, Validators.min(1)]);
+    }
+
+    this.form.controls.nationalId.updateValueAndValidity();
+    this.form.controls.experience.updateValueAndValidity();
+    this.form.controls.maxTravelDistance.updateValueAndValidity();
+  }
 
   submit(): void {
     this.apiError.set(null);
@@ -38,20 +59,40 @@ export class RegisterComponent {
     }
 
     this.isSubmitting.set(true);
-    const request: RegisterRequest = this.form.getRawValue();
+    const formValue = this.form.getRawValue();
 
-    this.authService.register(request).subscribe({
-      next: () => {
-        this.isSubmitting.set(false);
-        this.router.navigate(['/auth/login'], {
-          queryParams: { registered: 'true' },
-        });
-      },
-      error: (error) => {
-        this.isSubmitting.set(false);
-        this.apiError.set(this.getErrorMessage(error));
-      },
-    });
+    this.authService
+      .geocodeAddress(formValue.address)
+      .pipe(
+        switchMap((location) => {
+          const request: RegisterRequest = {
+            fullName: formValue.fullName,
+            email: formValue.email,
+            password: formValue.password,
+            age: formValue.age,
+            applicationUserRole: formValue.applicationUserRole,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            nationalId: formValue.nationalId,
+            experience: formValue.experience,
+            maxTravelDistance: formValue.maxTravelDistance,
+          };
+
+          return this.authService.register(request);
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.router.navigate(['/auth/login'], {
+            queryParams: { registered: 'true' },
+          });
+        },
+        error: (error) => {
+          this.isSubmitting.set(false);
+          this.apiError.set(this.getErrorMessage(error));
+        },
+      });
   }
 
   hasError(
@@ -61,8 +102,10 @@ export class RegisterComponent {
       | 'password'
       | 'age'
       | 'applicationUserRole'
-      | 'latitude'
-      | 'longitude',
+      | 'address'
+      | 'nationalId'
+      | 'experience'
+      | 'maxTravelDistance',
     errorName: string,
   ): boolean {
     const control = this.form.controls[controlName];

@@ -12,7 +12,6 @@ using Neighborhood.Services.Domain.Staffs;
 using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
-using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
 using StackExchange.Redis;
@@ -191,12 +190,9 @@ namespace Neighborhood.Services.API
             
             using (var scope = app.Services.CreateScope())
             {
-                var services = scope.ServiceProvider;
-                var env = services.GetRequiredService<IWebHostEnvironment>();
-                // var logger = services.GetRequiredService<ILogger<Program>>(); // اختياري لو مسجلين لوجر
-
-                // الاستدعاء الصح لـ DbSeeder الاستاتيك
-                await DbSeeder.SeedAsync(services, env);
+                var environment = app.Services.GetRequiredService<IWebHostEnvironment>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                await DbSeeder.SeedAsync(scope.ServiceProvider, environment, logger);
             }
 
             
@@ -211,6 +207,7 @@ namespace Neighborhood.Services.API
             //app.UseCors("AllowJS");
             app.UseHttpsRedirection();
             app.UseExceptionHandler();
+            app.UseStaticFiles();
             app.UseCors("Frontend");
            
             app.UseAuthentication();
