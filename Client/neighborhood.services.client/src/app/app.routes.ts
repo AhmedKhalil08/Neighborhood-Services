@@ -46,13 +46,41 @@ export const routes: Routes = [
   },
 
   // STAFF dashboard
-  {
-    path: 'staff',
-    component: StaffLayoutComponent,
-    children: [
-      { path: '', component: StaffDashboardComponent },
-    ],
-  },
+ {
+  path: 'staff',
+  component: StaffLayoutComponent,
+  children: [
+    { path: '', component: StaffDashboardComponent },
+
+    {
+      path: 'staff-management',
+      loadComponent: () =>
+        import('./features/staff/pages/staff-management/staff-management.component')
+          .then(m => m.StaffManagementComponent)
+    },
+
+    // 🆕 SUPPORT TICKETS
+    {
+      path: 'support-tickets',
+      loadComponent: () =>
+        import('./features/staff/pages/support-tickets/support-tickets.component')
+          .then(m => m.SupportTicketsComponent)
+    },
+    {
+  path: 'disputes',
+  loadComponent: () =>
+    import('./features/staff/pages/disputes/disputes.component')
+      .then(m => m.DisputesComponent)
+},
+{
+  path: 'reviews',
+  loadComponent: () =>
+ import('./features/staff/pages/reviews/reviews.component')
+    .then(m => m.ReviewsComponent)
+
+}
+  ]
+},
 
   // Unknown URL → home
   { path: '**', redirectTo: '' },
