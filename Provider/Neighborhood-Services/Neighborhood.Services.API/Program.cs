@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Neighborhood.Services.API.Middlewares;
 using Neighborhood.Services.Application;
+using Neighborhood.Services.Application.AI.Interfaces;
 using Neighborhood.Services.Application.Authorization;
 using Neighborhood.Services.Application.Cloudinary;
 using Neighborhood.Services.Domain.Staffs;
@@ -80,16 +81,15 @@ namespace Neighborhood.Services.API
             });
 
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
-                builder.Services.AddAuthentication(options =>
-                {
-                    // AddIdentity() sets the default authenticate scheme to the Identity cookie, which
-                    // means our JWT (in the access_token cookie) is never read. Force JwtBearer to be
-                    // the default for authenticate/challenge so protected endpoints actually use the JWT.
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
+            builder.Services.AddAuthentication(options =>
+            {
+                // AddIdentity() sets the default authenticate scheme to the Identity cookie, which
+                // means our JWT (in the access_token cookie) is never read. Force JwtBearer to be
+                // the default for authenticate/challenge so protected endpoints actually use the JWT.
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -122,8 +122,10 @@ namespace Neighborhood.Services.API
                 })
                 .AddGoogle(options =>
                 {
-                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
-                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+                    //options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                    //options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "dummy-google-client-id";
+                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "dummy-google-client-secret";
                 });
             // Add authorization policies for each permission type (Amira)
             builder.Services.AddAuthorization(options =>
@@ -175,9 +177,24 @@ namespace Neighborhood.Services.API
 
             //END OF ARWA
             // Seed dev/test data on startup (migrates + seeds if empty)
+            // CLI: pure knowledge reindex. Assumes the DB is already migrated (boot the app
+            // normally at least once first). Does NOT seed dev data, does NOT start the server.
+            //   dotnet run -- reindex-knowledge   (same job as POST /api/knowledge/reindex)
+            if (args.Contains("reindex-knowledge"))
+            {
+                using var reindexScope = app.Services.CreateScope();
+                await reindexScope.ServiceProvider.GetRequiredService<IKnowledgeIndexer>().ReindexAllAsync();
+                Console.WriteLine("Knowledge reindex complete.");
+                return;
+            }
+
+            // Normal boot only: migrate + seed dev/test data. (Knowledge index is NOT seeded here —
+            // rebuild it deliberately via the CLI above or POST /api/knowledge/reindex.)
             using (var scope = app.Services.CreateScope())
             {
-                await DbSeeder.SeedAsync(scope.ServiceProvider);
+                var environment = app.Services.GetRequiredService<IWebHostEnvironment>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                await DbSeeder.SeedAsync(scope.ServiceProvider, environment, logger);
 
 
                 // Seed Qdrant knowledge base from the DB (catalog) + Faqs.json.
@@ -190,8 +207,8 @@ namespace Neighborhood.Services.API
                 }
                 catch (Exception ex)
                 {
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                    logger.LogWarning(ex, "KnowledgeSeeder failed at startup — AI endpoints may not work until this is fixed. App will continue to run.");
+                    var logger2 = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger2.LogWarning(ex, "KnowledgeSeeder failed at startup — AI endpoints may not work until this is fixed. App will continue to run.");
                 }
 
             }
@@ -208,6 +225,7 @@ namespace Neighborhood.Services.API
             app.UseExceptionHandler();
             app.UseStaticFiles();
             app.UseCors("Frontend");
+           
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard("/hangfire");
