@@ -188,30 +188,18 @@ namespace Neighborhood.Services.API
                 return;
             }
 
-            // Normal boot only: migrate + seed dev/test data. (Knowledge index is NOT seeded here —
-            // rebuild it deliberately via the CLI above or POST /api/knowledge/reindex.)
+            
             using (var scope = app.Services.CreateScope())
             {
-                var environment = app.Services.GetRequiredService<IWebHostEnvironment>();
-                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                await DbSeeder.SeedAsync(scope.ServiceProvider, environment, logger);
+                var services = scope.ServiceProvider;
+                var env = services.GetRequiredService<IWebHostEnvironment>();
+                // var logger = services.GetRequiredService<ILogger<Program>>(); // اختياري لو مسجلين لوجر
 
-
-                // Seed Qdrant knowledge base from the DB (catalog) + Faqs.json.
-                // If OpenAI/Qdrant is unavailable (bad key, no quota, network down) we log
-                // and continue — the app stays up; only the AI endpoints will fail per-call.
-                try
-                {
-                    var knowledgeSeeder = scope.ServiceProvider.GetRequiredService<KnowledgeSeeder>();
-                    await knowledgeSeeder.SeedAsync();
-                }
-                catch (Exception ex)
-                {
-                    var logger2 = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                    logger2.LogWarning(ex, "KnowledgeSeeder failed at startup — AI endpoints may not work until this is fixed. App will continue to run.");
-                }
-
+                // الاستدعاء الصح لـ DbSeeder الاستاتيك
+                await DbSeeder.SeedAsync(services, env);
             }
+
+            
 
 
             // Configure the HTTP request pipeline.
