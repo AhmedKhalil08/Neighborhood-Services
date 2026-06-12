@@ -55,6 +55,15 @@ export class CustomerProfileService {
     });
   }
 
+  uploadUserPhoto(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ photoUrl: string }>(`${this.apiUrl}/api/Users/photo-upload`, formData, {
+      withCredentials: true,
+    });
+  }
+
   getAddressesByUserId(userId: string) {
     return this.http.get<CustomerAddress[]>(`${this.apiUrl}/api/CustomerAddresses/user/${userId}`, {
       withCredentials: true,

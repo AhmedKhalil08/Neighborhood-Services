@@ -1,6 +1,7 @@
 import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { of, switchMap } from 'rxjs';
 import { ApplicationUserRole, RegisterRequest } from '../../models/auth.models';
 import { AuthService } from '../../services/auth.service';
 
@@ -71,13 +72,16 @@ export class RegisterComponent implements OnDestroy {
       return;
     }
 
+    if (file.size > 5 * 1024 * 1024) {
+      this.apiError.set('Profile photo must be 5 MB or smaller.');
+      input.value = '';
+      return;
+    }
+
     this.revokeAvatarPreview();
     this.selectedAvatarFile.set(file);
     this.avatarPreviewUrl.set(URL.createObjectURL(file));
     this.apiError.set(null);
-
-    // TODO: Backend CreateUserCommand does not accept Photo/file yet.
-    // Keep the selected avatar frontend-only until register upload integration exists.
   }
 
   submit(): void {
@@ -91,36 +95,43 @@ export class RegisterComponent implements OnDestroy {
     this.isSubmitting.set(true);
     const formValue = this.form.getRawValue();
 
-    this.authService.geocodeAddress(formValue.address).subscribe({
-      next: (location) => {
-        const request: RegisterRequest = {
-          fullName: formValue.fullName,
-          email: formValue.email,
-          password: formValue.password,
-          age: formValue.age,
-          applicationUserRole: formValue.applicationUserRole,
-          latitude: location.latitude,
-          longitude: location.longitude,
-        };
+    const photoUpload$ = this.selectedAvatarFile()
+      ? this.authService.uploadUserPhoto(this.selectedAvatarFile() as File)
+      : of({ photoUrl: '' });
 
-        this.authService.register(request).subscribe({
-          next: () => {
-            this.isSubmitting.set(false);
-            this.router.navigate(['/auth/login'], {
-              queryParams: { registered: 'true' },
-            });
-          },
-          error: (error) => {
-            this.isSubmitting.set(false);
-            this.apiError.set(this.getErrorMessage(error));
-          },
-        });
-      },
-      error: () => {
-        this.isSubmitting.set(false);
-        this.apiError.set('Could not find this address. Please enter a more specific address.');
-      },
-    });
+    photoUpload$
+      .pipe(
+        switchMap(({ photoUrl }) =>
+          this.authService.geocodeAddress(formValue.address).pipe(
+            switchMap((location) => {
+              const request: RegisterRequest = {
+                fullName: formValue.fullName,
+                email: formValue.email,
+                photo: photoUrl,
+                password: formValue.password,
+                age: formValue.age,
+                applicationUserRole: formValue.applicationUserRole,
+                latitude: location.latitude,
+                longitude: location.longitude,
+              };
+
+              return this.authService.register(request);
+            }),
+          ),
+        ),
+      )
+      .subscribe({
+        next: () => {
+          this.isSubmitting.set(false);
+          this.router.navigate(['/auth/login'], {
+            queryParams: { registered: 'true' },
+          });
+        },
+        error: (error) => {
+          this.isSubmitting.set(false);
+          this.apiError.set(this.getErrorMessage(error));
+        },
+      });
   }
 
   hasError(

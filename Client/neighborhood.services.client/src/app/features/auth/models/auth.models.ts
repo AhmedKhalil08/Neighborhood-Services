@@ -8,6 +8,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   fullName: string;
   email: string;
+  photo?: string;
   password: string;
   age: number;
   applicationUserRole: ApplicationUserRole;
@@ -34,6 +35,7 @@ export interface AuthResponse {
   userId: string;
   fullName: string;
   email: string;
+  photo: string;
   role: string;
   expiresAt: string;
 }

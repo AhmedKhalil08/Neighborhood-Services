@@ -32,6 +32,7 @@ namespace Neighborhood.Services.Application.Users.Commands.CreateUserCommands
                 FullName = request.FullName,
                 Email = request.Email,
                 UserName = request.Email,
+                Photo = request.Photo,
                 Age = request.Age,
                 ApplicationUserRole = request.ApplicationUserRole,
                 Location = new Point(request.Longitude, request.Latitude) { SRID = 4326 },

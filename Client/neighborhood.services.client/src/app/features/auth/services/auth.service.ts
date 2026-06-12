@@ -40,6 +40,19 @@ export class AuthService {
     });
   }
 
+  uploadUserPhoto(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ photoUrl: string }>(`${this.baseUrl}/api/Users/photo-upload`, formData, {
+      withCredentials: true,
+    });
+  }
+
+  completeExternalLogin(user: SafeAuthUser): void {
+    this.setCurrentUser(user);
+  }
+
   geocodeAddress(address: string) {
     return this.http.get<GeocodingResult>(`${this.baseUrl}/api/Geocoding/search`, {
       params: { address },

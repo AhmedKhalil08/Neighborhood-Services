@@ -13,6 +13,7 @@ import { AboutComponent } from './features/public/pages/about/about.component';
 import { ContactComponent } from './features/public/pages/contact/contact.component';
 import { LoginComponent } from './features/auth/pages/login/login.component';
 import { RegisterComponent } from './features/auth/pages/register/register.component';
+import { ExternalCallbackComponent } from './features/auth/pages/external-callback/external-callback.component';
 import { CustomerDashboardComponent } from './features/customer/pages/dashboard/customer-dashboard.component';
 import { CustomerPlaceholderComponent } from './features/customer/pages/customer-placeholder/customer-placeholder.component';
 import { CustomerProfileComponent } from './features/customer/pages/profile/customer-profile.component';
@@ -32,6 +33,7 @@ export const routes: Routes = [
       { path: 'contact', component: ContactComponent },
       { path: 'auth/login', component: LoginComponent },
       { path: 'auth/register', component: RegisterComponent },
+      { path: 'auth/external-callback', component: ExternalCallbackComponent },
     ],
   },
   {

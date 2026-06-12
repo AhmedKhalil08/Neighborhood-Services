@@ -2,6 +2,7 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { NotificationBellComponent } from '../../shared/components/notification-bell/notification-bell.component';
 import { AuthService } from '../../features/auth/services/auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-dashboard-shell',
@@ -21,6 +22,15 @@ export class DashboardShellComponent {
   readonly userInitial = computed(() => {
     const fullName = this.currentUser()?.fullName?.trim();
     return fullName ? fullName.charAt(0).toUpperCase() : 'A';
+  });
+  readonly userPhoto = computed(() => {
+    const photo = this.currentUser()?.photo ?? '';
+
+    if (!photo || photo.startsWith('http') || photo.startsWith('blob:') || photo.startsWith('data:')) {
+      return photo;
+    }
+
+    return `${environment.apiUrl}${photo.startsWith('/') ? '' : '/'}${photo}`;
   });
 
   logout(): void {
