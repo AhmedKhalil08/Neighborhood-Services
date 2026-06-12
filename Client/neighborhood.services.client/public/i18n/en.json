@@ -14,7 +14,11 @@
         "locationShared": "📍 Got your location. Now ask me about a price (e.g. \"how much to fix a sink?\") and I'll estimate it for your area.",
         "locationDenied": "No problem — just tell me your city (e.g. Cairo, Alexandria) for a local estimate.",
         "locationAttached": "Location attached",
-        "removeLocation": "Remove location"
+        "removeLocation": "Remove location",
+        "attachImage": "Attach a photo",
+        "uploadingImage": "Uploading photo…",
+        "removeImage": "Remove photo",
+        "imageFailed": "Couldn't upload the photo. Please try again."
     },
     "navbar": {
         "home": "Home",
@@ -330,6 +334,47 @@
             "noCategories": "This technician hasn't listed any service categories."
         }
     },
+    "dispute": {
+        "raise": "Raise a dispute",
+        "title": "Raise a dispute",
+        "subtitle": "Tell us what went wrong. Our team will review this booking.",
+        "type": "Issue type",
+        "reason": "What happened?",
+        "reasonHint": "Describe the issue…",
+        "submit": "Submit dispute",
+        "raised": "Dispute submitted. Our team will review it.",
+        "types": {
+            "PaymentIssue": "Payment issue",
+            "TechnicianBehavior": "Technician behavior",
+            "PoorService": "Poor service",
+            "Scam": "Scam",
+            "Other": "Other"
+        }
+    },
+    "smartMatch": {
+        "button": "Smart Match",
+        "title": "Smart Match",
+        "subtitle": "Don't want to browse? Pick what you need and we'll suggest the best technician(s) for you.",
+        "category": "Category",
+        "chooseCategory": "Choose a category",
+        "problemType": "Problem type",
+        "chooseProblemType": "Choose a problem type",
+        "describe": "Describe the issue",
+        "describeHint": "e.g. water pooling under the kitchen sink, getting worse",
+        "useLocation": "Use my location",
+        "locationAttached": "Location attached",
+        "find": "Find my match",
+        "finding": "Finding…",
+        "resultsHint": "Best matches for you",
+        "aiPicked": "AI pick",
+        "ruleRanked": "Top rated nearby",
+        "score": "Match score",
+        "book": "Book Now",
+        "recurring": "Set up Recurring",
+        "refine": "Change my choices",
+        "none": "No matching technicians found. Try a different category or widen your area.",
+        "failed": "Couldn't fetch matches. Please try again."
+    },
     "findTech": {
         "title": "Find a Technician",
         "subtitle": "Browse skilled technicians — book now or set up a recurring visit",
@@ -383,6 +428,11 @@
                 "outOfRange": "Price must be between {{min}} and {{max}}.",
                 "noPricing": "You haven't set a price range for this problem type yet.",
                 "problemPhotos": "Customer's photos of the problem",
+                "detect": "Detect from photo (AI)",
+                "detectFailed": "Couldn't analyze the photo. Please try again.",
+                "aiResult": "AI assessment",
+                "aiEstimate": "Suggested range: EGP {{min}} – {{max}}",
+                "aiHint": "AI suggestion — your price is up to you.",
                 "submit": "Send Quote"
             },
             "tabs": {

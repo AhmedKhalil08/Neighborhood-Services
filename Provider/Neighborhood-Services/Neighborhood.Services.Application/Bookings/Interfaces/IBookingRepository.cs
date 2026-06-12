@@ -1,4 +1,5 @@
-﻿using Neighborhood.Services.Application.Shared;
+﻿using Neighborhood.Services.Application.Bookings.DTOs;
+using Neighborhood.Services.Application.Shared;
 using Neighborhood.Services.Domain.Bookings;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,8 @@ namespace Neighborhood.Services.Application.Bookings.Interface
 {
     public interface IBookingRepository: IGenericRepository<Booking,int>
     {
+        // Staff oversight: every booking, paged, with customer + technician names, filter + search.
+        Task<PagedResult<StaffBookingDto>> GetBookingsForStaffPagedAsync(BookingStatus? status, string? search, int page, int pageSize);
         Task<Booking?> GetBookingWithDetailsAsync(int bookingId);
         Task<IEnumerable<Booking>> GetCustomerBookingsAsync(int customerId, bool includeDeleted = false);
         Task<IEnumerable<Booking>> GetTechnicianBookingsAsync(int technicianId);

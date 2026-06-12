@@ -29,6 +29,24 @@
             </a>
           }
         </div>
+
+        <!-- Optional AI triage of the photo (on-demand) -->
+        <button type="button" class="btn btn-sm btn-outline-primary mt-2" (click)="detectFromPhoto()" [disabled]="analyzing()">
+          @if (analyzing()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+          <i class="bi bi-stars me-1"></i>{{ 'technician.jobs.quote.detect' | translate }}
+        </button>
+
+        @if (analysis(); as a) {
+          <div class="border rounded-3 p-2 mt-2 small">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="fw-semibold"><i class="bi bi-robot me-1"></i>{{ 'technician.jobs.quote.aiResult' | translate }}</span>
+              <span class="badge" [class]="severityClass(a.severityLevel)">{{ a.severityLevel }}</span>
+            </div>
+            <div>{{ a.detectedProblem }}</div>
+            <div class="text-muted mt-1">{{ 'technician.jobs.quote.aiEstimate' | translate: { min: a.estimatedMinPrice, max: a.estimatedMaxPrice } }}</div>
+            <div class="text-muted fst-italic">{{ 'technician.jobs.quote.aiHint' | translate }}</div>
+          </div>
+        }
       </div>
     }
 

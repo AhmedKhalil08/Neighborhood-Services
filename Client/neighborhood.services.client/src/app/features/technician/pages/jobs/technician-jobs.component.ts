@@ -8,9 +8,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { JobService } from '../../services/job.service';
 import { PagedResult } from '../../../../core/models/paged-result.model';
-import { MyBookingSummary, BookingStatus } from '../../../customer/models/booking.model';
+import { MyBookingSummary, BookingStatus, DisputeType } from '../../../customer/models/booking.model';
 import { QuoteJobModalComponent } from '../../components/quote-job-modal/quote-job-modal.component';
 import { CompleteJobModalComponent } from '../../components/complete-job-modal/complete-job-modal.component';
+import { RaiseDisputeModalComponent } from '../../../customer/components/raise-dispute-modal/raise-dispute-modal.component';
 import { googleMapsUrl } from '../../../../core/utils/maps.util';
 
 interface Tab {
@@ -119,6 +120,29 @@ export class TechnicianJobsComponent implements OnInit {
         this.run(job.id, this.service.complete(job.id), this.translate.instant('technician.jobs.completed')),
       () => {},
     );
+  }
+
+  // Technician disputes the customer — type list is the customer-facing subset that makes sense
+  // from the tech's side (non-payment, scam/abuse, or anything else).
+  raiseDispute(job: MyBookingSummary) {
+    const ref = this.modal.open(RaiseDisputeModalComponent);
+    const types: DisputeType[] = ['PaymentIssue', 'Scam', 'Other'];
+    ref.componentInstance.types = types;
+    ref.componentInstance.disputeType.set(types[0]);
+    ref.result.then(
+      (res: { disputeType: DisputeType; reason: string }) =>
+        this.run(
+          job.id,
+          this.service.raiseDispute(job.id, res.disputeType, res.reason),
+          this.translate.instant('dispute.raised'),
+        ),
+      () => {},
+    );
+  }
+
+  // A dispute only makes sense once there's a committed job (mirrors the backend rule).
+  canDispute(status: BookingStatus): boolean {
+    return status === 'Confirmed' || status === 'Completed';
   }
 
   private run(id: number, action: Observable<unknown>, successMsg: string) {

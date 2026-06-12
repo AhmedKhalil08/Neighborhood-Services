@@ -17,6 +17,10 @@
 
 <!-- Toolbar: sort + quick filters -->
 <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+  <button class="btn btn-sm btn-primary" (click)="openSmartMatch()">
+    <i class="bi bi-stars me-1"></i>{{ 'smartMatch.button' | translate }}
+  </button>
+  <div class="vr mx-1"></div>
   <div class="btn-group btn-group-sm" role="group">
     <button class="btn btn-outline-secondary" [class.active]="sortBy() === 'rating'" (click)="setSort('rating')">
       <i class="bi bi-star me-1"></i>{{ 'findTech.sortRating' | translate }}

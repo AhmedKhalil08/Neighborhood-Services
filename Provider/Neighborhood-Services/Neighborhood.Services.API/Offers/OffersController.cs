@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Neighborhood.Services.Application.Offers.Commands.AcceptOffer;
 using Neighborhood.Services.Application.Offers.Commands.CreateOffer;
@@ -13,6 +14,7 @@ namespace Neighborhood.Services.API.Offers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OffersController : ControllerBase
     {
         private readonly IMediator _mediator;

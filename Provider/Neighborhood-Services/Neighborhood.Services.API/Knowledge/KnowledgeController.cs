@@ -7,6 +7,7 @@ namespace Neighborhood.Services.API.Knowledge
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class KnowledgeController(IMediator mediator) : ControllerBase
     {
         private readonly IMediator _mediator = mediator;

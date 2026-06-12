@@ -9,6 +9,8 @@ import {
   BookingImage,
   MyBookingSummary,
   TechnicianPricingRange,
+  AiAnalysis,
+  DisputeType,
 } from '../../customer/models/booking.model';
 
 export interface GetMyJobsParams {
@@ -45,6 +47,11 @@ export class JobService {
     return this.api.post<void>(`/api/bookings/${id}/complete`, {});
   }
 
+  /** POST /api/bookings/{id}/dispute — technician raises a dispute (flips booking to Disputed + creates the dispute record). */
+  raiseDispute(id: number, disputeType: DisputeType, reason: string): Observable<void> {
+    return this.api.post<void>(`/api/bookings/${id}/dispute`, { disputeType, reason });
+  }
+
   /** POST /api/bookings/{id}/images — upload a Before/After photo (URL already hosted on Cloudinary). */
   uploadImage(id: number, imageUrl: string, type: BookingImageType): Observable<{ id: number }> {
     return this.api.post<{ id: number }>(`/api/bookings/${id}/images`, { bookingId: id, imageUrl, type });
@@ -53,6 +60,11 @@ export class JobService {
   /** GET /api/bookings/{id}/images — Before/After photos for this booking. */
   getImages(id: number): Observable<BookingImage[]> {
     return this.api.get<BookingImage[]>(`/api/bookings/${id}/images`);
+  }
+
+  /** POST /api/aianalysis — optional AI triage of the problem from the customer's before-photo. */
+  analyze(bookingId: number, problemTypeId: number, description: string, imageUrl: string): Observable<AiAnalysis> {
+    return this.api.post<AiAnalysis>('/api/aianalysis', { bookingId, problemTypeId, description, imageUrl });
   }
 
   /** GET /api/bookings/tech-pricing-range — tech's own range for one problem type (null if not configured). */

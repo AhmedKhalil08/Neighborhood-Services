@@ -83,6 +83,9 @@
               @if (job.status === 'Confirmed') {
                 <button class="btn btn-sm btn-outline-success" [disabled]="busyId() === job.id" (click)="complete(job)">{{ 'technician.jobs.complete' | translate }}</button>
               }
+              @if (canDispute(job.status)) {
+                <button class="btn btn-sm btn-outline-danger" [disabled]="busyId() === job.id" (click)="raiseDispute(job)">{{ 'dispute.raise' | translate }}</button>
+              }
             </div>
           </div>
         </div>

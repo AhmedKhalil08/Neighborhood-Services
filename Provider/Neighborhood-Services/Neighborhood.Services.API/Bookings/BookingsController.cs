@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Neighborhood.Services.Application.BookingImages.Commands;
 using Neighborhood.Services.Application.BookingImages.Queries.GetBookingImagesByTypeQuery;
@@ -9,6 +10,7 @@ using Neighborhood.Services.Application.Bookings.Commands.CompleteBookingCommand
 using Neighborhood.Services.Application.Bookings.Commands.ConfirmBookingCommands;
 using Neighborhood.Services.Application.Bookings.Commands.CreateBookingCommands;
 using Neighborhood.Services.Application.Bookings.Commands.QuoteBookingCommands;
+using Neighborhood.Services.Application.Bookings.Commands.RaiseDisputeCommands;
 using Neighborhood.Services.Application.Bookings.Commands.RejectQuoteCommands;
 using Neighborhood.Services.Application.Bookings.Queries.GetAllBookingsQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingByIdQuery;
@@ -18,7 +20,9 @@ using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByCustomerQu
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByRecurringQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByStatusQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetBookingsByTechnicianQuery;
+using Neighborhood.Services.Application.Bookings.Queries.GetBookingsForStaffQuery;
 using Neighborhood.Services.Application.Bookings.Queries.GetTechnicianPricingRangeQuery;
+using Neighborhood.Services.Application.Bookings.Commands.StaffCancelBookingCommands;
 using Neighborhood.Services.Application.Matching.Queries;
 using Neighborhood.Services.Domain.BookingImages;
 using Neighborhood.Services.Domain.Bookings;
@@ -27,6 +31,7 @@ namespace Neighborhood.Services.API.Bookings
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BookingsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -34,6 +39,37 @@ namespace Neighborhood.Services.API.Bookings
         public BookingsController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        // ---------- Staff oversight ----------
+
+        // GET /api/bookings/staff?status=&search=&page=1&pageSize=10
+        [Authorize(Roles = "Staff")]
+        [HttpGet("staff")]
+        public async Task<IActionResult> GetForStaff(
+            [FromQuery] BookingStatus? status,
+            [FromQuery] string? search,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _mediator.Send(new GetBookingsForStaffQuery
+            {
+                Status = status,
+                Search = search,
+                Page = page,
+                PageSize = pageSize
+            });
+            return Ok(result);
+        }
+
+        // POST /api/bookings/{id}/staff-cancel  (admin cancel — no refund/reassign, separate from customer/tech cancel)
+        [Authorize(Roles = "Staff")]
+        [HttpPost("{id:int}/staff-cancel")]
+        public async Task<IActionResult> StaffCancel(int id, [FromBody] StaffCancelBookingCommand command)
+        {
+            command.BookingId = id;
+            await _mediator.Send(command);
+            return NoContent();
         }
 
         // POST /api/bookings/match
@@ -78,6 +114,15 @@ namespace Neighborhood.Services.API.Bookings
         public async Task<IActionResult> RejectQuote(int id)
         {
             await _mediator.Send(new RejectQuoteCommand { BookingId = id });
+            return NoContent();
+        }
+
+        // POST /api/bookings/{id}/dispute  (customer or technician raises a dispute -> Booking Disputed + Dispute record)
+        [HttpPost("{id:int}/dispute")]
+        public async Task<IActionResult> RaiseDispute(int id, [FromBody] RaiseDisputeCommand command)
+        {
+            command.BookingId = id;
+            await _mediator.Send(command);
             return NoContent();
         }
 

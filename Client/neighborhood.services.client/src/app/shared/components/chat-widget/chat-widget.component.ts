@@ -5,10 +5,12 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ChatbotService, ChatSession } from '../../../core/services/chatbot.service';
 import { AuthService } from '../../../features/auth/services/auth.service';
+import { UploadService } from '../../services/upload.service';
 
 interface UiMessage {
   role: 'User' | 'Assistant';
   content: string;
+  imageUrl?: string;
 }
 
 @Component({
@@ -22,6 +24,7 @@ export class ChatWidgetComponent {
   private readonly auth = inject(AuthService);
   private readonly toastr = inject(ToastrService);
   private readonly translate = inject(TranslateService);
+  private readonly uploadService = inject(UploadService);
 
   isOpen = signal(false);
   view = signal<'chat' | 'history'>('chat');
@@ -29,6 +32,10 @@ export class ChatWidgetComponent {
   messages = signal<UiMessage[]>([]);
   draft = '';
   sending = signal(false);
+
+  // Optional photo of the problem, attached to the next message (vision).
+  attachedImage = signal<string | null>(null);
+  uploadingImage = signal(false);
 
   // null = no saved session yet (guest, or a fresh chat). Logged-in users get a real id back.
   sessionId = signal<number | null>(null);
@@ -50,12 +57,37 @@ export class ChatWidgetComponent {
     this.isOpen.set(false);
   }
 
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = ''; // allow re-selecting the same file
+    if (!file) return;
+
+    this.uploadingImage.set(true);
+    this.uploadService.upload(file).subscribe({
+      next: (url) => {
+        this.attachedImage.set(url);
+        this.uploadingImage.set(false);
+      },
+      error: () => {
+        this.uploadingImage.set(false);
+        this.toastr.error(this.translate.instant('chatbot.imageFailed'));
+      },
+    });
+  }
+
+  removeImage() {
+    this.attachedImage.set(null);
+  }
+
   send() {
     const text = this.draft.trim();
-    if (!text || this.sending()) return;
+    const image = this.attachedImage();
+    if ((!text && !image) || this.sending() || this.uploadingImage()) return;
 
-    this.messages.update((m) => [...m, { role: 'User', content: text }]);
+    this.messages.update((m) => [...m, { role: 'User', content: text, imageUrl: image ?? undefined }]);
     this.draft = '';
+    this.attachedImage.set(null);
     this.sending.set(true);
 
     const c = this.coords();
@@ -65,6 +97,7 @@ export class ChatWidgetComponent {
         message: text,
         latitude: c?.lat ?? null,
         longitude: c?.lng ?? null,
+        imageUrl: image,
       })
       .subscribe({
         next: (r) => {

@@ -9,6 +9,7 @@ export interface SendChatMessageRequest {
   region?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  imageUrl?: string | null;   // optional photo of the problem (vision)
 }
 
 // Mirrors ChatReplyDto

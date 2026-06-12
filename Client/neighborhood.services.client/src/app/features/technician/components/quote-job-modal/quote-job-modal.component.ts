@@ -6,7 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { JobService } from '../../services/job.service';
-import { MyBookingSummary, TechnicianPricingRange, BookingImage } from '../../../customer/models/booking.model';
+import { MyBookingSummary, TechnicianPricingRange, BookingImage, AiAnalysis } from '../../../customer/models/booking.model';
 import { googleMapsUrl } from '../../../../core/utils/maps.util';
 
 @Component({
@@ -32,6 +32,10 @@ export class QuoteJobModalComponent implements OnInit {
   // "Before" photos the customer attached so the tech can assess before quoting.
   beforePhotos = signal<BookingImage[]>([]);
 
+  // Optional AI triage of the before-photo (on-demand, not automatic).
+  analyzing = signal(false);
+  analysis = signal<AiAnalysis | null>(null);
+
   protected readonly mapsUrl = googleMapsUrl;
 
   form = this.fb.group({
@@ -55,6 +59,33 @@ export class QuoteJobModalComponent implements OnInit {
     this.jobService.getImages(this.job.id).subscribe({
       next: (images) => this.beforePhotos.set((images ?? []).filter((i) => i.type === 'Before')),
     });
+  }
+
+  // Optional: ask the AI to read the customer's before-photo and suggest the problem + a range.
+  detectFromPhoto() {
+    const photo = this.beforePhotos()[0];
+    if (!photo || this.analyzing()) return;
+
+    this.analyzing.set(true);
+    this.analysis.set(null);
+    this.jobService.analyze(this.job.id, this.job.problemTypeId, this.job.description, photo.imageUrl).subscribe({
+      next: (a) => {
+        this.analysis.set(a);
+        this.analyzing.set(false);
+      },
+      error: () => {
+        this.analyzing.set(false);
+        this.toastr.error(this.translate.instant('technician.jobs.quote.detectFailed'));
+      },
+    });
+  }
+
+  severityClass(level: string): string {
+    switch (level) {
+      case 'High': return 'text-bg-danger';
+      case 'Medium': return 'text-bg-warning';
+      default: return 'text-bg-success';
+    }
   }
 
   /** Out-of-range warning — for UX only; the backend enforces the hard limit. */

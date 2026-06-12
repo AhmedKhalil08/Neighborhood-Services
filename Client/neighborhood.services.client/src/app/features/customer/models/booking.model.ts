@@ -1,7 +1,25 @@
+import { TechnicianCard } from '../../../core/models/technician-card.model';
+
 // Mirrors the backend enums (serialized as strings via JsonStringEnumConverter)
 export type BookingType = 'Direct' | 'Bidding' | 'Recurring';
 // "Quoted" = Direct flow only: tech has set FinalPrice + DurationMinutes, customer must accept / reject.
 export type BookingStatus = 'Pending' | 'Quoted' | 'Confirmed' | 'Completed' | 'Cancelled' | 'Disputed';
+
+// Mirrors DisputeType (serialized by name). Reason a customer/technician can dispute a booking.
+export type DisputeType = 'PaymentIssue' | 'TechnicianBehavior' | 'PoorService' | 'Scam' | 'Other';
+
+// Mirrors SeverityLevel (serialized by name).
+export type SeverityLevel = 'Low' | 'Medium' | 'High';
+
+// Mirrors AiAnalysisDto (POST /api/aianalysis) — optional AI triage of a problem from its photo.
+export interface AiAnalysis {
+  detectedProblem: string;
+  confidenceScore: number;
+  severityLevel: SeverityLevel;
+  estimatedMinPrice: number;
+  estimatedMaxPrice: number;
+  generatedAt: string;
+}
 
 // Body for POST /api/bookings (Direct booking). Customer is resolved from the token server-side.
 export interface CreateBooking {
@@ -15,6 +33,31 @@ export interface CreateBooking {
   scheduledAt: string;   // "yyyy-MM-ddTHH:mm:ss" (must be in the future)
   promoCodeId?: number | null;
   beforeImageUrl?: string | null;  // optional photo of the problem, shown to the tech before quoting
+}
+
+// ---- Smart Match (POST /api/bookings/match) ----
+
+// What the customer picks in the "Smart Match" modal.
+export interface SmartMatchCriteria {
+  categoryId: number;
+  problemTypeId?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  description?: string | null;   // optional free text — makes the match smarter
+  topN?: number;
+}
+
+// One ranked suggestion. `technician` is a full browse card → drops into Book Now / Recurring.
+export interface TechnicianMatch {
+  rank: number;
+  score: number;
+  reason: string;
+  technician: TechnicianCard;
+}
+
+export interface TechnicianMatchResult {
+  rankedByAi: boolean;            // true = LLM ranked; false = rule-based fallback
+  matches: TechnicianMatch[];
 }
 
 // Mirrors BookingSummaryDto (used by GET /api/bookings/recurring/{id} and admin lists).

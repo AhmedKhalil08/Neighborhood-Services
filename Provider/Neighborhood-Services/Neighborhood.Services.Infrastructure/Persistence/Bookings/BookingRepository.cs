@@ -1,4 +1,5 @@
-﻿using Neighborhood.Services.Application.Bookings.Interface;
+﻿using Neighborhood.Services.Application.Bookings.DTOs;
+using Neighborhood.Services.Application.Bookings.Interface;
 using Neighborhood.Services.Application.Shared;
 using Neighborhood.Services.Domain.BookingImages;
 using Neighborhood.Services.Domain.Bookings;
@@ -16,6 +17,55 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Bookings
         public BookingRepository(ApplicationDbContext context):base(context)
         {
             
+        }
+
+        public async Task<PagedResult<StaffBookingDto>> GetBookingsForStaffPagedAsync(BookingStatus? status, string? search, int page, int pageSize)
+        {
+            var query =
+                from b in _context.Bookings.AsNoTracking()
+                where !b.IsDeleted
+                join cust in _context.Customers on b.CustomerId equals cust.Id
+                join cu in _context.Users on cust.ApplicationUserId equals cu.Id
+                join tech in _context.Technicians on b.TechnicianId equals tech.Id
+                join tu in _context.Users on tech.ApplicationUserId equals tu.Id
+                select new { b, CustomerName = cu.FullName, TechnicianName = tu.FullName };
+
+            if (status.HasValue)
+                query = query.Where(x => x.b.Status == status.Value);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                int? idTerm = int.TryParse(term, out var parsed) ? parsed : null;
+                query = query.Where(x =>
+                    x.CustomerName.Contains(term) ||
+                    x.TechnicianName.Contains(term) ||
+                    x.b.Description.Contains(term) ||
+                    (idTerm != null && x.b.Id == idTerm));
+            }
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(x => x.b.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => new StaffBookingDto
+                {
+                    Id = x.b.Id,
+                    BookingType = x.b.BookingType,
+                    Status = x.b.Status,
+                    CustomerName = x.CustomerName,
+                    TechnicianName = x.TechnicianName,
+                    EstimatedPrice = x.b.EstimatedPrice,
+                    FinalPrice = x.b.FinalPrice,
+                    ScheduledAt = x.b.ScheduledAt,
+                    CreatedAt = x.b.CreatedAt,
+                    Address = x.b.Address
+                })
+                .ToListAsync();
+
+            return new PagedResult<StaffBookingDto>(items, total, page, pageSize);
         }
 
         public async Task<Booking?> GetBookingWithDetailsAsync(int bookingId)

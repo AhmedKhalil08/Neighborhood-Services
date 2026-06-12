@@ -8,9 +8,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { BookingService } from '../../services/booking.service';
 import { PagedResult } from '../../../../core/models/paged-result.model';
-import { MyBookingSummary, BookingStatus } from '../../models/booking.model';
+import { MyBookingSummary, BookingStatus, DisputeType } from '../../models/booking.model';
 import { BookingDetailsModalComponent } from '../../components/booking-details-modal/booking-details-modal.component';
 import { CancelBookingModalComponent } from '../../components/cancel-booking-modal/cancel-booking-modal.component';
+import { RaiseDisputeModalComponent } from '../../components/raise-dispute-modal/raise-dispute-modal.component';
 import { googleMapsUrl } from '../../../../core/utils/maps.util';
 import { ConfirmService } from '../../../../shared/services/confirm.service';
 
@@ -176,6 +177,24 @@ export class BookingsComponent implements OnInit {
     );
   }
 
+  raiseDispute(b: MyBookingSummary) {
+    const ref = this.modal.open(RaiseDisputeModalComponent);
+    ref.result.then(
+      (res: { disputeType: DisputeType; reason: string }) => {
+        this.busyId.set(b.id);
+        this.bookingService.raiseDispute(b.id, res.disputeType, res.reason).subscribe({
+          next: () => {
+            this.busyId.set(null);
+            this.toastr.success(this.translate.instant('dispute.raised'));
+            this.load();
+          },
+          error: () => this.busyId.set(null),
+        });
+      },
+      () => {} // dismissed — do nothing
+    );
+  }
+
   // --- UI helpers ---
 
   badgeClass(status: BookingStatus): string {
@@ -202,7 +221,12 @@ export class BookingsComponent implements OnInit {
     return status === 'Quoted';
   }
 
+  // A dispute only makes sense once there's a committed job.
+  canDispute(status: BookingStatus): boolean {
+    return status === 'Confirmed' || status === 'Completed';
+  }
+
   hasActions(b: MyBookingSummary): boolean {
-    return this.canCancel(b.status) || this.canConfirm(b) || this.canRespondToQuote(b.status);
+    return this.canCancel(b.status) || this.canConfirm(b) || this.canRespondToQuote(b.status) || this.canDispute(b.status);
   }
 }

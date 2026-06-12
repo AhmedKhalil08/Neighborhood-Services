@@ -11,6 +11,10 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
         // The user's message
         public string Message { get; set; } = string.Empty;
 
+        // Optional: a Cloudinary image URL the user attached (e.g. a photo of the problem).
+        // When present, it's sent to the vision model for THIS turn only (not replayed).
+        public string? ImageUrl { get; set; }
+
 
         // Optional: user's region (city), e.g. "Alexandria" / "Cairo".
         // Explicit override/fallback. The handler also resolves the region from GPS

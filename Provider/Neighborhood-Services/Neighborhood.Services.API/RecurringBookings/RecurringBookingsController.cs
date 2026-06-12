@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Neighborhood.Services.Application.RecurringBookings.Commands.ApproveRecurring;
 using Neighborhood.Services.Application.RecurringBookings.Commands.CancelRecurring;
@@ -16,6 +17,7 @@ namespace Neighborhood.Services.API.RecurringBookings
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RecurringBookingsController : ControllerBase
     {
         private readonly IMediator _mediator;

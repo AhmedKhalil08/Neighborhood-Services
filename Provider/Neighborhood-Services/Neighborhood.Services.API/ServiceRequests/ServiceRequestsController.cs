@@ -15,6 +15,7 @@ namespace Neighborhood.Services.API.ServiceRequests
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ServiceRequestsController : ControllerBase
     {
         private readonly IMediator _mediator;

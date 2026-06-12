@@ -9,6 +9,7 @@ import { TechnicianService } from '../../../../shared/services/technician.servic
 import { TechnicianCard, TechnicianCardCategory } from '../../../../core/models/technician-card.model';
 import { CreateRecurringBookingModalComponent } from '../../components/create-recurring-booking-modal/create-recurring-booking-modal.component';
 import { CreateBookingModalComponent } from '../../components/create-booking-modal/create-booking-modal.component';
+import { SmartMatchModalComponent, SmartMatchChoice } from '../../components/smart-match-modal/smart-match-modal.component';
 
 type SortBy = 'rating' | 'available';
 
@@ -107,6 +108,20 @@ export class FindTechnicianComponent implements OnInit {
 
   selectCategory(id: number | null) {
     this.selectedCategory.set(id);
+  }
+
+  // --- Smart Match ---
+
+  openSmartMatch() {
+    const ref = this.modal.open(SmartMatchModalComponent, { size: 'lg' });
+    ref.result.then(
+      (choice: SmartMatchChoice) => {
+        // The modal returns the chosen technician → open the existing Book / Recurring flow.
+        if (choice?.action === 'book') this.bookNow(choice.tech);
+        else if (choice?.action === 'recurring') this.setupRecurring(choice.tech);
+      },
+      () => {}, // dismissed
+    );
   }
 
   // --- CTAs (wired in the next steps: recurring-modal refactor + direct booking) ---

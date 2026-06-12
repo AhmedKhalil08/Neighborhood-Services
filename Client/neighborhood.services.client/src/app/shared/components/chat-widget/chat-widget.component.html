@@ -56,7 +56,13 @@
         }
         @for (m of messages(); track $index) {
           <div class="msg mb-2" [class.user]="m.role === 'User'" [class.assistant]="m.role === 'Assistant'">
-            <div class="msg-bubble">{{ m.content }}</div>
+            <div class="msg-bubble">
+              @if (m.imageUrl) {
+                <img [src]="m.imageUrl" alt="attachment" class="rounded mb-1 d-block"
+                     style="max-width: 160px; max-height: 160px; object-fit: cover;" />
+              }
+              @if (m.content) { {{ m.content }} }
+            </div>
           </div>
         }
         @if (sending()) {
@@ -81,15 +87,35 @@
             </span>
           </div>
         }
+        @if (attachedImage(); as img) {
+          <div class="mb-2 d-inline-block position-relative">
+            <img [src]="img" alt="attachment" class="rounded border"
+                 style="max-width: 64px; max-height: 64px; object-fit: cover;" />
+            <button type="button" class="btn-close bg-white rounded-circle position-absolute top-0 start-100 translate-middle p-1"
+                    style="font-size: 0.5rem;" (click)="removeImage()"
+                    [attr.aria-label]="'chatbot.removeImage' | translate"></button>
+          </div>
+        } @else if (uploadingImage()) {
+          <div class="mb-2 small text-muted">
+            <span class="spinner-border spinner-border-sm me-1"></span>{{ 'chatbot.uploadingImage' | translate }}
+          </div>
+        }
         <div class="input-group">
           <button type="button" class="btn btn-outline-secondary" (click)="shareLocation()"
                   [class.text-success]="coords()" [title]="'chatbot.shareLocation' | translate">
             <i class="bi bi-geo-alt"></i>
           </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="imageInput.click()"
+                  [disabled]="uploadingImage()" [class.text-primary]="attachedImage()"
+                  [title]="'chatbot.attachImage' | translate">
+            <i class="bi bi-image"></i>
+          </button>
+          <input #imageInput type="file" accept="image/*" class="d-none" (change)="onImageSelected($event)" />
           <input type="text" class="form-control" [(ngModel)]="draft"
                  [placeholder]="'chatbot.placeholder' | translate"
                  (keydown.enter)="send()" [disabled]="sending()" />
-          <button type="button" class="btn btn-primary" (click)="send()" [disabled]="sending() || !draft.trim()">
+          <button type="button" class="btn btn-primary" (click)="send()"
+                  [disabled]="sending() || uploadingImage() || (!draft.trim() && !attachedImage())">
             <i class="bi bi-send"></i>
           </button>
         </div>

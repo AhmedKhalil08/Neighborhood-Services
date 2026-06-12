@@ -85,6 +85,9 @@
                       @if (canCancel(b.status)) {
                         <button ngbDropdownItem class="text-danger" (click)="cancel(b)">{{ 'bookings.cancelBooking' | translate }}</button>
                       }
+                      @if (canDispute(b.status)) {
+                        <button ngbDropdownItem class="text-danger" [disabled]="busyId() === b.id" (click)="raiseDispute(b)">{{ 'dispute.raise' | translate }}</button>
+                      }
                     </div>
                   </div>
                 }

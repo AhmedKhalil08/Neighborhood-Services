@@ -27,6 +27,7 @@ import { TechnicianBrowseRequestsComponent } from './features/technician/pages/b
 import { TechnicianRecurringJobsComponent } from './features/technician/pages/recurring-jobs/technician-recurring-jobs.component';
 import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-dashboard.component';
 import { FlaggedRequestsComponent } from './features/staff/pages/flagged-requests/flagged-requests.component';
+import { StaffBookingsComponent } from './features/staff/pages/bookings/staff-bookings.component';
 
 export const routes: Routes = [
   {
@@ -83,6 +84,7 @@ export const routes: Routes = [
     data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
     children: [
       { path: '', component: StaffDashboardComponent },
+      { path: 'bookings', component: StaffBookingsComponent },
       { path: 'flagged-requests', component: FlaggedRequestsComponent },
     ],
   },

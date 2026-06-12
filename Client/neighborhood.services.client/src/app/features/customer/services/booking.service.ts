@@ -11,6 +11,9 @@ import {
   BookingImage,
   MyBookingSummary,
   TechnicianPricingRange,
+  SmartMatchCriteria,
+  TechnicianMatchResult,
+  DisputeType,
 } from '../models/booking.model';
 
 export interface GetMyBookingsParams {
@@ -50,6 +53,11 @@ export class BookingService {
   /** POST /api/bookings — direct booking (starts Pending until the technician accepts) */
   create(body: CreateBooking): Observable<{ id: number }> {
     return this.api.post<{ id: number }>('/api/bookings', body);
+  }
+
+  /** POST /api/bookings/match — Smart Match: best 1-2 technicians for a category/problem (AI-ranked, rule fallback). */
+  smartMatch(body: SmartMatchCriteria): Observable<TechnicianMatchResult> {
+    return this.api.post<TechnicianMatchResult>('/api/bookings/match', body);
   }
 
   /** GET /api/bookings/estimate/{problemTypeId} — optional on-demand price estimate */
@@ -95,5 +103,10 @@ export class BookingService {
   /** POST /api/bookings/{id}/reject-quote — customer rejects; booking goes back to Pending. */
   rejectQuote(id: number): Observable<void> {
     return this.api.post<void>(`/api/bookings/${id}/reject-quote`, {});
+  }
+
+  /** POST /api/bookings/{id}/dispute — raise a dispute (flips booking to Disputed + creates the dispute record). */
+  raiseDispute(id: number, disputeType: DisputeType, reason: string): Observable<void> {
+    return this.api.post<void>(`/api/bookings/${id}/dispute`, { disputeType, reason });
   }
 }
