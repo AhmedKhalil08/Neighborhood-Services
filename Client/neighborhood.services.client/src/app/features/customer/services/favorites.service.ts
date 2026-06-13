@@ -22,6 +22,13 @@ favItems?: FavoriteItem[];
    return this.apiService.get<FavoriteItem[]>(this.Endpoint + '/GetMyFavorites');
   }
 
+  AddToMyFavorites(technicianId: number): Observable<FavoriteItem[]> {
+  return this.apiService.put<FavoriteItem[]>(
+    `${this.Endpoint}/${technicianId}`,
+    {}
+  );
+}
+
   Delete(id: number):Observable<FavoriteItem> {
     return this.apiService.delete(`${this.Endpoint}/${id}`);
   }

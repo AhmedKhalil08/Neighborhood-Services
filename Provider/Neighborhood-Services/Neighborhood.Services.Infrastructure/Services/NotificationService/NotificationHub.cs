@@ -59,8 +59,8 @@ public NotificationHub(ILogger<NotificationHub> logger)
             if (!string.IsNullOrEmpty(userRole))
                 await Groups.AddToGroupAsync(Context.ConnectionId, userRole);
 
-            if (!string.IsNullOrEmpty(ur))
-                await Groups.AddToGroupAsync(Context.ConnectionId, ur);
+            //if (!string.IsNullOrEmpty(ur))
+            //    await Groups.AddToGroupAsync(Context.ConnectionId, ur);
 
 
             if (!string.IsNullOrEmpty(businessUserId))

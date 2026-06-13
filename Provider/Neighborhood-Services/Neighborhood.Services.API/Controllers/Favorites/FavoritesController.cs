@@ -19,9 +19,11 @@ namespace Neighborhood.Services.API.Controllers.Favorites
         }
        
 
-        [HttpPut]
-        public async Task<ActionResult> Add(AddToFavoriteCommandDto command)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Add(int id)
         {
+            AddToFavoriteCommandDto command = new AddToFavoriteCommandDto();
+            command.technicianId = id;
             var result = await _mediator.Send(command);
             return Ok(result);
         }
