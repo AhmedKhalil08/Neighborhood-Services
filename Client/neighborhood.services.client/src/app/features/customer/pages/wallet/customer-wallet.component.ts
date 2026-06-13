@@ -32,11 +32,12 @@ export class CustomerWalletComponent implements OnInit, OnDestroy {
     return Math.ceil(this.transactions().length / this.pageSize) || 1;
   });
   // Top Up Modal State
-  topUpAmount = signal<number>(100);
+  topUpAmount = signal<number | null>(null);
   selectedPaymentMethodId = signal<number | null>(null);
+  isToppingUp = signal<boolean>(false);
 
   // Withdraw Modal State
-  withdrawAmount = signal<number>(0);
+  withdrawAmount = signal<number | null>(null);
   isWithdrawing = signal<boolean>(false);
 
   // Add Payment Method Modal State
@@ -139,9 +140,15 @@ export class CustomerWalletComponent implements OnInit, OnDestroy {
   }
 
   initiateTopUp(): void {
+    const amount = this.topUpAmount();
+    if (!amount || amount < 10) {
+      this.toastr.warning('Please enter an amount of at least 10 EGP.');
+      return;
+    }
+
+    this.isToppingUp.set(true);
     const methodId = this.selectedPaymentMethodId();
-    // methodId can be null if user wants to use a new card
-    this.walletService.topUp(this.topUpAmount(), methodId !== null ? methodId : undefined, PaymentProvider.Paymob).subscribe({
+    this.walletService.topUp(amount, methodId !== null ? methodId : undefined, PaymentProvider.Paymob).subscribe({
       next: (res) => {
         // Redirect to Paymob payment page or append query string for instant pay
         if (res.redirectUrl.startsWith('?')) {
@@ -156,6 +163,7 @@ export class CustomerWalletComponent implements OnInit, OnDestroy {
       error: (err) => {
         const msg = err?.error?.errorMessage || err?.error?.title || 'Failed to initiate top-up';
         this.toastr.error(msg);
+        this.isToppingUp.set(false);
         // Refresh immediately to show the failed transaction
         this.refreshTransactions();
         console.error('Top-up error:', err);
@@ -178,8 +186,8 @@ export class CustomerWalletComponent implements OnInit, OnDestroy {
     this.isWithdrawing.set(true);
     this.walletService.withdraw(amount).subscribe({
       next: () => {
-        this.toastr.success(`Withdrawal of EGP ${amount.toFixed(2)} initiated successfully`);
-        this.withdrawAmount.set(0);
+        this.toastr.success('Withdrawal request submitted successfully!');
+        this.withdrawAmount.set(null);
         this.isWithdrawing.set(false);
         this.refreshTransactions();
       },
@@ -217,21 +225,21 @@ export class CustomerWalletComponent implements OnInit, OnDestroy {
 
   getStatusLabel(status: any): string {
     const s = status?.toString();
-    if (s === 'Pending' || s === '0') return 'Pending';
-    if (s === 'Completed' || s === '1') return 'Completed';
-    if (s === 'Failed' || s === '2') return 'Failed';
-    if (s === 'Reversed' || s === '3') return 'Reversed';
+    if (s === 'Pending' || s === '0') return 'wallet.statusType.pending';
+    if (s === 'Completed' || s === '1') return 'wallet.statusType.completed';
+    if (s === 'Failed' || s === '2') return 'wallet.statusType.failed';
+    if (s === 'Reversed' || s === '3') return 'wallet.statusType.reversed';
     return s ?? 'Unknown';
   }
 
   getTypeLabel(type: any): string {
     const t = type?.toString();
-    if (t === 'TopUp' || t === '0') return 'Top Up';
-    if (t === 'Transfer' || t === '1') return 'Transfer';
-    if (t === 'Withdrawal' || t === '2') return 'Withdrawal';
-    if (t === 'BookingPayment' || t === '3') return 'Booking Payment';
-    if (t === 'Refund' || t === '4') return 'Refund';
-    if (t === 'Reversal' || t === '5') return 'Reversal';
+    if (t === 'TopUp' || t === '0') return 'wallet.transactionType.topUp';
+    if (t === 'Transfer' || t === '1') return 'wallet.transactionType.transfer';
+    if (t === 'Withdrawal' || t === '2') return 'wallet.transactionType.withdrawal';
+    if (t === 'BookingPayment' || t === '3') return 'wallet.transactionType.bookingPayment';
+    if (t === 'Refund' || t === '4') return 'wallet.transactionType.refund';
+    if (t === 'Reversal' || t === '5') return 'wallet.transactionType.reversal';
     return t ?? 'Unknown';
   }
 }

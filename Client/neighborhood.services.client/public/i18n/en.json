@@ -53,7 +53,31 @@
         "selectPaymentMethod": "Select Payment Method",
         "chooseMethod": "Choose a method...",
         "proceedToPayment": "Proceed to Payment",
-        "availableForPayout": "Available for next payout"
+        "availableForPayout": "Available for next payout",
+        "withdraw": "Withdraw",
+        "withdrawFunds": "Withdraw Funds",
+        "availableBalance": "Available balance",
+        "withdrawalAmount": "Withdrawal Amount",
+        "enterAmount": "Enter amount",
+        "confirmWithdrawal": "Confirm Withdrawal",
+        "processing": "Processing...",
+        "previous": "Previous",
+        "next": "Next",
+        "pageOf": "Page {{current}} of {{total}}",
+        "statusType": {
+            "pending": "Pending",
+            "completed": "Completed",
+            "failed": "Failed",
+            "reversed": "Reversed"
+        },
+        "transactionType": {
+            "topUp": "Top Up",
+            "transfer": "Transfer",
+            "withdrawal": "Withdrawal",
+            "bookingPayment": "Booking Payment",
+            "refund": "Refund",
+            "reversal": "Reversal"
+        }
     },
     "earnings": {
         "title": "Earnings & Invoices",

@@ -19,7 +19,7 @@
               <i class="bi bi-plus-circle me-2"></i>{{ 'wallet.topUp' | translate }}
             </button>
             <button class="btn btn-outline-light fw-bold px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-              <i class="bi bi-arrow-up-circle me-2"></i>Withdraw
+              <i class="bi bi-arrow-up-circle me-2"></i>{{ 'wallet.withdraw' | translate }}
             </button>
           </div>
         </div>
@@ -51,18 +51,18 @@
             }
             @for (tx of paginatedTransactions(); track tx.id) {
               <tr>
-                <td class="ps-4 text-center">{{ tx.createdAt | date:'medium' }}</td>
+                <td class="ps-4 text-center" dir="ltr">{{ tx.createdAt | date:'medium' }}</td>
                 <td class="text-center">
                   <span class="badge bg-light text-dark border d-inline-block text-center" style="width: 120px;">
-                    {{ getTypeLabel(tx.type) }}
+                    {{ getTypeLabel(tx.type) | translate }}
                   </span>
                 </td>
-                <td class="fw-bold text-center" [ngClass]="{'text-success': tx.toWalletId === wallet()?.id, 'text-danger': tx.fromWalletId === wallet()?.id}">
-                  {{ tx.toWalletId === wallet()?.id ? '+' : '-' }}{{ tx.amount | number:'1.2-2' }} {{ tx.currency }}
+                <td class="fw-bold text-center" dir="ltr" [ngClass]="{'text-success': tx.toWalletId === wallet()?.id, 'text-danger': tx.fromWalletId === wallet()?.id}">
+                  {{ tx.toWalletId === wallet()?.id ? '+' : '-' }} {{ tx.amount | number:'1.2-2' }} {{ tx.currency }}
                 </td>
                 <td class="text-center">
                   <span class="badge d-inline-block text-center" style="width: 100px;" [ngClass]="getStatusBadgeClass(tx.status)">
-                    {{ getStatusLabel(tx.status) }}
+                    {{ getStatusLabel(tx.status) | translate }}
                   </span>
                 </td>
               </tr>
@@ -77,18 +77,18 @@
           <nav aria-label="Transaction pagination">
             <ul class="pagination mb-0">
               <li class="page-item" [class.disabled]="currentPage() === 1">
-                <button class="page-link" (click)="changePage(currentPage() - 1)">Previous</button>
+                <button class="page-link" (click)="changePage(currentPage() - 1)">{{ 'wallet.previous' | translate }}</button>
               </li>
               
               <!-- Simple pagination dots / numbers -->
               <li class="page-item disabled">
                 <span class="page-link text-muted">
-                  Page {{ currentPage() }} of {{ totalPages() }}
+                  {{ 'wallet.pageOf' | translate: { current: currentPage(), total: totalPages() } }}
                 </span>
               </li>
 
               <li class="page-item" [class.disabled]="currentPage() === totalPages()">
-                <button class="page-link" (click)="changePage(currentPage() + 1)">Next</button>
+                <button class="page-link" (click)="changePage(currentPage() + 1)">{{ 'wallet.next' | translate }}</button>
               </li>
             </ul>
           </nav>
@@ -111,7 +111,7 @@
           <label class="form-label text-muted">{{ 'wallet.amount' | translate }}</label>
           <div class="input-group input-group-lg">
             <span class="input-group-text bg-white">EGP</span>
-            <input type="number" class="form-control" [ngModel]="topUpAmount()" (ngModelChange)="topUpAmount.set($event)" min="10">
+            <input type="number" class="form-control" [ngModel]="topUpAmount()" (ngModelChange)="topUpAmount.set($event)" min="10" [placeholder]="'wallet.enterAmount' | translate">
           </div>
         </div>
           <!-- Payment Method Removed: Now assumes default redirection -->
@@ -129,25 +129,25 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold"><i class="bi bi-arrow-up-circle me-2 text-danger"></i>Withdraw Funds</h5>
+        <h5 class="modal-title fw-bold"><i class="bi bi-arrow-up-circle me-2 text-danger"></i>{{ 'wallet.withdrawFunds' | translate }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="alert alert-info py-2 mb-3">
-          <small><i class="bi bi-info-circle me-1"></i>Available balance: <strong>EGP {{ wallet()?.balance || 0 | number:'1.2-2' }}</strong></small>
+          <small><i class="bi bi-info-circle me-1"></i>{{ 'wallet.availableBalance' | translate }}: <strong>EGP {{ wallet()?.balance || 0 | number:'1.2-2' }}</strong></small>
         </div>
         <div class="mb-4">
-          <label class="form-label text-muted">Withdrawal Amount</label>
+          <label class="form-label text-muted">{{ 'wallet.withdrawalAmount' | translate }}</label>
           <div class="input-group input-group-lg">
             <span class="input-group-text bg-white">EGP</span>
-            <input type="number" class="form-control" [ngModel]="withdrawAmount()" (ngModelChange)="withdrawAmount.set($event)" min="1" [max]="wallet()?.balance || 0" placeholder="Enter amount">
+            <input type="number" class="form-control" [ngModel]="withdrawAmount()" (ngModelChange)="withdrawAmount.set($event)" min="1" [max]="wallet()?.balance || 0" [placeholder]="'wallet.enterAmount' | translate">
           </div>
         </div>
         <button type="button" class="btn btn-danger w-100 py-2 fw-bold" (click)="initiateWithdraw()" data-bs-dismiss="modal" [disabled]="isWithdrawing()">
           @if (isWithdrawing()) {
-            <span class="spinner-border spinner-border-sm me-2"></span>Processing...
+            <span class="spinner-border spinner-border-sm me-2"></span>{{ 'wallet.processing' | translate }}
           } @else {
-            <i class="bi bi-arrow-up-circle me-2"></i>Confirm Withdrawal
+            <i class="bi bi-arrow-up-circle me-2"></i>{{ 'wallet.confirmWithdrawal' | translate }}
           }
         </button>
       </div>

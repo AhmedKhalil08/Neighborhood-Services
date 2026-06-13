@@ -53,7 +53,31 @@
         "selectPaymentMethod": "اختر طريقة الدفع",
         "chooseMethod": "اختر طريقة...",
         "proceedToPayment": "المتابعة للدفع",
-        "availableForPayout": "متاح للسحب القادم"
+        "availableForPayout": "متاح للسحب القادم",
+        "withdraw": "سحب الرصيد",
+        "withdrawFunds": "سحب الأموال",
+        "availableBalance": "الرصيد المتاح",
+        "withdrawalAmount": "مبلغ السحب",
+        "enterAmount": "أدخل المبلغ",
+        "confirmWithdrawal": "تأكيد السحب",
+        "processing": "جارٍ المعالجة...",
+        "previous": "السابق",
+        "next": "التالي",
+        "pageOf": "صفحة {{current}} من {{total}}",
+        "statusType": {
+            "pending": "قيد الانتظار",
+            "completed": "مكتلمة",
+            "failed": "فشلت",
+            "reversed": "معكوس"
+        },
+        "transactionType": {
+            "topUp": "شحن",
+            "transfer": "تحويل",
+            "withdrawal": "سحب",
+            "bookingPayment": "دفع حجز",
+            "refund": "استرداد",
+            "reversal": "عكس معاملة"
+        }
     },
     "earnings": {
         "title": "الأرباح والفواتير",
