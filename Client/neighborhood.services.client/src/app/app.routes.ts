@@ -2,11 +2,11 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { guestGuard } from './core/guards/guest.guard';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
 import { CustomerLayoutComponent } from './layouts/customer-layout/customer-layout.component';
 import { TechnicianLayoutComponent } from './layouts/technician-layout/technician-layout.component';
 import { StaffLayoutComponent } from './layouts/staff-layout/staff-layout.component';
-
 import { HomeComponent } from './features/public/pages/home/home.component';
 import { ServicesComponent } from './features/public/pages/services/services.component';
 import { AboutComponent } from './features/public/pages/about/about.component';
@@ -38,6 +38,12 @@ import { TechnicianEarningsComponent } from './features/technician/pages/earning
 import { StaffUsersComponent } from './features/staff/pages/users/staff-users.component';
 import { StaffPromoCodesComponent } from './features/staff/pages/promo-codes/staff-promo-codes.component';
 
+import { CategoryComponent } from './features/staff/pages/categories/category/category.component';
+import { CategoryDetailsComponent } from './features/staff/pages/categories/category-details/category-details.component';
+import { AvailiabilityAndExceptionComponent } from './features/technician/pages/availabilities/availiability-and-exception/availiability-and-exception.component';
+import { PricingComponent } from './features/technician/pages/pricing/pricing.component';
+import { ProblemTypeComponent } from './features/public/pages/services/problem-type/problem-type.component';
+import { PoliciesComponent } from './features/staff/pages/policies/policies.component';
 
 export const routes: Routes = [
   {
@@ -46,13 +52,17 @@ export const routes: Routes = [
     children: [
       { path: '', component: HomeComponent },
       { path: 'services', component: ServicesComponent },
+      { path: 'problemType/:id', component: ProblemTypeComponent },
       { path: 'about', component: AboutComponent },
       { path: 'contact', component: ContactComponent },
-      { path: 'auth/login', component: LoginComponent },
-      { path: 'auth/register', component: RegisterComponent },
+      { path: 'auth/login', component: LoginComponent, canActivate: [guestGuard] },
+      { path: 'auth/register', component: RegisterComponent, canActivate: [guestGuard] },
       { path: 'auth/external-callback', component: ExternalCallbackComponent },
     ],
   },
+
+
+
   {
     path: 'customer',
     component: CustomerLayoutComponent,
@@ -75,6 +85,9 @@ export const routes: Routes = [
       { path: '**', redirectTo: '' }
     ],
   },
+
+
+
   {
     path: 'technician',
     component: TechnicianLayoutComponent,
@@ -90,54 +103,59 @@ export const routes: Routes = [
       { path: 'profile', component: TechnicianProfileComponent },
       { path: 'wallet', component: TechnicianWalletComponent },
       { path: 'earnings', component: TechnicianEarningsComponent },
-    ],
+      { path: 'availability', component: AvailiabilityAndExceptionComponent },
+      { path: 'pricing', component: PricingComponent },
+      {
+        path: 'staff',
+        component: StaffLayoutComponent,
+        canActivate: [authGuard, roleGuard],
+        canActivateChild: [authGuard, roleGuard],
+        data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
+        children: [
+          { path: '', component: StaffDashboardComponent },
+
+          // Existing
+          { path: 'bookings', component: StaffBookingsComponent },
+          { path: 'flagged-requests', component: FlaggedRequestsComponent },
+          { path: 'users', component: StaffUsersComponent },
+          { path: 'categories', component: CategoryComponent, title: 'Staff Categories' },
+          { path: 'details/:categoryId', component: CategoryDetailsComponent, title: 'Category Details ' },
+          { path: 'policies', component: PoliciesComponent, title: 'Staff Policies' }
+        ],
+      },
+
+      // Staff Management
+      {
+        path: 'staff-management',
+        loadComponent: () =>
+          import('./features/staff/pages/staff-management/staff-management.component')
+            .then(m => m.StaffManagementComponent)
+      },
+
+      // Support Tickets
+      {
+        path: 'support-tickets',
+        loadComponent: () =>
+          import('./features/staff/pages/support-tickets/support-tickets.component')
+            .then(m => m.SupportTicketsComponent)
+      },
+
+      // Disputes
+      {
+        path: 'disputes',
+        loadComponent: () =>
+          import('./features/staff/pages/disputes/disputes.component')
+            .then(m => m.DisputesComponent)
+      },
+
+      // Reviews
+      {
+        path: 'reviews',
+        loadComponent: () =>
+          import('./features/staff/pages/reviews/reviews.component')
+            .then(m => m.ReviewsComponent)
+      }
+    ]
   },
-{
-  path: 'staff',
-  component: StaffLayoutComponent,
-  canActivate: [authGuard, roleGuard],
-  canActivateChild: [authGuard, roleGuard],
-  data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
-  children: [
-    { path: '', component: StaffDashboardComponent },
-
-    // Existing
-    { path: 'bookings', component: StaffBookingsComponent },
-    { path: 'flagged-requests', component: FlaggedRequestsComponent },
-    { path: 'users', component: StaffUsersComponent },
-
-    // Staff Management
-    {
-      path: 'staff-management',
-      loadComponent: () =>
-        import('./features/staff/pages/staff-management/staff-management.component')
-          .then(m => m.StaffManagementComponent)
-    },
-
-    // Support Tickets
-    {
-      path: 'support-tickets',
-      loadComponent: () =>
-        import('./features/staff/pages/support-tickets/support-tickets.component')
-          .then(m => m.SupportTicketsComponent)
-    },
-
-    // Disputes
-    {
-      path: 'disputes',
-      loadComponent: () =>
-        import('./features/staff/pages/disputes/disputes.component')
-          .then(m => m.DisputesComponent)
-    },
-
-    // Reviews
-    {
-      path: 'reviews',
-      loadComponent: () =>
-        import('./features/staff/pages/reviews/reviews.component')
-          .then(m => m.ReviewsComponent)
-    }
-  ]
-},
   { path: '**', redirectTo: '' },
-];
+]

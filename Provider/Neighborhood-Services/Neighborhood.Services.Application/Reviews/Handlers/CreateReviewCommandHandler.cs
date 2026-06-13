@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Neighborhood.Services.Application.Bookings.Interface;
 using Neighborhood.Services.Application.Exceptions;
+using Neighborhood.Services.Application.QA.Interface;
 using Neighborhood.Services.Application.Reviews.Commands;
 using Neighborhood.Services.Application.Reviews.DTOs;
 using Neighborhood.Services.Application.Reviews.Interfaces;
@@ -17,18 +18,16 @@ namespace Neighborhood.Services.Application.Reviews.Handlers
         private readonly IReviewRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBookingRepository _bookingRepository;
+        private readonly IQaAgent _qaAgent;
         private readonly ICurrentUserService _currentUser;
 
-        public CreateReviewCommandHandler(
-            IReviewRepository repository,
-            IUnitOfWork unitOfWork,
-            IBookingRepository bookingRepository,
-            ICurrentUserService currentUser)
+        public CreateReviewCommandHandler(IReviewRepository repository, IUnitOfWork unitOfWork, IBookingRepository bookingRepository , IQaAgent qaAgent , ICurrentUserService currentUserService)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
             _bookingRepository = bookingRepository;
-            _currentUser = currentUser;
+           _qaAgent = qaAgent;
+            _currentUser = currentUserService;
         }
 
         public async Task<ReviewDto> Handle(CreateReviewCommand request, CancellationToken cancellationToken)
@@ -90,6 +89,19 @@ namespace Neighborhood.Services.Application.Reviews.Handlers
 
             await _repository.AddAsync(review);
             await _unitOfWork.SaveChangesAsync();
+
+            // QA moderation is best-effort: the review is already persisted, so a failing/slow
+            // AI call (bad key, rate limit, malformed JSON, duplicate analysis) must NOT fail the
+            // submission. Fail open — the AI call logs its own failures via AgentLog, and staff can
+            // still moderate manually. Re-analysis can be triggered later if needed.
+            try
+            {
+                await _qaAgent.AnalyzeReviewAsync(request.Comment, review.Id);
+            }
+            catch
+            {
+                // Swallow — analysis is non-critical to creating the review.
+            }
 
             return ReviewMapper.MapToDto(review);
         }
