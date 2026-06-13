@@ -22,77 +22,74 @@ namespace Neighborhood.Services.Application.TechnitianPricing.Commands
         private readonly IProblemTypeRepository _problemTypeRepo;
         private readonly IUnitOfWork _unitOfWork;
 
-        public AddTechnicianPricingForProblemTypeCommandHandler(ITechnicianPricingRepository technicianPricingRepo ,IHistoricalPriceRepository historicalRepository , ITechnicianRepository technicianRepo , IProblemTypeRepository problemTypeRepo , IUnitOfWork unitOfWork)
+        public AddTechnicianPricingForProblemTypeCommandHandler(ITechnicianPricingRepository technicianPricingRepo, IHistoricalPriceRepository historicalRepository, ITechnicianRepository technicianRepo, IProblemTypeRepository problemTypeRepo, IUnitOfWork unitOfWork)
         {
             _technicianPricingRepo = technicianPricingRepo;
             _historicalRepository = historicalRepository;
             _technicianRepo = technicianRepo;
-           _problemTypeRepo = problemTypeRepo;
+            _problemTypeRepo = problemTypeRepo;
             _unitOfWork = unitOfWork;
         }
 
 
         public async Task<int> Handle(AddTechnicianPricingForProblemTypeCommand request, CancellationToken cancellationToken)
         {
-            var technician = await _technicianRepo.GetByIdAsync(request.TechnicianId);
-            var problemType = await _problemTypeRepo.GetByIdAsync(request.ProblemTypeId);
+            var technicianPricing = (await _technicianPricingRepo.GetByConditionAsync(TP => TP.TechnicianId == request.TechnicianId && TP.ProblemTypeId == request.ProblemTypeId)).FirstOrDefault();
 
-             if( technician is null )
-                throw new NotFoundException("Technician" , request.TechnicianId);
-
-
-             if( problemType is null)
-                throw new NotFoundException("Problem" , request.ProblemTypeId);
-
-
-            if (await _technicianPricingRepo.IsExistsAsync(request.TechnicianId, request.ProblemTypeId))
+            if (request.TechMinPrice <= 0)
             {
-                throw new ValidationException("Technician already has pricing for this problem.");}
+                throw new ValidationException("MinPrice must be greater than zero.");
+            }
 
-
-
-            if (request.MinPrice <= 0)
+            if (request.TechMaxPrice <= 0)
             {
-                throw new ValidationException("MinPrice must be greater than zero.");}
+                throw new ValidationException("MaxPrice must be greater than zero.");
+            }
 
-
-            if (request.MaxPrice <= 0)
+            if (request.TechMinPrice >= request.TechMaxPrice)
             {
-                throw new ValidationException("MaxPrice must be greater than zero.");}
+                throw new ValidationException("MinPrice must be less than MaxPrice.");
+            }
 
-
-
-            if (request.MinPrice >= request.MaxPrice)
+            if (technicianPricing is not null)
             {
-                throw new ValidationException("MinPrice must be less than MaxPrice.");}
-
-            var techPricing = new TechnicianPricing()
+                technicianPricing.IsDeleted = false;
+                await _technicianPricingRepo.UpdateAsync(technicianPricing);
+            }
+            else
             {
-                TechnicianId = request.TechnicianId ,
-                ProblemTypeId = request.ProblemTypeId, 
-                MinPrice = request.MinPrice ,
-                MaxPrice = request.MaxPrice ,
-            };
-
-            await _technicianPricingRepo.AddAsync(techPricing);
+                var technician = await _technicianRepo.GetByIdAsync(request.TechnicianId);
+                var problemType = await _problemTypeRepo.GetByIdAsync(request.ProblemTypeId);
+                if (technician is null)
+                    throw new NotFoundException("Technician", request.TechnicianId);
 
 
-            var historical = new HistoricalPrice()
-            {
-                ProblemTypeId = problemType.Id,
-                Region = "",
-                AveragePrice = (request.MinPrice + request.MaxPrice ) / 2,
-                MaterialCost = 0
-            };
+                if (problemType is null)
+                    throw new NotFoundException("Problem", request.ProblemTypeId);
 
-           await _historicalRepository.AddAsync(historical);
-            
-           await _unitOfWork.SaveChangesAsync();
+
+                if (await _technicianPricingRepo.IsExistsAsync(request.TechnicianId, request.ProblemTypeId))
+                {
+                    throw new ValidationException("Technician already has pricing for this problem.");
+                }
 
 
 
 
-            return techPricing.Id;
+                technicianPricing = new TechnicianPricing()
+                {
+                    TechnicianId = request.TechnicianId,
+                    ProblemTypeId = request.ProblemTypeId,
+                    MinPrice = request.TechMinPrice,
+                    MaxPrice = request.TechMaxPrice,
+                };
+
+                await _technicianPricingRepo.AddAsync(technicianPricing);
+
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return technicianPricing.Id;
         }
     }
 }

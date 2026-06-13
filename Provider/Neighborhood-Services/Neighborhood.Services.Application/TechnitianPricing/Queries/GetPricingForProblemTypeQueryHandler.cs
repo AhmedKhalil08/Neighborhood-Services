@@ -17,9 +17,8 @@ namespace Neighborhood.Services.Application.TechnitianPricing.Queries
         public async Task<IReadOnlyList<TechnicianPricingDto>> Handle(GetPricingForProblemTypeQuery request, CancellationToken cancellationToken)
         {
 
-
             var lang = request.Lang.ToLower();
-            var pricing = await _technicianPricingRepo.GetByConditionAsync(TP => (!TP.IsDeleted)  &&  TP.TechnicianId == request.TechnicianId, "ProblemType");
+            var pricing = await _technicianPricingRepo.GetByConditionAsync(TP => (!TP.IsDeleted)  &&  TP.TechnicianId == request.TechnicianId, "ProblemType,Technician");
 
             if (pricing == null || !pricing.Any())
             {
@@ -27,12 +26,19 @@ namespace Neighborhood.Services.Application.TechnitianPricing.Queries
             }
 
             return pricing
-                .OrderBy(TP => TP.MinPrice)
                 .Select(TP => new TechnicianPricingDto
                 {
+                    Id = TP.Id,
+                    NationalId = TP.Technician.NationalId,
+                    Experience  = TP.Technician.Experience,
+                    Rating = TP.Technician.Rating,
+                    MaxTravelDistance =TP.Technician.MaxTravelDistance,
+                    VerificationStatus = TP.Technician.VerificationStatus,
+                    ProblemTypeId = TP.ProblemTypeId,
+                    ProblemTypeDescription = lang == "en" ? TP.ProblemType.DescriptionEn : TP.ProblemType.DescriptionAr,
                     ProblemTypeName = lang == "en" ?  TP.ProblemType.NameEn : TP.ProblemType.NameAr,
-                    TechPriceMaxPrice = TP.MaxPrice,
-                    TechPriceMinPrice = TP.MinPrice
+                    TechMaxPrice = TP.MaxPrice,
+                    TechMinPrice = TP.MinPrice ,
                 })
                 .ToList();
         }

@@ -18,30 +18,36 @@ namespace Neighborhood.Services.API.Controllers.AvilabilitiesException
         }
 
 
-        [HttpGet]
+        [HttpGet("{technicianId}")]
         public async Task<ActionResult<IReadOnlyList<AvailiabilityExceptionDTO>>> Get(int technicianId)
-             => Ok(await _mediator.Send(new GetAvabilityExceptionForSpecificTechQuery(technicianId) ));
+             => Ok(await _mediator.Send(new GetAvabilityExceptionForSpecificTechQuery(technicianId)));
 
 
 
-        [HttpPost]
-        public async Task<ActionResult<int>> Add(AddAvailabilityExceptionCommand command)
-          => Ok(await _mediator.Send(command));
+        [HttpPost("{technicianId}")]
+        public async Task<ActionResult<int>> Add(int technicianId, AddAvailabilityExceptionCommand command)
+        {
+            command.TechnicianId = technicianId;
+            return Ok(await _mediator.Send(command));
+        }
 
 
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<int>> Update (int id , UpdateAvailabilityExceptionCommand command)
+        public async Task<ActionResult<int>> Update(int id, UpdateAvailabilityExceptionCommand command)
         {
             command.Id = id;
-         return  Ok(await _mediator.Send(command));
+            return Ok(await _mediator.Send(command));
         }
 
 
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<int>> Delete(int id)
-            =>  Ok(await _mediator.Send(new DeleteAvailabilityExceptionCommand(id)));
+        {
+            var command = new DeleteAvailabilityExceptionCommand(id);
+            return Ok(await _mediator.Send(command));
+        }
 
 
 

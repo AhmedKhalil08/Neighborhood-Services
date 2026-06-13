@@ -34,7 +34,8 @@
     using Neighborhood.Services.Application.Payments.Interfaces;
     using Neighborhood.Services.Application.ProblemTypes.Interface;
     using Neighborhood.Services.Application.PromoCodes.Interface;
-    using Neighborhood.Services.Application.RecurringBookings.Interfaces;
+using Neighborhood.Services.Application.QA.Interface;
+using Neighborhood.Services.Application.RecurringBookings.Interfaces;
     using Neighborhood.Services.Application.Reviews.Interfaces;
 using Neighborhood.Services.Application.ReviewsAnalysis;
     using Neighborhood.Services.Application.ServiceRequests.Interfaces;
@@ -76,7 +77,8 @@ using Neighborhood.Services.Application.ReviewsAnalysis;
     using Neighborhood.Services.Infrastructure.Persistence.Payments;
     using Neighborhood.Services.Infrastructure.Persistence.ProblemTypes;
     using Neighborhood.Services.Infrastructure.Persistence.PromoCodes;
-    using Neighborhood.Services.Infrastructure.Persistence.RecurringBookings;
+using Neighborhood.Services.Infrastructure.Persistence.QA;
+using Neighborhood.Services.Infrastructure.Persistence.RecurringBookings;
     using Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository;
 using Neighborhood.Services.Infrastructure.Persistence.ReviewsAnalysis;
     using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
@@ -183,14 +185,15 @@ namespace Neighborhood.Services.Infrastructure
                 services.AddScoped<ISupportMessageRepository, SupportMessageRepository>();
 
 
-                services.AddHttpClient();
-
                 services.AddScoped<ICurrentUserService, CurrentUserService>();
                 services.AddScoped<IJwtTokenService, JwtTokenService>();
                 services.AddScoped<IInvoicePdfService, InvoicePdfService>();
                 services.AddHttpClient<IPaymentGatewayService, PaymentGatewayService>();
                 services.Configure<PaymentGatewayOptions>(configuration.GetSection("PaymentGateway"));
-                services.AddScoped<IGeocodingService, GeocodingService>();
+                services.AddHttpClient<IGeocodingService, GeoapifyGeocodingService>(client =>
+                {
+                    client.BaseAddress = new Uri(configuration["Geoapify:BaseUrl"]!);
+                });
 
 
                 services.AddScoped<ITechnicianCategoryRepository, TechnicianCategoryRepository>();
@@ -202,7 +205,9 @@ namespace Neighborhood.Services.Infrastructure
                 services.AddHangfireServer();
                 services.AddScoped<RecurringBookingGeneratorService>();
                 services.AddScoped<ServiceRequestExpiryService>();
-                services.AddScoped<KnowledgeSeeder>();
+                services.AddScoped<ServiceRequestModerationJob>();
+                services.AddScoped<IBackgroundJobScheduler, BackgroundJobScheduler>();
+                services.AddScoped<IKnowledgeIndexer, KnowledgeSeeder>();
                 //Kernl
                 services.AddSingleton(sp => {
                     var apiKey = configuration["OpenAI:ApiKey"] ?? "dummy-key";
@@ -231,6 +236,8 @@ namespace Neighborhood.Services.Infrastructure
                 services.AddScoped<IVectorMemory, QdrantMemoryService>();
                 // Chatbot
                 services.AddScoped<IChatbotRepository, ChatbotRepository>();
+                // QA  
+                services.AddScoped<IQaAgent, QaAgent>();
                 //Amira
                 services.AddScoped<IAuthorizationHandler, PermissionHandler>();
                 services.AddScoped<ICloudinaryService,CloudinaryService>();

@@ -610,6 +610,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -1241,6 +1244,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -1628,6 +1634,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -1733,6 +1742,9 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int?>("BookingId")
                         .HasColumnType("int");
 
@@ -1749,6 +1761,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PromoCodeUsageId")
                         .HasColumnType("int");
@@ -1771,6 +1787,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("BookingId")
                         .HasDatabaseName("IX_SupportTickets_BookingId");
@@ -2669,6 +2687,10 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.SupportTickets.SupportTicket", b =>
                 {
+                    b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", null)
+                        .WithMany("SupportTickets")
+                        .HasForeignKey("ApplicationUserId");
+
                     b.HasOne("Neighborhood.Services.Domain.Bookings.Booking", "Booking")
                         .WithMany()
                         .HasForeignKey("BookingId")
@@ -2683,7 +2705,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasForeignKey("PromoCodeUsageId");
 
                     b.HasOne("Neighborhood.Services.Domain.ApplicationUsers.ApplicationUser", "User")
-                        .WithMany("SupportTickets")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();

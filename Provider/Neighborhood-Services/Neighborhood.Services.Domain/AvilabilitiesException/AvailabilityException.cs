@@ -5,7 +5,7 @@ namespace Neighborhood.Services.Domain.AvilabilitiesException
 {
     public class AvailabilityException :BaseEntity<int>
     {
-        public int TechnicianId { get; set; }
+        public string TechnicianId { get; set; }
         public DateOnly Date { get; set; }
         public bool IsAvailable { get; set; }
         public TimeOnly? StartTime { get; set; }

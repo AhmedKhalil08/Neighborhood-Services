@@ -26,7 +26,6 @@ namespace Neighborhood.Services.Application.TechnitianAvailability.Queries
             {
                 throw new ValidationException("No availability found for this technician."); }
 
-
           return  techAvailabilities.OrderByDescending(TA => TA.DayOfWeek).ThenByDescending(TA => TA.StartTime).Adapt<IReadOnlyList<TechnicianAvailabilityDetailsDTO>>();
 
         }

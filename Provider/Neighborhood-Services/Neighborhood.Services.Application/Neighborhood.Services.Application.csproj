@@ -4,7 +4,17 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>1fde0260-edb8-4698-82c1-cdddcb487c8e</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="NewFolder1\**" />
+    <Compile Remove="NewFolder\**" />
+    <EmbeddedResource Remove="NewFolder1\**" />
+    <EmbeddedResource Remove="NewFolder\**" />
+    <None Remove="NewFolder1\**" />
+    <None Remove="NewFolder\**" />
+  </ItemGroup>
 
   <ItemGroup>
 
@@ -16,6 +26,7 @@
     <!--<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.10" />-->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.77.0" />
     <PackageReference Include="MimeKit" Version="4.17.0" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -36,10 +47,6 @@
     <Folder Include="CancellationPolicies\DTOs\" />
     <Folder Include="CancellationPolicies\Queries\" />
     <Folder Include="Messages\Queries\" />
-    <Folder Include="NewFolder1\" />
-    <Folder Include="NewFolder\" />
-    <Folder Include="NewFolder\" />
-    <Folder Include="NewFolder\" />
     <Folder Include="Newsletter\DTOs\" />
     <Folder Include="Newsletter\NewFolder\" />
     <Folder Include="Notifications\DTOs\" />
