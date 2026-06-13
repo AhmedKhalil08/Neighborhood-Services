@@ -50,6 +50,8 @@
 
   <ItemGroup>
     <None Include="SeedData\Knowledge\**\*.json" CopyToOutputDirectory="Always" />
+    <!-- DbSeeder reads these next to the DLLs (AppContext.BaseDirectory), not the API ContentRoot. -->
+    <None Include="Persistence\Seeding\*.json" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
 </Project>
