@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DecimalPipe, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { StaffBookingService, StaffBooking, StaffBookingStatus } from '../../services/staff-booking.service';
 import { StaffUsersService } from '../../services/staff-users.service';
@@ -506,20 +507,22 @@ export class StaffDashboardComponent implements OnInit {
     this.loading.set(true);
     this.error.set(false);
 
+    // Per-stream catchError so one failing widget doesn't blank out the whole dashboard
+    // (forkJoin's default behaviour is to abort all the other inner streams on any error).
     forkJoin({
-      // bookings: this.bookingSvc.getBookings({ pageSize: 100 }),
-      users:    this.usersSvc.getUsers(),
-      tickets:  this.ticketsSvc.getTickets({ pageSize: 100 }),
-      disputes: this.disputeSvc.getByStatus('Open'),
-      reviews:  this.reviewsSvc.getAll(),
-      flagged:  this.reviewsSvc.getFlagged(),
-      approved: this.reviewsSvc.getByStatus('Approved' as any),
+      bookings: this.bookingSvc.getBookings({ pageSize: 100 }).pipe(catchError(() => of(null))),
+      users:    this.usersSvc.getUsers().pipe(catchError(() => of([] as any[]))),
+      tickets:  this.ticketsSvc.getTickets({ pageSize: 100 }).pipe(catchError(() => of([] as any))),
+      disputes: this.disputeSvc.getByStatus('Open').pipe(catchError(() => of([] as any[]))),
+      reviews:  this.reviewsSvc.getAll().pipe(catchError(() => of([] as any[]))),
+      flagged:  this.reviewsSvc.getFlagged().pipe(catchError(() => of([] as any[]))),
+      approved: this.reviewsSvc.getByStatus('Approved' as any).pipe(catchError(() => of([] as any[]))),
     }).subscribe({
-      next: ({  users, tickets, disputes, reviews, flagged, approved }) => {
-        // Bookings — PagedResult
-        // const pr = bookings as PagedResult<StaffBooking>;
-        // this._bookings.set(pr.items ?? []);
-        // this._totalBk.set(pr.totalCount ?? pr.items?.length ?? 0);
+      next: ({ bookings, users, tickets, disputes, reviews, flagged, approved }) => {
+        // Bookings — PagedResult (null if the call failed; treat as empty)
+        const pr = bookings as PagedResult<StaffBooking> | null;
+        this._bookings.set(pr?.items ?? []);
+        this._totalBk.set(pr?.totalCount ?? pr?.items?.length ?? 0);
 
         // Users — array
         this._users.set(Array.isArray(users) ? users.length : 0);
