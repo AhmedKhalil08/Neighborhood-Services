@@ -1,25 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500&family=Space+Grotesk:wght@600&display=swap');
 
 /* ====================================================================
-   Design tokens
+   Design tokens - blue / orange palette
    ==================================================================== */
-.approved-reviews {
-  --color-ink: #1f3a3a;        /* dark teal - header background */
-  --color-paper: #f4f1ea;      /* light text on dark surfaces */
-  --color-bg: #f6f3ec;         /* light page / chip background */
-  --color-border: #e7e2d6;     /* card borders */
-  --color-muted: #8a8478;      /* secondary text */
-  --color-text: #23282a;       /* primary text */
-  --color-comment: #3d3933;    /* comment text */
-  --color-copper: #c1764b;     /* accent - tools / service icon */
-  --color-gold: #d9a04b;       /* accent - stars / gauge progress */
-  --color-star-empty: #d8d2c6;
+.tech-reviews {
+  --color-primary: #1d4ed8;      /* deep blue - header background */
+  --color-primary-soft: #3b5fc4; /* lighter blue accents inside header */
+  --color-on-primary: #f4f7fe;   /* light text on dark blue surfaces */
+  --color-bg: #eef3fb;           /* light page / chip background */
+  --color-border: #dde6f5;       /* card borders */
+  --color-muted: #7a8aa3;        /* secondary text */
+  --color-text: #1f2a3d;         /* primary text */
+  --color-comment: #3a4658;      /* comment text */
+  --color-accent: #f97316;       /* orange accent - stars / gauge / icons */
+  --color-star-empty: #d9dfec;
 
   --font-display: 'Tajawal', sans-serif;
   --font-body: 'IBM Plex Sans Arabic', sans-serif;
   --font-num: 'Space Grotesk', sans-serif;
 
-  max-width: 640px;
+  max-width: 900px;
   margin: 0 auto;
   font-family: var(--font-body);
   color: var(--color-text);
@@ -29,7 +29,7 @@
    Header + gauge
    ==================================================================== */
 .header {
-  background: var(--color-ink);
+  background: var(--color-primary);
   border-radius: 16px;
   padding: 24px 32px;
   display: flex;
@@ -49,14 +49,14 @@
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 22px;
-  color: var(--color-paper);
+  color: var(--color-on-primary);
   margin: 0;
 }
 
 .subtitle {
   font-size: 13px;
   line-height: 1.7;
-  color: #a8b0ae;
+  color: #c9d6f4;
   margin: 8px 0 0;
   max-width: 320px;
 }
@@ -75,31 +75,31 @@
 
 .gauge-track {
   fill: none;
-  stroke: #3a4a4a;
+  stroke: var(--color-primary-soft);
   stroke-width: 10;
   stroke-linecap: round;
 }
 
 .gauge-progress {
   fill: none;
-  stroke: var(--color-gold);
+  stroke: var(--color-accent);
   stroke-width: 10;
   stroke-linecap: round;
 }
 
 .gauge-tick {
-  stroke: #6e7b7b;
+  stroke: #9db4e8;
   stroke-width: 2;
 }
 
 .gauge-needle {
-  stroke: var(--color-paper);
+  stroke: var(--color-on-primary);
   stroke-width: 3;
   stroke-linecap: round;
 }
 
 .gauge-pivot {
-  fill: var(--color-paper);
+  fill: var(--color-on-primary);
 }
 
 .gauge-readout {
@@ -113,54 +113,18 @@
   font-family: var(--font-num);
   font-weight: 600;
   font-size: 30px;
-  color: var(--color-paper);
+  color: var(--color-on-primary);
 }
 
 .gauge-caption {
   font-size: 12px;
-  color: #a8b0ae;
+  color: #c9d6f4;
   margin-top: 4px;
 }
 
 /* ====================================================================
-   Demo / fallback banner
+   Status states (loading / error / empty / no-user)
    ==================================================================== */
-.demo-banner {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--color-muted);
-  background: var(--color-bg);
-  border-radius: 12px;
-  padding: 8px 12px;
-}
-
-.demo-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--color-copper);
-  color: var(--color-paper);
-  font-weight: 700;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ====================================================================
-   List + states
-   ==================================================================== */
-.reviews-list {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .state {
   display: flex;
   flex-direction: column;
@@ -171,16 +135,22 @@
   color: var(--color-muted);
 }
 
-.empty-title {
+.state.info {
+  margin-top: 16px;
+  background: var(--color-bg);
+  border-radius: 16px;
+}
+
+.state-title {
   font-weight: 700;
   font-size: 14px;
-  color: #5b5650;
+  color: var(--color-text);
   margin: 0;
 }
 
-.empty-text {
+.state-text {
   font-size: 12px;
-  max-width: 280px;
+  max-width: 320px;
   margin: 0;
   line-height: 1.7;
 }
@@ -189,7 +159,7 @@
   width: 22px;
   height: 22px;
   border: 2px solid var(--color-border);
-  border-top-color: var(--color-copper);
+  border-top-color: var(--color-accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -207,6 +177,16 @@
 }
 
 /* ====================================================================
+   Reviews grid
+   ==================================================================== */
+.reviews-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ====================================================================
    Review card
    ==================================================================== */
 .review-card {
@@ -214,7 +194,9 @@
   border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 16px 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(29, 78, 216, 0.05);
+  display: flex;
+  flex-direction: column;
 }
 
 .review-head {
@@ -235,8 +217,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--color-ink);
-  color: var(--color-paper);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   font-weight: 700;
   font-size: 16px;
   display: flex;
@@ -280,7 +262,7 @@
 }
 
 .star.filled {
-  color: var(--color-gold);
+  color: var(--color-accent);
 }
 
 /* ----------------------------------------------------------------
@@ -295,13 +277,13 @@
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 13px;
-  color: #5b5650;
+  color: var(--color-comment);
   line-height: 1.6;
 }
 
 .booking-label {
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-primary);
   white-space: nowrap;
 }
 
@@ -331,5 +313,9 @@
 
   .subtitle {
     max-width: 100%;
+  }
+
+  .reviews-grid {
+    grid-template-columns: 1fr;
   }
 }

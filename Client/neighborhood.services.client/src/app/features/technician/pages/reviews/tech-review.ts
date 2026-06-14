@@ -1,6 +1,8 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 // ====================================================================
 // "My Approved Reviews" component - Technician screen
@@ -14,13 +16,11 @@ import { Subscription } from 'rxjs';
 // Configuration points (check / adjust based on your backend):
 // --------------------------------------------------------------------
 //
-// 1) API_BASE
-//    Set the API domain if it's different from the current origin.
-//    Leave empty if served from the same domain.
+// 1) environment.apiUrl
+//    The base API domain, coming from your environment file.
 //
 // 2) ENDPOINTS.reviewsByReviewee(id)
 //    Uses: GET /api/Reviews/reviewee/{revieweeId}
-//    This is the endpoint you already have.
 //
 // 3) APPROVED_VALUES
 //    Filtering happens on the frontend against `status`.
@@ -35,6 +35,12 @@ import { Subscription } from 'rxjs';
 //      GET /api/Bookings/{bookingId}  -> booking description
 //    Adjust ENDPOINTS.userById / ENDPOINTS.bookingById if your backend
 //    uses different routes or field names.
+//
+// 5) Technician id (revieweeId)
+//    If no [revieweeId] input is passed, the component tries to read
+//    the id from the JWT stored after login (see getCurrentUserId()
+//    and decodeJwt() below). Adjust TOKEN_STORAGE_KEY and the claim
+//    names to match your backend/auth flow.
 // ====================================================================
 
 interface RawReview {
@@ -66,7 +72,7 @@ export interface NormalizedReview {
   bookingLoading: boolean;
 }
 
-export type ViewStatus = 'loading' | 'success' | 'error' | 'empty';
+export type ViewStatus = 'loading' | 'success' | 'error' | 'empty' | 'no-user';
 
 interface GaugeTick {
   v: number;
@@ -76,7 +82,7 @@ interface GaugeTick {
   y2: number;
 }
 
-const API_BASE = ''; // e.g. 'https://api.example.com'
+const API_BASE = environment.apiUrl;
 
 const ENDPOINTS = {
   reviewsByReviewee: (id: string | number) => `${API_BASE}/api/Reviews/reviewee/${id}`,
@@ -84,44 +90,38 @@ const ENDPOINTS = {
   bookingById: (id: string | number) => `${API_BASE}/api/Bookings/${id}`,
 };
 
-// Values considered "approved" - adjust based on your status enum
-const APPROVED_VALUES: Array<string | number> = ['Approved', 'approved', 2, '2'];
+// Values considered "approved" - adjust based on your status enum.
+// Comparison below is case-insensitive for strings, and also checks
+// common numeric enum values (adjust if your enum order is different).
+const APPROVED_VALUES: Array<string | number> = ['approved', 1, '1', 2, '2'];
+
+function isApproved(status: string | number): boolean {
+  if (typeof status === 'string') {
+    return APPROVED_VALUES.includes(status.toLowerCase());
+  }
+  return APPROVED_VALUES.includes(status);
+}
 
 // ----------------------------------------------------------------
-// Demo data (used only when no revieweeId is provided, or on error)
+// Read the technician's id from the auth user object stored after login
 // ----------------------------------------------------------------
-const DEMO_REVIEWS: NormalizedReview[] = [
-  {
-    id: 'demo-1',
-    rating: 5,
-    comment: 'شغل نضيف ومحترم جدًا، وصل في الميعاد وحل المشكلة بسرعة. تعامل راقي.',
-    createdAt: '2026-05-28T10:30:00Z',
-    reviewerName: 'أحمد فتحي',
-    bookingDescription: 'تصليح تسريب مواسير المطبخ',
-    reviewerLoading: false,
-    bookingLoading: false,
-  },
-  {
-    id: 'demo-2',
-    rating: 4,
-    comment: 'خدمة كويسة، بس استغرق وقت أطول من المتوقع شوية.',
-    createdAt: '2026-05-15T14:00:00Z',
-    reviewerName: 'منى عبد الرازق',
-    bookingDescription: 'صيانة تكييف سبليت 1.5 حصان',
-    reviewerLoading: false,
-    bookingLoading: false,
-  },
-  {
-    id: 'demo-3',
-    rating: 5,
-    comment: 'أكثر من رائع، شرح لي المشكلة بالتفصيل واقترح حلول وقائية كمان.',
-    createdAt: '2026-04-30T09:15:00Z',
-    reviewerName: 'كريم سامي',
-    bookingDescription: 'تركيب سخان مياه كهربائي 50 لتر',
-    reviewerLoading: false,
-    bookingLoading: false,
-  },
-];
+
+// ⚠️ this matches the key seen in localStorage: ns_auth_user
+const AUTH_USER_STORAGE_KEY = 'ns_auth_user';
+
+function getCurrentUserId(): string | number | null {
+  const raw =
+    localStorage.getItem(AUTH_USER_STORAGE_KEY) ?? sessionStorage.getItem(AUTH_USER_STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    const user = JSON.parse(raw);
+    // ⚠️ adjust this if the reviewee id should come from a different field
+    return user.userId ?? user.id ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // ----------------------------------------------------------------
 // Gauge geometry helpers (half-circle rating gauge, 0 -> 5)
@@ -145,17 +145,19 @@ function pointAt(angleDeg: number, radius: number): { x: number; y: number } {
 }
 
 @Component({
-  selector: 'app-approved-reviews',
+  selector: 'app-tech-reviews',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './tech-review.html',
   styleUrls: ['./tech-review.css'],
 })
-export class ApprovedReviewsComponent implements OnInit, OnDestroy {
-  // The technician's id (the "reviewee")
+export class TechReviewsComponent implements OnInit, OnDestroy {
+  // The technician's id (the "reviewee"). If not passed in, it's read
+  // from the JWT token (see getCurrentUserId above).
   @Input() revieweeId: string | number | null = null;
 
-  reviews: NormalizedReview[] = [];
-  status: ViewStatus = 'loading';
-  isDemo = false;
+  reviews = signal<NormalizedReview[]>([]);
+  status = signal<ViewStatus>('loading');
 
   // Static gauge geometry (doesn't depend on the rating value)
   readonly gaugeArcStart = pointAt(180, GAUGE_R);
@@ -172,6 +174,9 @@ export class ApprovedReviewsComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
+    if (this.revieweeId === null || this.revieweeId === undefined) {
+      this.revieweeId = getCurrentUserId();
+    }
     this.load();
   }
 
@@ -183,12 +188,12 @@ export class ApprovedReviewsComponent implements OnInit, OnDestroy {
   // Data loading
   // ----------------------------------------------------------------
   private load(): void {
-    this.status = 'loading';
+    this.status.set('loading');
 
     if (this.revieweeId === null || this.revieweeId === undefined) {
-      this.reviews = DEMO_REVIEWS;
-      this.isDemo = true;
-      this.status = 'success';
+      // No id from @Input and none found in the stored auth user either
+      this.reviews.set([]);
+      this.status.set('no-user');
       return;
     }
 
@@ -197,10 +202,8 @@ export class ApprovedReviewsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => this.handleReviews(data ?? []),
         error: () => {
-          // Fall back to demo data so the UI still has something to show
-          this.reviews = DEMO_REVIEWS;
-          this.isDemo = true;
-          this.status = 'error';
+          this.reviews.set([]);
+          this.status.set('error');
         },
       });
 
@@ -208,22 +211,25 @@ export class ApprovedReviewsComponent implements OnInit, OnDestroy {
   }
 
   private handleReviews(data: RawReview[]): void {
+    // 🔍 temporary debug - check the real field names/status values coming
+    // from the API, then remove this line once everything is confirmed.
+    console.log('Raw reviews from API:', JSON.stringify(data, null, 2));
+
     // Frontend-side filter: only keep reviews approved by the admin
-    const approved = data.filter((r) => APPROVED_VALUES.includes(r.status));
+    const approved = data.filter((r) => isApproved(r.status));
 
     if (approved.length === 0) {
-      this.reviews = [];
-      this.isDemo = false;
-      this.status = 'empty';
+      this.reviews.set([]);
+      this.status.set('empty');
       return;
     }
 
-    this.reviews = approved.map((r) => this.normalizeReview(r));
-    this.isDemo = false;
-    this.status = 'success';
+    const normalized = approved.map((r) => this.normalizeReview(r));
+    this.reviews.set(normalized);
+    this.status.set('success');
 
     // Fetch any missing reviewer names / booking descriptions in the background
-    this.reviews.forEach((item, index) => {
+    normalized.forEach((item, index) => {
       if (item.reviewerLoading && item.reviewerId !== undefined) {
         this.fetchReviewerName(item.reviewerId, index);
       }
@@ -275,41 +281,40 @@ export class ApprovedReviewsComponent implements OnInit, OnDestroy {
   }
 
   private updateReview(index: number, patch: Partial<NormalizedReview>): void {
-    if (!this.reviews[index]) return;
-    this.reviews = this.reviews.map((rv, i) => (i === index ? { ...rv, ...patch } : rv));
+    this.reviews.update((current) => {
+      if (!current[index]) return current;
+      return current.map((rv, i) => (i === index ? { ...rv, ...patch } : rv));
+    });
   }
 
   // ----------------------------------------------------------------
   // Derived values used by the template
   // ----------------------------------------------------------------
-  get averageRating(): number {
-    if (this.reviews.length === 0) return 0;
-    const sum = this.reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
-    return sum / this.reviews.length;
-  }
+  averageRating = computed(() => {
+    const reviews = this.reviews();
+    if (reviews.length === 0) return 0;
+    const sum = reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+    return sum / reviews.length;
+  });
 
-  get averageRatingLabel(): string {
-    return this.averageRating.toFixed(1);
-  }
+  averageRatingLabel = computed(() => this.averageRating().toFixed(1));
 
-  get gaugeProgressEnd(): { x: number; y: number } {
-    const value = Math.min(Math.max(this.averageRating, 0), GAUGE_MAX);
+  gaugeProgressEnd = computed(() => {
+    const value = Math.min(Math.max(this.averageRating(), 0), GAUGE_MAX);
     return pointAt(angleFor(value), GAUGE_R);
-  }
+  });
 
-  get gaugeNeedleEnd(): { x: number; y: number } {
-    const value = Math.min(Math.max(this.averageRating, 0), GAUGE_MAX);
+  gaugeNeedleEnd = computed(() => {
+    const value = Math.min(Math.max(this.averageRating(), 0), GAUGE_MAX);
     return pointAt(angleFor(value), GAUGE_R - 14);
-  }
+  });
 
-  get gaugeProgressPath(): string {
-    const end = this.gaugeProgressEnd;
+  gaugeProgressPath = computed(() => {
+    const end = this.gaugeProgressEnd();
     return `M ${this.gaugeArcStart.x} ${this.gaugeArcStart.y} A ${GAUGE_R} ${GAUGE_R} 0 0 1 ${end.x} ${end.y}`;
-  }
+  });
 
-  get gaugeBackgroundPath(): string {
-    return `M ${this.gaugeArcStart.x} ${this.gaugeArcStart.y} A ${GAUGE_R} ${GAUGE_R} 0 0 1 ${this.gaugeArcEnd.x} ${this.gaugeArcEnd.y}`;
-  }
+  gaugeBackgroundPath = `M ${this.gaugeArcStart.x} ${this.gaugeArcStart.y} A ${GAUGE_R} ${GAUGE_R} 0 0 1 ${this.gaugeArcEnd.x} ${this.gaugeArcEnd.y}`;
 
   // ----------------------------------------------------------------
   // Template helpers
