@@ -25,7 +25,7 @@ export class CustomerChatsComponent {
   ConvSignals = signal<ConversationDto[]>([]);
   isLoading = signal(false);
   public ConvDtos: ConversationDto[] = [];
-   public myId: string = "0b6c2e03-1110-4cb6-9ad0-98c79ee97d1c";
+   public myId: string = "";
 
 private ngZone = inject(NgZone);
  
@@ -63,7 +63,7 @@ private ngZone = inject(NgZone);
   ngOnInit(): void {
     this.loadConversations();
         this.chatService.initializeChat(1)
-        //this.getMyId();
+        this.getMyId();
     console.log("from init", this.chatService.AllMessagesForBooking());
     this.loadConversationMessages(1);
 

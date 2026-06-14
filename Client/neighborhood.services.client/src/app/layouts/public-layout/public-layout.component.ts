@@ -6,6 +6,8 @@ import {NotificationBellComponent} from '../../shared/components/notification-be
 import { FavoriteListComponent } from '../../features/customer/pages/favorite-list/favorite-list.component';
 import { CustomerChatsComponent } from '../../features/customer/pages/customer-chats/customer-chats.component';
 import { ChatRoomComponent } from '../../features/customer/components/chat-room/chat-room.component';
+import {NewsletterpublishingComponent} from '../../features/staff/pages/newsletter/newsletterpublishing/newsletterpublishing.component'
+import {NewsletterSubscribeComponent} from '../../shared/components/newsletter-subscribe/newsletter-subscribe.component'
 
 
 @Component({
@@ -14,16 +16,18 @@ import { ChatRoomComponent } from '../../features/customer/components/chat-room/
     NotificationBellComponent, 
     FavoriteListComponent, 
     CustomerChatsComponent,
-    ChatRoomComponent
+    ChatRoomComponent,
+    NewsletterpublishingComponent,
+    NewsletterSubscribeComponent
   ],
   template: `
     <app-navbar />
   
     <main class="flex-grow-1">
  
-   <app-customer-chats />
-  
-   <!--  <app-favorite-list />-->
+  <app-newsletter-subscribe/>
+  <app-newsletterpublishing></app-newsletterpublishing>
+
       <router-outlet />
     </main>
     <app-footer />

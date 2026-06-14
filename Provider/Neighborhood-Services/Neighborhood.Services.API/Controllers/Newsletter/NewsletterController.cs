@@ -5,6 +5,7 @@ using Neighborhood.Services.Application.Messages.Queries;
 using Neighborhood.Services.Application.Newsletter.Commands;
 using Neighborhood.Services.Application.Newsletter.Queries;
 using Neighborhood.Services.Application.Shared.Email;
+using Neighborhood.Services.Application.Newsletter.DTOs;
 
 
 
@@ -26,10 +27,11 @@ namespace Neighborhood.Services.API.Controllers.Newsletter
         }
 
         [HttpPost("SendNewsLetter")]
-        public async Task<IActionResult> NewsletterEmail(string subj, string content)
+        public async Task<IActionResult> NewsletterEmail([FromBody] NewsletterDto dto)
         {
 
-            var result = await _emailService.SendNewsletterEmailAsync(subj, content);
+            var result = await _emailService
+        .SendNewsletterEmailAsync(dto.Subj, dto.Content);
 
 
             return Ok(result);
@@ -37,7 +39,7 @@ namespace Neighborhood.Services.API.Controllers.Newsletter
         }
 
         [HttpPost]
-        public async Task<IActionResult> Subscribe(string email)
+        public async Task<IActionResult> Subscribe([FromBody]string email)
         {
             var command = new CreateNewsCommandDTO();
             command.email = email;

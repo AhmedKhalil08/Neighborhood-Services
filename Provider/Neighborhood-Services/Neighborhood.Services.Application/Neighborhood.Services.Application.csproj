@@ -39,7 +39,6 @@
     <Folder Include="NewFolder\" />
     <Folder Include="NewFolder\" />
     <Folder Include="NewFolder\" />
-    <Folder Include="Newsletter\DTOs\" />
     <Folder Include="Newsletter\NewFolder\" />
     <Folder Include="Notifications\DTOs\" />
     <Folder Include="Notifications\Queries\" />
