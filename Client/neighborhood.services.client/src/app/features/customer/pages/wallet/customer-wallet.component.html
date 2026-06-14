@@ -15,10 +15,10 @@
             <h1 class="display-4 fw-bold mb-0">EGP {{ wallet()?.balance || 0 | number:'1.2-2' }}</h1>
           </div>
           <div class="mt-4 d-flex justify-content-center gap-3">
-            <button class="btn btn-light fw-bold px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#topUpModal" (click)="focusInput('topUpAmountInput')">
+            <button class="btn btn-light fw-bold px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#topUpModal" (click)="topUpAmount.set(null); focusInput('topUpAmountInput')">
               <i class="bi bi-plus-circle me-2"></i>{{ 'wallet.topUp' | translate }}
             </button>
-            <button class="btn btn-outline-light fw-bold px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#withdrawModal" (click)="focusInput('withdrawAmountInput')">
+            <button class="btn btn-outline-light fw-bold px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#withdrawModal" (click)="withdrawAmount.set(null); focusInput('withdrawAmountInput')">
               <i class="bi bi-arrow-up-circle me-2"></i>{{ 'wallet.withdraw' | translate }}
             </button>
           </div>
@@ -91,7 +91,7 @@
           <nav aria-label="Transaction pagination">
             <ul class="pagination mb-0">
               <li class="page-item" [class.disabled]="currentPage() === 1">
-                <button class="page-link" (click)="changePage(currentPage() - 1)">{{ 'wallet.previous' | translate }}</button>
+                <a class="page-link" role="button" (click)="changePage(currentPage() - 1)">{{ 'wallet.previous' | translate }}</a>
               </li>
               
               <!-- Simple pagination dots / numbers -->
@@ -102,7 +102,7 @@
               </li>
 
               <li class="page-item" [class.disabled]="currentPage() === totalPages()">
-                <button class="page-link" (click)="changePage(currentPage() + 1)">{{ 'wallet.next' | translate }}</button>
+                <a class="page-link" role="button" (click)="changePage(currentPage() + 1)">{{ 'wallet.next' | translate }}</a>
               </li>
             </ul>
           </nav>

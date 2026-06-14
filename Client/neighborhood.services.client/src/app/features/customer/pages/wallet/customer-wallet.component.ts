@@ -67,35 +67,89 @@ export class CustomerWalletComponent implements OnInit, OnDestroy, AfterViewInit
   ) {}
 
   ngOnInit(): void {
-    // Process Paymob Callback redirect
-    this.route.queryParams.subscribe(params => {
-      if (params['merchant_order_id'] && params['success']) {
-        const orderId = +params['merchant_order_id'];
-        const success = params['success'] === 'true';
-        const token = params['token'] || '';
-        const maskedPan = params['masked_pan'] || '';
+    // Paymob may redirect to either:
+    //   http://localhost:4200/#/customer/wallet?merchant_order_id=...  (hash routing - route.queryParams works)
+    //   http://localhost:4200/#/customer/wallet  (MPGS 3DS - NO params, use localStorage)
+    // So we check BOTH sources.
+    const pathParams = new URLSearchParams(window.location.search);
+    const pathMerchantOrderId = pathParams.get('merchant_order_id');
+    const pathSuccess = pathParams.get('success');
 
-        this.walletService.finalizeTransaction(orderId, success, token, maskedPan).subscribe({
-          next: () => {
-            if (success) {
-              this.toastr.success('Payment completed successfully!');
-            } else {
-              this.toastr.error('Payment failed. Please try again.');
+    if (pathMerchantOrderId && pathSuccess !== null) {
+      // Came from Paymob redirect via path-level URL (non-hash)
+      const orderId = pathMerchantOrderId;
+      const success = pathSuccess === 'true';
+      const token = pathParams.get('token') || '';
+      const maskedPan = pathParams.get('masked_pan') || '';
+      window.history.replaceState({}, '', '/#/customer/wallet');
+      this.walletService.finalizeTransaction(orderId, success, token, maskedPan).subscribe({
+        next: () => {
+          if (success) {
+            this.toastr.success('Payment completed successfully!');
+          } else {
+            this.toastr.error('Payment failed. Please try again.');
+          }
+          this.loadData();
+        },
+        error: (err) => {
+          console.error('Finalize error (path params)', err);
+          this.loadData();
+        }
+      });
+    } else {
+      // Check Angular route queryParams (hash routing)
+      this.route.queryParams.subscribe(params => {
+        if (params['merchant_order_id'] && params['success']) {
+          const orderId = params['merchant_order_id'] as string;
+          const success = params['success'] === 'true';
+          const token = params['token'] || '';
+          const maskedPan = params['masked_pan'] || '';
+
+          this.walletService.finalizeTransaction(orderId, success, token, maskedPan).subscribe({
+            next: () => {
+              if (success) {
+                this.toastr.success('Payment completed successfully!');
+              } else {
+                this.toastr.error('Payment failed. Please try again.');
+              }
+              this.router.navigate([], { queryParams: {} });
+              this.loadData();
+            },
+            error: (err) => {
+              console.error('Finalize error (route params)', err);
+              this.loadData();
             }
-            // Clear query params so refresh doesn't trigger it again
-            this.router.navigate([], { queryParams: {} });
+          });
+        } else {
+          // Check localStorage for a pending Paymob top-up (MPGS 3DS redirect has NO query params)
+          const pending = localStorage.getItem('pending_paymob_topup');
+          if (pending) {
+            const { localTransactionId, paymobOrderId } = JSON.parse(pending);
+            localStorage.removeItem('pending_paymob_topup');
+            // Load existing data immediately so screen isn't blank
             this.loadData();
-          },
-          error: (err) => {
-            console.error('Finalize error', err);
-            // Still load data even if finalize fails
+            
+            this.walletService.verifyPayment(localTransactionId, paymobOrderId).subscribe({
+              next: (res) => {
+                if (res.success) {
+                  this.toastr.success('Payment completed successfully!');
+                } else {
+                  this.toastr.warning('Payment could not be confirmed. Please check your transaction history.');
+                }
+                // Silently refresh to show the updated transaction status
+                this.refreshTransactions();
+              },
+              error: (err) => {
+                console.error('Verify payment error', err);
+                this.refreshTransactions();
+              }
+            });
+          } else {
             this.loadData();
           }
-        });
-      } else {
-        this.loadData();
-      }
-    });
+        }
+      });
+    }
 
     // Poll transactions every 10 seconds
     this.pollingInterval = setInterval(() => {
@@ -175,6 +229,12 @@ export class CustomerWalletComponent implements OnInit, OnDestroy, AfterViewInit
             const success = urlParams.get('success');
             this.router.navigate([], { queryParams: { merchant_order_id: orderId, success: success } });
         } else {
+            // Store payment info BEFORE redirect so we can verify on return
+            // Paymob MPGS (3DS) flow does NOT append params to redirect URL
+            localStorage.setItem('pending_paymob_topup', JSON.stringify({
+              localTransactionId: res.transactionId,
+              paymobOrderId: res.providerReference
+            }));
             window.location.href = res.redirectUrl;
         }
       },
