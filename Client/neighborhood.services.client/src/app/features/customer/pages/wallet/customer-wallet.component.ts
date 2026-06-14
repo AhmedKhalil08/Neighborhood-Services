@@ -23,10 +23,57 @@ export class CustomerWalletComponent implements OnInit, OnDestroy, AfterViewInit
   currentPage = signal<number>(1);
   readonly pageSize = 6;
 
+  // Filters
+  filterType = signal<TransactionType | ''>('');
+  filterStatus = signal<TransactionStatus | ''>('');
+
+  filteredTransactions = computed(() => {
+    let list = this.transactions();
+    const type = this.filterType();
+    const status = this.filterStatus();
+    
+    if (type !== '') {
+      list = list.filter(t => {
+        const tTypeStr = t.type?.toString();
+        return tTypeStr === type.toString() || tTypeStr === TransactionType[Number(type)];
+      });
+    }
+    if (status !== '') {
+      list = list.filter(t => {
+        const tStatusStr = t.status?.toString();
+        return tStatusStr === status.toString() || tStatusStr === TransactionStatus[Number(status)];
+      });
+    }
+    return list;
+  });
+
   paginatedTransactions = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize;
-    return this.transactions().slice(start, start + this.pageSize);
+    return this.filteredTransactions().slice(start, start + this.pageSize);
   });
+
+  getFilterTypeLabel(type: TransactionType | ''): string {
+    if (type === '') return 'All Types';
+    switch (Number(type)) {
+      case TransactionType.TopUp: return 'Top Up';
+      case TransactionType.Withdrawal: return 'Withdrawal';
+      case TransactionType.BookingPayment: return 'Payment';
+      case TransactionType.Refund: return 'Refund';
+      case TransactionType.Transfer: return 'Transfer';
+      default: return 'All Types';
+    }
+  }
+
+  getFilterStatusLabel(status: TransactionStatus | ''): string {
+    if (status === '') return 'All Statuses';
+    switch (Number(status)) {
+      case TransactionStatus.Pending: return 'Pending';
+      case TransactionStatus.Completed: return 'Completed';
+      case TransactionStatus.Failed: return 'Failed';
+      case TransactionStatus.Reversed: return 'Reversed';
+      default: return 'All Statuses';
+    }
+  }
 
   emptyRows = computed(() => {
     const currentRecords = this.paginatedTransactions().length;
@@ -35,7 +82,7 @@ export class CustomerWalletComponent implements OnInit, OnDestroy, AfterViewInit
   });
 
   totalPages = computed(() => {
-    return Math.ceil(this.transactions().length / this.pageSize) || 1;
+    return Math.ceil(this.filteredTransactions().length / this.pageSize) || 1;
   });
   // Top Up Modal State
   topUpAmount = signal<number | null>(null);
