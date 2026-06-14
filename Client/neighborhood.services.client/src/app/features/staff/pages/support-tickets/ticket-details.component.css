@@ -1,0 +1,150 @@
+.td-card {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  padding: 25px;
+}
+
+.td-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #edf2f7;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.td-ticket-id {
+  color: #adb5bd;
+  font-weight: 600;
+  margin: 0;
+}
+
+.td-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 5px 0 10px 0;
+  direction: rtl;
+}
+
+.td-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.td-body {
+  display: grid;
+  grid-template-columns: 2s 1fr;
+  gap: 25px;
+}
+
+@media (max-width: 992px) {
+  .td-body { grid-template-columns: 1fr; }
+}
+
+.td-section-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #a0aec0;
+  margin-bottom: 10px;
+}
+
+/* كارت معلومات العميل */
+.td-customer-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.td-avatar {
+  width: 45px;
+  height: 45px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.td-customer-info {
+  flex-grow: 1;
+}
+
+.td-customer-name {
+  font-weight: 600;
+  margin: 0;
+  color: #2d3748;
+}
+
+.td-customer-email {
+  font-size: 0.85rem;
+  color: #718096;
+  text-decoration: none;
+}
+
+/* صندوق المشكلة المشروحة بالعربي */
+.td-issue-box {
+  background: #fffaf0;
+  border: 1px solid #feebc8;
+  padding: 20px;
+  border-radius: 8px;
+  color: #2d3748;
+  line-height: 1.6;
+  direction: rtl; /* للقراءة الصحيحة للغة العربية */
+  text-align: right;
+}
+
+/* كروت التحكم الجانبية (الأزرار والـ Danger Zone) */
+.td-side-card {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.td-action-btn {
+  width: 100%;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.td-action-btn--resolve {
+  background: #10b981;
+}
+
+.td-priority-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+}
+
+.td-side-card--danger {
+  border-color: #fee2e2;
+  background: #fef2f2;
+}
+
+.td-delete-btn {
+  width: 100%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}

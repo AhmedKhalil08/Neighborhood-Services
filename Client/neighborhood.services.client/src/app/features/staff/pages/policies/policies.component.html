@@ -1,0 +1,405 @@
+<section class="container-fluid p-3 p-md-4 policy-page">
+
+    <!-- HEADER -->
+    <div class="row g-3 align-items-center mb-4">
+
+        <div class="col-12 col-md-8 text-center text-md-start">
+
+            <h3 class="fw-bold text-black mb-1">
+                {{ "policy.cancellationPolicies" | translate }}
+            </h3>
+
+            <p class="text-black opacity-75 mb-0">
+                {{ "policy.manageCancellationRulesForCustomersTechnicians" | translate }}
+            </p>
+
+        </div>
+
+        <div class="col-12 col-md-4 d-flex justify-content-center justify-content-md-end">
+
+            <button class="btn btn-primary px-4 w-100 w-md-auto" (click)="openAddModal()" data-bs-toggle="modal"
+                data-bs-target="#policyModal">
+
+                + {{ "policy.addPolicy" | translate }}
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card filter-card mb-4">
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- Applies To -->
+                <div class="col-12 col-md-4">
+
+                    <label class="form-label">
+                        {{ "policy.appliesTo" | translate }}
+                    </label>
+
+                    <select class="form-select border border-2" [(ngModel)]="filterPolicy.appliesTo"
+                        (change)="applyFilter()">
+
+                        <option value="Both">
+                            {{ "policy.both" | translate }}
+                        </option>
+
+                        <option value="Customer">
+                            {{ "policy.customer" | translate }}
+                        </option>
+
+                        <option value="Technican">
+                            {{ "policy.technician" | translate }}
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Hours -->
+                <div class="col-12 col-md-4">
+
+                    <label class="form-label">
+                        {{ "policy.hoursBefore" | translate }}
+                    </label>
+
+                    <select class="form-select border border-2" [(ngModel)]="filterPolicy.hoursBeforeBooking"
+                        (change)="applyFilter()">
+
+                        @for (hour of uniqueHours(); track $index) {
+
+                        <option [value]="hour">
+                            {{ hour }}
+                        </option>
+
+                        }
+
+                    </select>
+
+                </div>
+
+                <!-- Reset -->
+                <div class="col-12 col-md-4">
+
+                    <button class="btn bg-info border border-2 w-100" (click)="resetFilter()">
+
+                        {{ "policy.reset" | translate }}
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="card table-card">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                {{ "policy.appliesTo" | translate }}
+                            </th>
+
+                            <th>
+                                {{ "policy.hoursBefore" | translate }}
+                            </th>
+
+                            <th>
+                                {{ "policy.penalty" | translate }} %
+                            </th>
+
+                            <th class="d-none d-lg-table-cell">
+                                {{ "policy.createdAt" | translate }}
+                            </th>
+
+                            <th class="text-center">
+                                {{ "policy.actions" | translate }}
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (isLoading()) {
+
+                        <tr>
+
+                            <td colspan="5" class="text-center py-5">
+
+                                <div class="spinner-border text-primary" role="status">
+
+                                    <span class="visually-hidden">
+                                        {{ "common.loading" | translate }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        } @else {
+
+                        @if (filteredPolicy()) {
+
+                        <tr>
+
+                            <td>
+
+                                <span class="badge" [class]="filteredPolicy()?.appliesTo === 'Customer'
+                                        ? 'bg-primary'
+                                        : 'bg-warning text-dark'">
+
+                                    {{ filteredPolicy()?.appliesTo }}
+
+                                </span>
+
+                            </td>
+
+                            <td class="fw-bold">
+
+                                {{ filteredPolicy()?.hoursBeforeBooking }}
+                                {{ "policy.hrs" | translate }}
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge" [class]="filteredPolicy()?.penaltyPct === 0
+                                        ? 'bg-success'
+                                        : 'bg-danger'">
+
+                                    {{ filteredPolicy()?.penaltyPct }}%
+
+                                </span>
+
+                            </td>
+
+                            <td class="text-muted d-none d-lg-table-cell">
+
+                                {{ filteredPolicy()?.createdAt | date:'medium' }}
+
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                    <button class="btn btn-sm btn-outline-primary"
+                                        (click)="openEditModal(filteredPolicy()!)" data-bs-toggle="modal"
+                                        data-bs-target="#policyModal">
+
+                                        {{ "policy.edit" | translate }}
+
+                                    </button>
+
+                                    <button class="btn btn-sm btn-outline-danger"
+                                        (click)="openDeleteModal(filteredPolicy()!)" data-bs-toggle="modal"
+                                        data-bs-target="#deletePolicyModal">
+
+                                        {{ "policy.delete" | translate }}
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        } @else {
+
+                        @for (item of filteredPolicies(); track item.id) {
+
+                        <tr>
+
+                            <td>
+
+                                <span class="badge" [class]="item.appliesTo === 'Customer'
+                                        ? 'bg-primary'
+                                        : 'bg-warning text-dark'">
+
+                                    {{ item.appliesTo }}
+
+                                </span>
+
+                            </td>
+
+                            <td class="fw-bold">
+
+                                {{ item.hoursBeforeBooking }}
+                                {{ "policy.hrs" | translate }}
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge" [class]="item.penaltyPct === 0
+                                        ? 'bg-success'
+                                        : 'bg-danger'">
+
+                                    {{ item.penaltyPct }}%
+
+                                </span>
+
+                            </td>
+
+                            <td class="text-muted d-none d-lg-table-cell">
+
+                                {{ item.createdAt | date:'medium' }}
+
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                    <button class="btn btn-sm btn-outline-primary" (click)="openEditModal(item)"
+                                        data-bs-toggle="modal" data-bs-target="#policyModal">
+
+                                        {{ "policy.edit" | translate }}
+
+                                    </button>
+
+                                    <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(item)"
+                                        data-bs-toggle="modal" data-bs-target="#deletePolicyModal">
+
+                                        {{ "policy.delete" | translate }}
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        } @empty {
+
+                        <tr>
+
+                            <td colspan="5" class="text-center py-5">
+
+                                <div class="alert alert-info mb-0">
+
+                                    {{ "policy.noPoliciesFound" | translate }}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        }
+
+                        }
+
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+
+<!-- Edit & Add Modal -->
+<div class="modal fade" id="policyModal">
+    <div class="modal-dialog">
+        <div class="modal-content modal-dark">
+
+            <div class="modal-header">
+                <h5 class="modal-title text-black">
+                    {{ isEdit() ? ('policy.editPolicy' |translate) : ('policy.addPolicy' |translate) }}
+                </h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form [formGroup]="policyForm">
+                    <div class="mb-3">
+                        <label class="form-label">{{"policy.appliesTo" |translate}}</label>
+                        <select class="form-select  border border-3" formControlName="appliesTo">
+                            <option value="Customer">{{"policy.customer" |translate}}</option>
+                            <option value="Technican">{{"policy.technician" |translate}}</option>
+                            <option value="Both">{{"policy.both" |translate}}</option>
+                        </select>
+
+                        @let appliesTo = policyForm.get("appliesTo");
+                        @if( appliesTo?.getError('required') && appliesTo?.touched ){
+                        <span class="text-danger"> {{"policy.appliesToIsRequired" |translate}}</span>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{"policy.hoursBeforeBooking" |translate}}</label>
+                        <input type="number" class="form-control  border border-3" formControlName="hoursBeforeBooking">
+                        @let hoursBeforeBooking = policyForm.get("hoursBeforeBooking");
+                        @if( hoursBeforeBooking?.getError('min') ){
+                        <span class="text-danger">{{"policy.hoursBeforeBookingIsRequired" |translate}}</span>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{"policy.penalty" |translate}} %</label>
+                        <input type="number" class="form-control  border border-3" formControlName="penaltyPct">
+                        @let penaltyPct = policyForm.get("penaltyPct");
+                        @if( penaltyPct?.getError('min') ){
+                        <span class="text-danger">{{"policy.penaltyIsRequired" |translate}}</span>
+                        }
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button #closeBtn class="btn btn-secondary" data-bs-dismiss="modal">{{"policy.cancle"
+                    |translate}}</button>
+                <button class="btn btn-primary" (click)="savePolicy()">
+                    {{"policy.save" |translate}}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Delete Modal -->
+
+<app-delete modalId="deletePolicyModal">
+    <h5 class="text-black mb-3">{{"policy.deletePolicy" |translate}}</h5>
+
+    <button class="btn btn-danger me-3 " (click)="confirmDelete()">
+        {{"policy.delete" |translate}}
+    </button>
+</app-delete>
