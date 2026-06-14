@@ -7,14 +7,15 @@
         <p class="lead mb-5">Subscribe to our newsletter for the latest news, updates, and exclusive offers.</p>
         <form class="newsletter-form">
           <div class="input-group mb-3">
-            <input type="email" class="form-control form-control-lg" placeholder="Enter your email" aria-label="Enter your email" required>
+            <input type="email" class="form-control form-control-lg" placeholder="Enter your email" aria-label="Enter your email" 
+            [(ngModel)]="email" (keydown.enter)="subs(email)" required>
             <button class="btn btn-primary btn-lg" type="submit">Subscribe</button>
           </div>
           <div class="form-check text-start">
-            <input class="form-check-input" type="checkbox" id="privacyCheck" required>
+            <!-- <input class="form-check-input" type="checkbox" id="privacyCheck" required>
             <label class="form-check-label" for="privacyCheck">
               I agree to the <a href="#" class="text-decoration-none">Privacy Policy</a>
-            </label>
+            </label> -->
           </div>
         </form>
       </div>

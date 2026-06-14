@@ -10,7 +10,7 @@ namespace Neighborhood.Services.Application.Messages.Queries
 {
     public class GetAllMssgsQDto : IRequest<List<MessageSelectedDto>>
     {
-        public int id { set; get; }
+       
     }
     public class GetAllMssgQHandler : IRequestHandler<GetAllMssgsQDto, List<MessageSelectedDto>>
     {

@@ -11,7 +11,7 @@ namespace Neighborhood.Services.Application.Favorites
     {
         public Task<List<Domain.favorites.Favorite>> GetByAppUserId(string userId);
 
-        public  Task<bool> CheckIfExists(string userId, int TechnicianId)
+        public Task<bool> CheckIfExists(string userId, int TechnicianId);
 
         //public Task<IReadOnlyList<FavoriteDto>> GetAllDetailsAsync();
 

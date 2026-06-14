@@ -84,4 +84,4 @@ namespace Neighborhood.Services.Application.Favorites.Commands
         }
     }
 }
-}
+
