@@ -2,6 +2,7 @@ using Neighborhood.Services.Application.PublicProfiles.DTOs;
 using Neighborhood.Services.Application.Shared;
 using Neighborhood.Services.Application.Technicians.DTOs;
 using Neighborhood.Services.Domain.Technicians;
+using Neighborhood.Services.Application.Technicians.DTOs;
 
 namespace Neighborhood.Services.Application.Technicians.Interfaces
 {
@@ -12,6 +13,13 @@ namespace Neighborhood.Services.Application.Technicians.Interfaces
         Task<List<Technician>> GetAllActiveAsync();
         Task<List<Technician>> GetByVerificationStatusAsync(TechnicianVerificationStatus verificationStatus);
         Task<List<Technician>> GetAvailableAsync();
+
+        
+        //arwa
+        Task<List<ComprehensiveTechDTO>> GetWithUserDetails();
+        Task<ComprehensiveTechDTO?> GetWithUserDetailsById(int techId);
+        //end of arwa
+
 
         // Customer-facing browse projection (joins ApplicationUser for name/photo/location + categories).
         Task<List<TechnicianCardDTO>> GetActiveForBrowseAsync();
