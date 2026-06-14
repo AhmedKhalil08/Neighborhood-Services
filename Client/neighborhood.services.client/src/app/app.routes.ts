@@ -46,6 +46,7 @@ import { ProblemTypeComponent } from './features/public/pages/services/problem-t
 import { PoliciesComponent } from './features/staff/pages/policies/policies.component';
 import { PublicProfileComponent } from './shared/components/public-profile/public-profile.component';
 import {FavoriteListComponent} from '../app/features/customer/pages/favorite-list/favorite-list.component';
+import {CustomerChatsComponent} from '../app/features/customer/pages/customer-chats/customer-chats.component'
 
 export const routes: Routes = [
   {
@@ -81,7 +82,7 @@ export const routes: Routes = [
       { path: 'recurring-bookings', component: RecurringBookingsComponent },
       { path: 'favorites', component: FavoriteListComponent, data: { title: 'Favorites' } },
       { path: 'wallet', component: CustomerWalletComponent },
-      { path: 'chat', component: CustomerPlaceholderComponent, data: { title: 'Chat' } },
+      { path: 'chat', component:CustomerChatsComponent, data: { title: 'Chat' } },
       { path: 'chats', redirectTo: 'chat', pathMatch: 'full' },
       { path: 'notifications', component: CustomerPlaceholderComponent, data: { title: 'Notifications' } },
       { path: 'profile', component: CustomerProfileComponent },
@@ -109,6 +110,8 @@ export const routes: Routes = [
       { path: 'earnings', component: TechnicianEarningsComponent },
       { path: 'availability', component: AvailiabilityAndExceptionComponent },
       { path: 'pricing', component: PricingComponent },
+      { path: 'chat', component:CustomerChatsComponent, data: { title: 'Chat' } },
+
       { path: '**', redirectTo: '' }
     ]
   },
