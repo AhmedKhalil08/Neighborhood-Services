@@ -32,16 +32,18 @@
           <small class="text-muted">{{ not.createdDate | date:'short' }}</small>
         </div>
       </div>
+      
     }
+     @if (this.unreadCount$.value==0){
     <div class="dropdown-item text-muted" >
+      <i class="bi bi-bell-slash me-2"></i>
+      No notifications
+    </div>}
+    <!-- <div class="dropdown-item text-muted" >
       <i class="bi bi-bell-slash me-2"></i>
       
      <p></p>
-    </div>
-    <div class="dropdown-item text-muted">
-      <i class="bi bi-bell-slash me-2"></i>
-      
-      No notifications
-    </div>
+    </div> -->
+   
   </div>
 </div>

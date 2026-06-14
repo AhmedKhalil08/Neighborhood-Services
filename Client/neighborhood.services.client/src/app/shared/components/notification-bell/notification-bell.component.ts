@@ -9,14 +9,12 @@ import { NotificationMessage } from './../../../core/models/notification-message
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 
-
-
-
 @Component({
   selector: 'app-notification-bell',
   imports: [CommonModule, NgbDropdownModule],
   templateUrl: './notification-bell.component.html',
   styleUrl: './notification-bell.component.css',
+
 })
 export class NotificationBellComponent {
   // // TODO (Arwa): replace with real unread count from the notifications service.
@@ -28,6 +26,7 @@ export class NotificationBellComponent {
   // }
   notifications$ = new BehaviorSubject<NotificationMessage[]>([]);
   unreadCount$ = new BehaviorSubject<number>(0);
+  
   private subscriptions: Subscription[] = [];
 
   constructor(private notificationService: NotificationServiceService, private toastr: ToastrService) { }
@@ -40,8 +39,11 @@ export class NotificationBellComponent {
     this.subscriptions.push(
       this.notificationService.notifications$.subscribe((data) => {
         this.notifications$.next(data);
+        if(data!=null){
         const unread = data.filter((n) => !n.isRead).length;
-        this.unreadCount$.next(unread);
+        this.unreadCount$.next(unread);}
+        else{this.unreadCount$.next(0)}
+        
         console.log('Received notifications via SignalR:', data);
       })
     );
@@ -52,7 +54,9 @@ export class NotificationBellComponent {
   loadNotifications() {
     this.notificationService.GetAllNotifications().subscribe({
       next: (data: NotificationMessage[]) => {
-        data.sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
+        if(data!=null){
+        data.sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());}
+        console.log(this.unreadCount$.value)
         this.notificationService.setNotifications(data);
         this.toastr.success('Notifications loaded successfully.');
       },
