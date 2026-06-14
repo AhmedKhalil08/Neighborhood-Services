@@ -1,4 +1,6 @@
+using Neighborhood.Services.Application.PublicProfiles.DTOs;
 using Neighborhood.Services.Application.Shared;
+using Neighborhood.Services.Application.Technicians.DTOs;
 using Neighborhood.Services.Domain.Technicians;
 using Neighborhood.Services.Application.Technicians.DTOs;
 
@@ -19,5 +21,10 @@ namespace Neighborhood.Services.Application.Technicians.Interfaces
         //end of arwa
 
 
+        // Customer-facing browse projection (joins ApplicationUser for name/photo/location + categories).
+        Task<List<TechnicianCardDTO>> GetActiveForBrowseAsync();
+
+        // Public profile (details + stats + approved reviews with reviewer name/photo) for a technician.
+        Task<PublicProfileDto?> GetPublicProfileAsync(int technicianId);
     }
 }

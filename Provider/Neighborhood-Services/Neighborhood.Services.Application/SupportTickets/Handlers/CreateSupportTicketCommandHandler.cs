@@ -25,22 +25,23 @@ namespace Neighborhood.Services.Application.SupportTickets.Handlers
 
         public async Task<SupportTicketDto> Handle(CreateSupportTicketCommand request, CancellationToken cancellationToken)
         {
-            if (request.BookingId.HasValue)
-            {
-                var booking = await _bookingRepository.GetByIdAsync(
-                    request.BookingId.Value);
+            //if (request.BookingId.HasValue)
+            //{
+            //    var booking = await _bookingRepository.GetByIdAsync(
+            //        request.BookingId.Value);
 
-                if (booking is null)
-                {
-                    throw new Exception(
-                        $"Booking with id {request.BookingId.Value} not found.");
-                }
-            }
+            //    if (booking is null)
+            //    {
+            //        throw new Exception(
+            //            $"Booking with id {request.BookingId.Value} not found.");
+            //    }
+            //}
             var ticket = new SupportTicket
             {
                 UserId = _currentUser.UserId,
-                BookingId = request.BookingId,
                 Subject = request.Subject,
+                SenderName = request.SenderName,
+                SenderEmail = request.SenderEmail,
                 Description = request.Description,
                 Status = SupportTicketStatus.Open,
                 CreatedAt = DateTime.UtcNow,

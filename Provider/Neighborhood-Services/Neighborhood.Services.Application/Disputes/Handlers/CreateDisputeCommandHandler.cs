@@ -38,7 +38,7 @@ namespace Neighborhood.Services.Application.Disputes.Handlers
             var dispute = new Dispute
             {
                 BookingId = request.BookingId,
-                RaisedByUserId = _currentUser.UserId,
+                RaisedByUserId = request.RaisedByUserId ?? _currentUser.UserId,
                 DisputeType = request.DisputeType,
                 Reason = request.Reason,
                 Status = DisputeStatus.Open,

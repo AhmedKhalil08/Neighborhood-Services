@@ -16,7 +16,6 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Config
                 .UseIdentityColumn();
 
             builder.Property(s => s.UserId)
-     .IsRequired()
      .HasMaxLength(450); // ← add this — 450 is the standard Identity FK length
             builder.Property(t => t.BookingId)
                 .IsRequired(false);
@@ -28,8 +27,9 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Config
             builder.Property(t => t.Status)
                 .IsRequired()
                 .HasConversion<string>();
+            builder.Property(t => t.Priority)
+                .HasConversion<string>();
 
-           
 
             builder.Property(t => t.CreatedAt)
                 .IsRequired();
@@ -43,11 +43,13 @@ namespace Neighborhood.Services.Infrastructure.Persistence.SupportTickets.Config
                 .HasForeignKey(m => m.TicketId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(t => t.User)
-                .WithMany()
+                 builder.HasOne(t => t.User)
+                .WithMany(u => u.SupportTickets)
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
-            builder.HasOne(t => t.Booking)
+
+
+                 builder.HasOne(t => t.Booking)
                 .WithMany()
                 .HasForeignKey(t => t.BookingId)
                 .OnDelete(DeleteBehavior.NoAction);

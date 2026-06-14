@@ -10,10 +10,14 @@ namespace Neighborhood.Services.Application.Users.Commands.CreateUserCommands
     {
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string Photo { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public int Age { get; set; } 
         public ApplicationUserRole ApplicationUserRole { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        public string? NationalId { get; set; }
+        public string? Experience { get; set; }
+        public int? MaxTravelDistance { get; set; }
     }
 }

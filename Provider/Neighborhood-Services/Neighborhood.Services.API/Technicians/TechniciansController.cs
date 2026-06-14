@@ -27,6 +27,15 @@ namespace Neighborhood.Services.API.Technicians
             return Ok(result);
         }
 
+        // Public profile (details + stats + approved reviews) — shown when a customer clicks a technician.
+        [Authorize]
+        [HttpGet("{id:int}/public-profile")]
+        public async Task<IActionResult> GetPublicProfile(int id)
+        {
+            var result = await _mediator.Send(new GetTechnicianPublicProfileQuery { TechnicianId = id });
+            return Ok(result);
+        }
+
         [Authorize]
         [HttpGet("user/{applicationUserId}")]
         public async Task<IActionResult> GetByUserId(string applicationUserId)
@@ -48,6 +57,15 @@ namespace Neighborhood.Services.API.Technicians
         public async Task<IActionResult> GetAvailable()
         {
             var result = await _mediator.Send(new GetAvailableTechniciansQuery());
+            return Ok(result);
+        }
+
+        // Customer-facing browse list for the "Find Technician" page
+        // (name/photo/location + categories). Additive — does not touch GetAll.
+        [HttpGet("browse")]
+        public async Task<IActionResult> Browse()
+        {
+            var result = await _mediator.Send(new GetTechniciansForBrowseQuery());
             return Ok(result);
         }
 

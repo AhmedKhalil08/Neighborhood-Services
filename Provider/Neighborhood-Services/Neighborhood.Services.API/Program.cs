@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Neighborhood.Services.API.Middlewares;
 using Neighborhood.Services.Application;
+using Neighborhood.Services.Application.AI.Interfaces;
 using Neighborhood.Services.Application.Authorization;
 using Neighborhood.Services.Application.Cloudinary;
 using Neighborhood.Services.Domain.Staffs;
 using Neighborhood.Services.Infrastructure;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
-using Neighborhood.Services.Infrastructure.Persistence.Seeding.Knowledge;
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
 using StackExchange.Redis;
@@ -98,12 +98,27 @@ namespace Neighborhood.Services.API
 
             builder.Services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
             {
+                try
+                {
                 var connection = builder.Configuration.GetConnectionString("Redis");
                 return ConnectionMultiplexer.Connect(connection);
+                }
+                catch
+                {
+                    return null;
+                }
             });
 
 
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            builder.Services.AddAuthentication(options =>
+            {
+                // AddIdentity() sets the default authenticate scheme to the Identity cookie, which
+                // means our JWT (in the access_token cookie) is never read. Force JwtBearer to be
+                // the default for authenticate/challenge so protected endpoints actually use the JWT.
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -133,12 +148,12 @@ namespace Neighborhood.Services.API
                             return Task.CompletedTask;
                         }
                     };
-                })
-                .AddGoogle(options =>
-                {
-                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
-                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
                 });
+                //.AddGoogle(options =>
+                //{
+                //    options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                //    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+                //});
             // Add authorization policies for each permission type (Amira)
             builder.Services.AddAuthorization(options =>
             {
@@ -157,9 +172,9 @@ namespace Neighborhood.Services.API
             builder.Services.AddScoped<ICloudinaryService,
                 CloudinaryService>();
             // end of Amira
-            builder.Services.AddAuthorization();
+            //builder.Services.AddAuthorization();
 
-            builder.Services.AddAuthorization();
+            //builder.Services.AddAuthorization();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -189,26 +204,26 @@ namespace Neighborhood.Services.API
 
             //END OF ARWA
             // Seed dev/test data on startup (migrates + seeds if empty)
+            // CLI: pure knowledge reindex. Assumes the DB is already migrated (boot the app
+            // normally at least once first). Does NOT seed dev data, does NOT start the server.
+            //   dotnet run -- reindex-knowledge   (same job as POST /api/knowledge/reindex)
+            if (args.Contains("reindex-knowledge"))
+            {
+                using var reindexScope = app.Services.CreateScope();
+                await reindexScope.ServiceProvider.GetRequiredService<IKnowledgeIndexer>().ReindexAllAsync();
+                Console.WriteLine("Knowledge reindex complete.");
+                return;
+            }
+
+            
             using (var scope = app.Services.CreateScope())
             {
-                await DbSeeder.SeedAsync(scope.ServiceProvider);
-
-
-                // Seed Qdrant knowledge base from the DB (catalog) + Faqs.json.
-                // If OpenAI/Qdrant is unavailable (bad key, no quota, network down) we log
-                // and continue — the app stays up; only the AI endpoints will fail per-call.
-                try
-                {
-                    var knowledgeSeeder = scope.ServiceProvider.GetRequiredService<KnowledgeSeeder>();
-                    await knowledgeSeeder.SeedAsync();
-                }
-                catch (Exception ex)
-                {
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                    logger.LogWarning(ex, "KnowledgeSeeder failed at startup — AI endpoints may not work until this is fixed. App will continue to run.");
-                }
-
+                var environment = app.Services.GetRequiredService<IWebHostEnvironment>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                await DbSeeder.SeedAsync(scope.ServiceProvider, environment, logger);
             }
+
+            
 
 
             // Configure the HTTP request pipeline.
@@ -218,11 +233,16 @@ namespace Neighborhood.Services.API
                 app.UseSwaggerUI();
             }
            
-            app.UseHttpsRedirection();
-            app.UseExceptionHandler();
+
             //app.UseCors("Frontend");
             //app.UseCors("AllowJs");
             app.UseCors("AllowAngular");
+            //app.UseCors("AllowJS");
+            app.UseHttpsRedirection();
+            app.UseExceptionHandler();
+            app.UseStaticFiles();
+            app.UseCors("Frontend");
+           
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseHangfireDashboard("/hangfire");

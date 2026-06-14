@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Neighborhood.Services.Domain.ApplicationUsers;
 using Neighborhood.Services.Domain.Bookings;
 using Neighborhood.Services.Domain.Categories;
@@ -9,12 +11,21 @@ using Neighborhood.Services.Domain.Offers;
 using Neighborhood.Services.Domain.ProblemTypes;
 using Neighborhood.Services.Domain.RecurringBookings;
 using Neighborhood.Services.Domain.ServiceRequests;
+using Neighborhood.Services.Domain.TechnicianCategories;
+using Neighborhood.Services.Domain.Staffs;
+using Neighborhood.Services.Domain.SupportTickets;
 using Neighborhood.Services.Domain.Technicians;
+using Neighborhood.Services.Domain.TechniciansPricing;
 using Neighborhood.Services.Domain.TechniciansAvailability;
 using Neighborhood.Services.Domain.Wallets;
 using Neighborhood.Services.Infrastructure.Persistence.Context;
 using NetTopologySuite.Geometries;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
 {
@@ -25,7 +36,7 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
     {
         private const string DefaultPassword = "Pass@123";
 
-        public static async Task SeedAsync(IServiceProvider services)
+        public static async Task SeedAsync(IServiceProvider services, IWebHostEnvironment environment, ILogger logger = null)
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
@@ -35,104 +46,221 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
             if (await context.Categories.AnyAsync())
                 return;
 
-            var problemTypes = await SeedReferenceDataAsync(context);
-
+            var problemTypes = await SeedReferenceDataAsync(context, environment, logger);
             var (customers, technicians) = await SeedAccountsAsync(context, userManager);
+            await SeedTechnicianCategoriesAsync(context, technicians);
+            await SeedTechnicianPricingAsync(context, technicians, problemTypes);
+
+            // 🎯 إضافة الـ Staff والـ Admin الافتراضي في الترتيب الصحيح
+            await SeedStaffAccountsAsync(context, userManager);
+
             await SeedBookingDomainAsync(context, customers, technicians, problemTypes);
+
+            await SeedSupportTicketsAsync(context, customers);
 
             await context.SaveChangesAsync();
         }
 
-        // ---------- Categories + Problem types ----------
-        private static async Task<List<ProblemType>> SeedReferenceDataAsync(ApplicationDbContext context)
+        // ---------- 1. Categories + Problem types ----------
+        private static async Task<List<ProblemType>> SeedReferenceDataAsync(ApplicationDbContext context, IWebHostEnvironment environment, ILogger logger = null)
         {
-            //var plumbing = new Category { Name = "Plumbing", Icon = "🔧", CreatedAt = DateTime.UtcNow };
-            //var electrical = new Category { Name = "Electrical", Icon = "💡", CreatedAt = DateTime.UtcNow };
-            //var cleaning = new Category { Name = "Cleaning", Icon = "🧹", CreatedAt = DateTime.UtcNow };
-            //context.Categories.AddRange(plumbing, electrical, cleaning);
-            //await context.SaveChangesAsync();
-
-            //var problemTypes = new List<ProblemType>
-            //{
-            //    new() { Name = "Leak Repair", Description = "Fix a leaking pipe or faucet", MinPrice = 100, MaxPrice = 300, CategoryId = plumbing.Id, CreatedAt = DateTime.UtcNow },
-            //    new() { Name = "Pipe Installation", Description = "Install new piping", MinPrice = 200, MaxPrice = 500, CategoryId = plumbing.Id, CreatedAt = DateTime.UtcNow },
-            //    new() { Name = "Wiring", Description = "Electrical wiring work", MinPrice = 150, MaxPrice = 400, CategoryId = electrical.Id, CreatedAt = DateTime.UtcNow },
-            //    new() { Name = "Deep Clean", Description = "Full apartment deep cleaning", MinPrice = 80, MaxPrice = 200, CategoryId = cleaning.Id, CreatedAt = DateTime.UtcNow }
-            //};
-            //context.ProblemTypes.AddRange(problemTypes);
-            //await context.SaveChangesAsync();
-
-            //return problemTypes;
-
-
-            if (!context.Categories.Any())
+            try
             {
-                var categoriesDate = await File.ReadAllTextAsync("../Neighborhood.Services.Infrastructure/Persistence/Seeding/Categories.json");
-                var categories = JsonSerializer.Deserialize<List<Category>>(categoriesDate);
-
-                if (categories.Count > 0)
+                if (!context.Categories.Any())
                 {
-                    foreach (var category in categories)
-                        await context.AddAsync(category);
-                    await context.SaveChangesAsync();
+                    var categoriesPath = Path.Combine(AppContext.BaseDirectory, "Persistence", "Seeding", "Categories.json");
+                    if (File.Exists(categoriesPath))
+                    {
+                        var categoriesDate = await File.ReadAllTextAsync(categoriesPath);
+                        var categories = JsonSerializer.Deserialize<List<Category>>(categoriesDate);
+
+                        if (categories != null && categories.Count > 0)
+                        {
+                            foreach (var category in categories)
+                                await context.AddAsync(category);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        logger?.LogWarning($"Categories.json file not found at {categoriesPath}. Skipping categories seed.");
+                    }
                 }
+
+                var problemTypesPath = Path.Combine(AppContext.BaseDirectory, "Persistence", "Seeding", "ProblemTypes.json");
+                var problemTypes = new List<ProblemType>();
+
+                if (File.Exists(problemTypesPath))
+                {
+                    var ProblemTypeDate = await File.ReadAllTextAsync(problemTypesPath);
+                    problemTypes = JsonSerializer.Deserialize<List<ProblemType>>(ProblemTypeDate);
+
+                    if (!context.ProblemTypes.Any())
+                    {
+                        if (problemTypes != null && problemTypes.Count > 0)
+                        {
+                            foreach (var problemType in problemTypes)
+                                await context.AddAsync(problemType);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                }
+                else
+                {
+                    logger?.LogWarning($"ProblemTypes.json file not found at {problemTypesPath}. Skipping problem types seed.");
+                }
+
+                return problemTypes ?? new List<ProblemType>();
             }
-
-
-            var ProblemTypeDate = await File.ReadAllTextAsync("../Neighborhood.Services.Infrastructure/Persistence/Seeding/ProblemTypes.json");
-            var problemTypes = JsonSerializer.Deserialize<List<ProblemType>>(ProblemTypeDate);
-            if (!context.ProblemTypes.Any())
+            catch (Exception ex)
             {
-                if (problemTypes.Count > 0)
-                {
-                    foreach (var problemType in problemTypes)
-                        await context.AddAsync(problemType);
-                    await context.SaveChangesAsync();
-                }
+                logger?.LogError(ex, "Error seeding reference data. Continuing with empty reference data.");
+                return new List<ProblemType>();
             }
-
-            return problemTypes;
         }
 
-
-
-
-
-
-
-
-        // ---------- Accounts ----------
+        // ---------- 2. Core Accounts Seeding (Customers & Technicians) ----------
         private static async Task<(List<Customer> customers, List<Technician> technicians)> SeedAccountsAsync(
             ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             var customers = new List<Customer>
             {
                 await CreateCustomerAsync(context, userManager, "customer1@test.com", "Sara Customer", 30, 31.2001, 29.9187),
-                await CreateCustomerAsync(context, userManager, "customer2@test.com", "Omar Customer", 27, 31.2100, 29.9250)
+                await CreateCustomerAsync(context, userManager, "customer2@test.com", "Omar Customer", 27, 31.2100, 29.9250),
+                await CreateCustomerAsync(context, userManager, "customer3@test.com", "Heba Customer", 33, 31.2200, 29.9350),
+                await CreateCustomerAsync(context, userManager, "customer4@test.com", "Youssef Customer", 25, 31.1950, 29.9100)
             };
 
+            // Varied technicians (rating / availability / verification) so the Find Technician
+            // badges, sorting and filters all have something to show.
             var technicians = new List<Technician>
             {
-                await CreateTechnicianAsync(context, userManager, "tech1@test.com", "Ali Technician", 35, "29801011200123", 31.2050, 29.9200),
-                await CreateTechnicianAsync(context, userManager, "tech2@test.com", "Mona Technician", 40, "29505052500456", 31.2150, 29.9300)
+                await CreateTechnicianAsync(context, userManager, "tech1@test.com", "Ali Technician", 35, "29801011200123", 31.2050, 29.9200, 4.5m, true, TechnicianVerificationStatus.Approved),
+                await CreateTechnicianAsync(context, userManager, "tech2@test.com", "Mona Technician", 40, "29505052500456", 31.2150, 29.9300, 4.8m, true, TechnicianVerificationStatus.Approved),
+                await CreateTechnicianAsync(context, userManager, "tech3@test.com", "Khaled Technician", 38, "29002021200789", 31.2080, 29.9220, 4.2m, true, TechnicianVerificationStatus.Approved),
+                await CreateTechnicianAsync(context, userManager, "tech4@test.com", "Nour Technician", 29, "29404041400321", 31.2250, 29.9400, 3.9m, false, TechnicianVerificationStatus.Approved),
+                await CreateTechnicianAsync(context, userManager, "tech5@test.com", "Hassan Technician", 45, "27803031300654", 31.1900, 29.9050, 4.6m, true, TechnicianVerificationStatus.Pending),
+                await CreateTechnicianAsync(context, userManager, "tech6@test.com", "Layla Technician", 31, "29606061600987", 31.2300, 29.9450, 5.0m, true, TechnicianVerificationStatus.Approved)
             };
 
             await context.SaveChangesAsync();
             return (customers, technicians);
         }
 
+        // ---------- Technician ↔ Category assignments ----------
+        private static async Task SeedTechnicianCategoriesAsync(ApplicationDbContext context, List<Technician> technicians)
+        {
+            var categories = await context.Categories.AsNoTracking().OrderBy(c => c.Id).ToListAsync();
+            if (categories.Count == 0)
+                return;
+
+            // Give each technician a rotating slice of categories so the data is varied (some
+            // overlap, some differ) — enough to exercise the category filter + per-tech booking.
+            var perTech = Math.Min(3, categories.Count);
+            for (var i = 0; i < technicians.Count; i++)
+            {
+                for (var j = 0; j < perTech; j++)
+                {
+                    var category = categories[(i + j) % categories.Count];
+                    context.TechnicianCategories.Add(new TechnicianCategory
+                    {
+                        TechnicianId = technicians[i].Id,
+                        CategoryId = category.Id
+                    });
+                }
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        // ---------- 3. Staff & Admin Seeding ----------
+        private static async Task SeedStaffAccountsAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            // الأدمن الأساسي معاه صلاحية واحدة وهي FullAccess
+            await CreateStaffUserAsync(context, userManager, "admin@test.com", "System Administrator", StaffRole.Admin, PermissionType.FullAccess);
+
+            // الـ Moderator هنا أخد صلاحيتين مع بعض (ManageUsers و ManagePromos) وتقدري تزودي تالتة ورابعة كمان 🎯
+            await CreateStaffUserAsync(context, userManager, "moderator@test.com", "Content Moderator", StaffRole.Admin,
+                PermissionType.ManageUsers,
+                PermissionType.ManagePromos);
+
+            await context.SaveChangesAsync();
+        }
+
+        // ---------- Technician ↔ ProblemType pricing ----------
+        // Every technician gets a price band for every problem type. The booking Quote
+        // flow REQUIRES a pricing row (the tech can only quote within [MinPrice, MaxPrice],
+        // and the customer's Book Now modal shows that range), so without this the Direct
+        // flow can't be exercised. Each tech's band sits inside the problem type's own
+        // market range, nudged a little per technician so the ranges vary (higher-index
+        // technicians price slightly higher) — useful for the "this tech vs market" hint.
+        private static async Task SeedTechnicianPricingAsync(
+            ApplicationDbContext context, List<Technician> technicians, List<ProblemType> problemTypes)
+        {
+            if (await context.TechnicianPricings.AnyAsync())
+                return;
+
+            var now = DateTime.UtcNow;
+            var techCount = technicians.Count;
+
+            for (var t = 0; t < techCount; t++)
+            {
+                foreach (var pt in problemTypes)
+                {
+                    var range = pt.MaxPrice - pt.MinPrice;
+
+                    // Raise the floor a bit for higher-index techs, and lower the ceiling a
+                    // bit for lower-index techs — both rounded to the nearest 10 EGP.
+                    var min = pt.MinPrice + RoundTo10(range * t / 25m);
+                    var max = pt.MaxPrice - RoundTo10(range * (techCount - 1 - t) / 33m);
+                    if (max <= min) max = min + 10m; // safety for very narrow ranges
+
+                    context.TechnicianPricings.Add(new TechnicianPricing
+                    {
+                        TechnicianId = technicians[t].Id,
+                        ProblemTypeId = pt.Id,
+                        MinPrice = min,
+                        MaxPrice = max,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    });
+                }
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        private static decimal RoundTo10(decimal value) => Math.Round(value / 10m) * 10m;
+
         // ---------- Booking domain (service requests, offers, bookings, recurring) ----------
         private static async Task SeedBookingDomainAsync(
             ApplicationDbContext context, List<Customer> customers, List<Technician> technicians, List<ProblemType> problemTypes)
         {
+            if (customers == null || customers.Count < 2 || technicians == null || technicians.Count < 2)
+            {
+                customers = await context.Customers.Take(2).ToListAsync();
+                technicians = await context.Technicians.Take(2).ToListAsync();
+
+                if (customers.Count < 2 || technicians.Count < 2) return;
+            }
+
+            if (problemTypes == null || problemTypes.Count == 0)
+            {
+                problemTypes = await context.ProblemTypes.ToListAsync();
+                if (problemTypes.Count == 0) return;
+            }
+
             var c1 = customers[0];
             var c2 = customers[1];
             var t1 = technicians[0];
             var t2 = technicians[1];
-            var leak = problemTypes[0];
-            var wiring = problemTypes[2];
 
-            // Open service requests (near seeded coords so the geo query returns them)
+            var leak = problemTypes.FirstOrDefault() ?? new ProblemType();
+            var wiring = problemTypes.Count > 2 ? problemTypes[2] : (problemTypes.Skip(1).FirstOrDefault() ?? leak);
+
+            var hasExistingRequests = await context.ServiceRequests.AnyAsync();
+            if (hasExistingRequests) return;
+
             var sr1 = new ServiceRequest
             {
                 Description = "Kitchen sink leaking under the cabinet",
@@ -162,15 +290,13 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
                 ProblemTypeId = wiring.Id
             };
             context.ServiceRequests.AddRange(sr1, sr2);
-            await context.SaveChangesAsync(); // need sr Ids
+            await context.SaveChangesAsync();
 
-            // Two pending offers on sr1 (one per technician)
             context.Offers.AddRange(
                 new Offer { ServiceRequestId = sr1.Id, TechnicianId = t1.Id, Price = 240, EstimatedDuration = 120, Message = "I can handle this today.", ScheduledAt = DateTime.UtcNow.AddDays(2), Status = OfferStatus.Pending, CreatedAt = DateTime.UtcNow },
                 new Offer { ServiceRequestId = sr1.Id, TechnicianId = t2.Id, Price = 280, EstimatedDuration = 90, Message = "Available tomorrow morning.", ScheduledAt = DateTime.UtcNow.AddDays(2).AddHours(2), Status = OfferStatus.Pending, CreatedAt = DateTime.UtcNow }
             );
 
-            // Direct bookings (read fixtures — these did NOT go through the escrow/payment flow)
             context.Bookings.AddRange(
                 new Booking
                 {
@@ -209,7 +335,6 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
                 }
             );
 
-            // One active recurring booking
             context.RecurringBookings.Add(new RecurringBooking
             {
                 Address = "12 Nile St, Alexandria",
@@ -226,13 +351,23 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
                 TechnicianId = t1.Id,
                 ProblemTypeId = leak.Id
             });
+
+            await context.SaveChangesAsync();
         }
+
+        // ---------- 5. Helper Methods For Creating Entities ----------
 
         private static async Task<Customer> CreateCustomerAsync(
             ApplicationDbContext context, UserManager<ApplicationUser> userManager,
             string email, string fullName, int age, double lat, double lng)
         {
             var user = await CreateUserAsync(userManager, email, fullName, age, ApplicationUserRole.Customer, lat, lng);
+
+            var existingCustomer = await context.Customers
+                .FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+
+            if (existingCustomer != null)
+                return existingCustomer;
 
             var customer = new Customer
             {
@@ -243,58 +378,133 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
             };
             context.Customers.Add(customer);
 
-            context.Wallets.Add(new Wallet
+            var walletExists = await context.Wallets.AnyAsync(w => w.UserId == user.Id);
+            if (!walletExists)
+            {
+                context.Wallets.Add(new Wallet
+                {
+                    UserId = user.Id,
+                    Balance = 5000m,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            await context.SaveChangesAsync();
+            return customer;
+        }
+
+        private static async Task CreateStaffUserAsync(
+       ApplicationDbContext context, UserManager<ApplicationUser> userManager,
+       string email, string fullName, StaffRole domainRole, params PermissionType[] permissions)
+        {
+            // 1. إنشاء أو جلب الـ Identity User
+            var user = await CreateUserAsync(userManager, email, fullName, 25, ApplicationUserRole.Staff, 31.2001, 29.9187);
+
+            // 2. فحص هل الموظف موجود في جدول الـ Staff قبل كدا
+            var existingStaff = await context.Staffs.Where(s => s.UserId == user.Id).FirstOrDefaultAsync();
+            // الأفضل نستخدم AnyAsync عشان الأداء، أو نعمل تشيك بالإيميل
+            if (await context.Staffs.AnyAsync(s => s.UserId == user.Id)) return;
+
+            // 3. إنشاء كائن الـ Staff (من غير ما نعمل SaveChanges)
+            var staffMember = new Staff
             {
                 UserId = user.Id,
-                Balance = 5000m,
+                Role = domainRole,
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
-            });
+            };
+            await context.Staffs.AddAsync(staffMember);
 
-            await context.SaveChangesAsync(); // need customer.Id for booking-domain seeding
-            return customer;
+            // 4. إضافة الصلاحيات بربطها بكائن الـ Staff نفسه (Navigation Property) 🎯
+            if (permissions != null && permissions.Length > 0)
+            {
+                foreach (var permission in permissions)
+                {
+                    var staffPermission = new StaffPermission
+                    {
+                        // StaffId = staffMember.Id, 👈 شيلنا السطر ده عشان ميعملش إيرور (بيكون بـ 0 لسه)
+                        Staff = staffMember, // 🎯 ربطنا الكائن بالكامل هنا، الـ EF هيهندل الـ ID تلقائياً أثناء الحفظ
+                        Permission = permission
+                    };
+                    await context.StaffPermissions.AddAsync(staffPermission);
+                }
+            }
+            // ❌ شيلنا الـ SaveChangesAsync اللي كانت هنا تماماً
         }
 
         private static async Task<Technician> CreateTechnicianAsync(
             ApplicationDbContext context, UserManager<ApplicationUser> userManager,
-            string email, string fullName, int age, string nationalId, double lat, double lng)
+            string email, string fullName, int age, string nationalId, double lat, double lng,
+            decimal rating = 4.5m, bool isAvailable = true,
+            TechnicianVerificationStatus verificationStatus = TechnicianVerificationStatus.Approved)
         {
             var user = await CreateUserAsync(userManager, email, fullName, age, ApplicationUserRole.Technician, lat, lng);
+
+            var existingTechnician = await context.Technicians
+                .FirstOrDefaultAsync(t => t.ApplicationUserId == user.Id || t.NationalId == nationalId);
+
+            if (existingTechnician != null)
+            {
+                var hasWallet = await context.Wallets.AnyAsync(w => w.UserId == user.Id);
+                if (!hasWallet)
+                {
+                    context.Wallets.Add(new Wallet
+                    {
+                        UserId = user.Id,
+                        Balance = 1000m,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    });
+                    await context.SaveChangesAsync();
+                }
+                return existingTechnician;
+            }
 
             var technician = new Technician
             {
                 ApplicationUserId = user.Id,
                 NationalId = nationalId,
                 Experience = "5 years of professional experience",
-                Rating = 4.5m,
+                Rating = rating,
                 MaxTravelDistance = 20000,
-                VerificationStatus = TechnicianVerificationStatus.Approved,
-                IsAvailable = true,
+                VerificationStatus = verificationStatus,
+                IsAvailable = isAvailable,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            context.Technicians.Add(technician);
-            await context.SaveChangesAsync(); // need technician.Id
 
-            for (var day = DayOfWeek.Sunday; day <= DayOfWeek.Thursday; day++)
+            context.Technicians.Add(technician);
+            await context.SaveChangesAsync();
+
+            var hasAvailability = await context.TechnicianAvailabilities.AnyAsync(a => a.TechnicianId == technician.Id);
+            if (!hasAvailability)
             {
-                context.TechnicianAvailabilities.Add(new TechnicianAvailability
+                for (var day = DayOfWeek.Sunday; day <= DayOfWeek.Thursday; day++)
                 {
-                    TechnicianId = technician.Id,
-                    DayOfWeek = day,
-                    StartTime = new TimeOnly(9, 0),
-                    EndTime = new TimeOnly(17, 0)
-                });
+                    context.TechnicianAvailabilities.Add(new TechnicianAvailability
+                    {
+                        TechnicianId = technician.Id,
+                        DayOfWeek = day,
+                        StartTime = new TimeOnly(9, 0),
+                        EndTime = new TimeOnly(17, 0)
+                    });
+                }
             }
 
-            context.Wallets.Add(new Wallet
+            var walletExists = await context.Wallets.AnyAsync(w => w.UserId == user.Id);
+            if (!walletExists)
             {
-                UserId = user.Id,
-                Balance = 1000m,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
+                context.Wallets.Add(new Wallet
+                {
+                    UserId = user.Id,
+                    Balance = 1000m,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
 
             await context.SaveChangesAsync();
             return technician;
@@ -304,6 +514,10 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
             UserManager<ApplicationUser> userManager,
             string email, string fullName, int age, ApplicationUserRole role, double lat, double lng)
         {
+            var existingUser = await userManager.FindByEmailAsync(email);
+            if (existingUser != null)
+                return existingUser;
+
             var user = new ApplicationUser
             {
                 UserName = email,
@@ -324,5 +538,55 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
 
             return user;
         }
+    
+    // ---------- 6. Support Tickets Seeding ----------
+private static async Task SeedSupportTicketsAsync(
+    ApplicationDbContext context, List<Customer> customers)
+        {
+            if (await context.SupportTickets.AnyAsync())
+                return;
+
+            if (customers == null || customers.Count == 0)
+                customers = await context.Customers.Take(2).ToListAsync();
+
+            if (customers.Count == 0) return;
+
+            var c1 = customers[0];
+            var c2 = customers.Count > 1 ? customers[1] : customers[0];
+
+            // جيب booking موجود عشان نربطه بالتيكت
+            var booking = await context.Bookings.FirstOrDefaultAsync();
+
+            var tickets = new List<SupportTicket>
+    {
+        new SupportTicket
+        {
+            UserId = c1.ApplicationUserId,
+            BookingId = booking?.Id,
+            SenderName= "Sara Customer",
+            SenderEmail= "sara@gmail.com",
+            Subject = "الفني لم يصلح المشكلة",
+            Description = "الراجل خد مني الفلوس حق تصليح الغسالة وبعدين لقيت الغسالة عطلانة تاني",
+            Status = SupportTicketStatus.Open,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            IsDeleted = false
+        },
+        new SupportTicket
+        {
+            UserId = c2.ApplicationUserId,
+            SenderName= "Omar guste",
+            SenderEmail= "omar@gmail.com",
+            Subject = "مشكلة في السحب من المحفظة",
+            Description = "حاولت مرارًا وتكرارًا السحب من المحفظة ولم أستطع، برجاء حل مشكلتي",
+            Status = SupportTicketStatus.Open,
+            CreatedAt = DateTime.UtcNow.AddDays(-1),
+            UpdatedAt = DateTime.UtcNow.AddDays(-1),
+            IsDeleted = false
+        }
+    };
+
+            await context.SupportTickets.AddRangeAsync(tickets);
+            await context.SaveChangesAsync();
+        } }
     }
-}

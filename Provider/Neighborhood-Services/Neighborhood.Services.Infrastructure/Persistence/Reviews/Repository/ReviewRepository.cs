@@ -9,9 +9,9 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository
 {
     public class ReviewRepository : GenericRepository<Review, int>, IReviewRepository
     {
-        
+        private readonly ApplicationDbContext _context;
 
-        public ReviewRepository(ApplicationDbContext context) : base(context){}
+        public ReviewRepository(ApplicationDbContext context) : base(context){ _context = context; }
 
         // ── Queries ────────────────────────────────────────────────────────────
 
@@ -84,6 +84,19 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Reviews.Repository
                 r.BookingId == bookingId &&
                 r.ReviewType == direction,
                 cancellationToken);
+        }
+
+        public async Task<HashSet<int>> GetBookingIdsReviewedByAsync(IEnumerable<int> bookingIds, string reviewerId, CancellationToken cancellationToken = default)
+        {
+            var ids = bookingIds as ICollection<int> ?? bookingIds.ToList();
+            if (ids.Count == 0) return new HashSet<int>();
+
+            var reviewed = await _context.Reviews
+                .Where(r => r.ReviewerId == reviewerId && ids.Contains(r.BookingId))
+                .Select(r => r.BookingId)
+                .ToListAsync(cancellationToken);
+
+            return reviewed.ToHashSet();
         }
     }
 }
