@@ -2051,7 +2051,7 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -2066,11 +2066,12 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
-
                     b.HasIndex("TechnicianId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("CustomerId", "TechnicianId")
+                        .IsUnique();
 
                     b.ToTable("Favorites");
                 });
@@ -2793,9 +2794,11 @@ namespace Neighborhood.Services.Infrastructure.Migrations
 
             modelBuilder.Entity("Neighborhood.Services.Domain.favorites.Favorite", b =>
                 {
-                    b.HasOne("Neighborhood.Services.Domain.Customers.Customer", null)
+                    b.HasOne("Neighborhood.Services.Domain.Customers.Customer", "Customer")
                         .WithMany("Favorites")
-                        .HasForeignKey("CustomerId");
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Neighborhood.Services.Domain.Technicians.Technician", "Technician")
                         .WithMany("Favorites")
@@ -2808,6 +2811,8 @@ namespace Neighborhood.Services.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Customer");
 
                     b.Navigation("Technician");
 
