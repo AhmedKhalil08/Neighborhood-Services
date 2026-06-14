@@ -23,7 +23,7 @@ export class FavoriteListComponent {
   loadFavorites(): void {
     this.isLoading.set(true);
 
-    this.favoritesService.getAll().subscribe({
+    this.favoritesService.getForCurrentUser().subscribe({
       next: data => {
         console.log(data);
         this.favorites.set(data);

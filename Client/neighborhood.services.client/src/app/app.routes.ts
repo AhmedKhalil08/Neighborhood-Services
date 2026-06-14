@@ -45,6 +45,7 @@ import { PricingComponent } from './features/technician/pages/pricing/pricing.co
 import { ProblemTypeComponent } from './features/public/pages/services/problem-type/problem-type.component';
 import { PoliciesComponent } from './features/staff/pages/policies/policies.component';
 import { PublicProfileComponent } from './shared/components/public-profile/public-profile.component';
+import {FavoriteListComponent} from '../app/features/customer/pages/favorite-list/favorite-list.component';
 
 export const routes: Routes = [
   {
@@ -78,7 +79,7 @@ export const routes: Routes = [
       { path: 'find-technician', component: FindTechnicianComponent },
       { path: 'technician/:id', component: PublicProfileComponent, data: { role: 'technician' } },
       { path: 'recurring-bookings', component: RecurringBookingsComponent },
-      { path: 'favorites', component: CustomerPlaceholderComponent, data: { title: 'Favorites' } },
+      { path: 'favorites', component: FavoriteListComponent, data: { title: 'Favorites' } },
       { path: 'wallet', component: CustomerWalletComponent },
       { path: 'chat', component: CustomerPlaceholderComponent, data: { title: 'Chat' } },
       { path: 'chats', redirectTo: 'chat', pathMatch: 'full' },
