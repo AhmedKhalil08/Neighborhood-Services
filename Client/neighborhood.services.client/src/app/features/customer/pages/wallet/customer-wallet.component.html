@@ -38,15 +38,15 @@
         <!-- Type Dropdown -->
         <div class="dropdown">
           <button class="btn btn-sm btn-light bg-transparent border-0 text-secondary fw-medium dropdown-toggle d-flex justify-content-between align-items-center pe-3" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 140px; box-shadow: none;">
-            <span class="text-dark">{{ getFilterTypeLabel(filterType()) }}</span>
+            <span class="text-dark">{{ getFilterTypeLabel(filterType()) | translate }}</span>
           </button>
           <ul class="dropdown-menu border-0 shadow" style="border-radius: 1rem; min-width: 160px; font-size: 0.95rem; padding: 0.5rem;">
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === ''" [class.text-primary]="filterType() === ''" (click)="filterType.set(''); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">All Types</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.TopUp" [class.text-primary]="filterType() === TransactionType.TopUp" (click)="filterType.set(TransactionType.TopUp); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">Top Up</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.Withdrawal" [class.text-primary]="filterType() === TransactionType.Withdrawal" (click)="filterType.set(TransactionType.Withdrawal); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">Withdrawal</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.BookingPayment" [class.text-primary]="filterType() === TransactionType.BookingPayment" (click)="filterType.set(TransactionType.BookingPayment); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">Payment</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.Refund" [class.text-primary]="filterType() === TransactionType.Refund" (click)="filterType.set(TransactionType.Refund); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">Refund</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.Transfer" [class.text-primary]="filterType() === TransactionType.Transfer" (click)="filterType.set(TransactionType.Transfer); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem;">Transfer</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === ''" [class.text-primary]="filterType() === ''" (click)="filterType.set(''); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.allTypes' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.TopUp" [class.text-primary]="filterType() === TransactionType.TopUp" (click)="filterType.set(TransactionType.TopUp); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.transactionType.topUp' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.Withdrawal" [class.text-primary]="filterType() === TransactionType.Withdrawal" (click)="filterType.set(TransactionType.Withdrawal); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.transactionType.withdrawal' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.BookingPayment" [class.text-primary]="filterType() === TransactionType.BookingPayment" (click)="filterType.set(TransactionType.BookingPayment); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.transactionType.bookingPayment' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.Refund" [class.text-primary]="filterType() === TransactionType.Refund" (click)="filterType.set(TransactionType.Refund); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.transactionType.refund' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterType() === TransactionType.Transfer" [class.text-primary]="filterType() === TransactionType.Transfer" (click)="filterType.set(TransactionType.Transfer); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem;">{{ 'wallet.transactionType.transfer' | translate }}</a></li>
           </ul>
         </div>
         
@@ -55,14 +55,14 @@
         <!-- Status Dropdown -->
         <div class="dropdown">
           <button class="btn btn-sm btn-light bg-transparent border-0 text-secondary fw-medium dropdown-toggle d-flex justify-content-between align-items-center pe-3" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 140px; box-shadow: none;">
-            <span class="text-dark">{{ getFilterStatusLabel(filterStatus()) }}</span>
+            <span class="text-dark">{{ getFilterStatusLabel(filterStatus()) | translate }}</span>
           </button>
           <ul class="dropdown-menu border-0 shadow" style="border-radius: 1rem; min-width: 160px; font-size: 0.95rem; padding: 0.5rem;">
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === ''" [class.text-primary]="filterStatus() === ''" (click)="filterStatus.set(''); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">All Statuses</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Pending" [class.text-primary]="filterStatus() === TransactionStatus.Pending" (click)="filterStatus.set(TransactionStatus.Pending); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">Pending</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Completed" [class.text-primary]="filterStatus() === TransactionStatus.Completed" (click)="filterStatus.set(TransactionStatus.Completed); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">Completed</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Failed" [class.text-primary]="filterStatus() === TransactionStatus.Failed" (click)="filterStatus.set(TransactionStatus.Failed); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">Failed</a></li>
-            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Reversed" [class.text-primary]="filterStatus() === TransactionStatus.Reversed" (click)="filterStatus.set(TransactionStatus.Reversed); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem;">Reversed</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === ''" [class.text-primary]="filterStatus() === ''" (click)="filterStatus.set(''); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.allStatuses' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Pending" [class.text-primary]="filterStatus() === TransactionStatus.Pending" (click)="filterStatus.set(TransactionStatus.Pending); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.statusType.pending' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Completed" [class.text-primary]="filterStatus() === TransactionStatus.Completed" (click)="filterStatus.set(TransactionStatus.Completed); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.statusType.completed' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Failed" [class.text-primary]="filterStatus() === TransactionStatus.Failed" (click)="filterStatus.set(TransactionStatus.Failed); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem; margin-bottom: 2px;">{{ 'wallet.statusType.failed' | translate }}</a></li>
+            <li><a class="dropdown-item py-2 px-3 fw-medium" [class.bg-light]="filterStatus() === TransactionStatus.Reversed" [class.text-primary]="filterStatus() === TransactionStatus.Reversed" (click)="filterStatus.set(TransactionStatus.Reversed); currentPage.set(1)" style="cursor: pointer; border-radius: 0.5rem;">{{ 'wallet.statusType.reversed' | translate }}</a></li>
           </ul>
         </div>
       </div>
@@ -127,7 +127,7 @@
             <ul class="pagination pagination-sm mb-0 gap-2">
               <li class="page-item" [class.disabled]="currentPage() === 1">
                 <a class="page-link border-0 shadow-sm rounded-pill px-3 fw-medium text-dark d-flex align-items-center" role="button" (click)="changePage(currentPage() - 1)">
-                  <i class="bi bi-chevron-left me-1 small"></i>{{ 'wallet.previous' | translate }}
+                  {{ 'wallet.previous' | translate }}
                 </a>
               </li>
               
@@ -140,7 +140,7 @@
 
               <li class="page-item" [class.disabled]="currentPage() === totalPages()">
                 <a class="page-link border-0 shadow-sm rounded-pill px-3 fw-medium text-dark d-flex align-items-center" role="button" (click)="changePage(currentPage() + 1)">
-                  {{ 'wallet.next' | translate }}<i class="bi bi-chevron-right ms-1 small"></i>
+                  {{ 'wallet.next' | translate }}
                 </a>
               </li>
             </ul>
@@ -199,7 +199,7 @@
           </div>
           @if ((withdrawAmount() || 0) > (wallet()?.balance || 0)) {
             <div class="text-danger small mt-2 fw-medium d-flex align-items-center">
-              <i class="bi bi-exclamation-triangle-fill me-1"></i>Amount exceeds available balance.
+              <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ 'wallet.amountExceedsBalance' | translate }}
             </div>
           }
         </div>

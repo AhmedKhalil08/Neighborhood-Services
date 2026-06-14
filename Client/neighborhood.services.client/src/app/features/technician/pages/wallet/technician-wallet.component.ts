@@ -51,25 +51,25 @@ export class TechnicianWalletComponent implements OnInit, AfterViewInit {
   });
 
   getFilterTypeLabel(type: TransactionType | ''): string {
-    if (type === '') return 'All Types';
+    if (type === '') return 'wallet.allTypes';
     switch (Number(type)) {
-      case TransactionType.TopUp: return 'Top Up';
-      case TransactionType.Withdrawal: return 'Withdrawal';
-      case TransactionType.BookingPayment: return 'Payment';
-      case TransactionType.Refund: return 'Refund';
-      case TransactionType.Transfer: return 'Transfer';
-      default: return 'All Types';
+      case TransactionType.TopUp: return 'wallet.transactionType.topUp';
+      case TransactionType.Withdrawal: return 'wallet.transactionType.withdrawal';
+      case TransactionType.BookingPayment: return 'wallet.transactionType.bookingPayment';
+      case TransactionType.Refund: return 'wallet.transactionType.refund';
+      case TransactionType.Transfer: return 'wallet.transactionType.transfer';
+      default: return 'wallet.allTypes';
     }
   }
 
   getFilterStatusLabel(status: TransactionStatus | ''): string {
-    if (status === '') return 'All Statuses';
+    if (status === '') return 'wallet.allStatuses';
     switch (Number(status)) {
-      case TransactionStatus.Pending: return 'Pending';
-      case TransactionStatus.Completed: return 'Completed';
-      case TransactionStatus.Failed: return 'Failed';
-      case TransactionStatus.Reversed: return 'Reversed';
-      default: return 'All Statuses';
+      case TransactionStatus.Pending: return 'wallet.statusType.pending';
+      case TransactionStatus.Completed: return 'wallet.statusType.completed';
+      case TransactionStatus.Failed: return 'wallet.statusType.failed';
+      case TransactionStatus.Reversed: return 'wallet.statusType.reversed';
+      default: return 'wallet.allStatuses';
     }
   }
 
