@@ -584,16 +584,6 @@ namespace Neighborhood.Services.Infrastructure.Persistence.Seeding
                     ExpiresAt = now.AddMonths(1),
                     IsActive = true,
                     CreatedAt = now
-                },
-                new PromoCode
-                {
-                    Code = "FREEDEAL",
-                    DiscountPercentage = 100m,
-                    MaxUses = 5,
-                    UsedCount = 0,
-                    ExpiresAt = now.AddMonths(1),
-                    IsActive = true,
-                    CreatedAt = now
                 }
             };
 
