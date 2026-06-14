@@ -6,6 +6,7 @@ import { MessagesService } from '../../services/messages.service';
 import { ChatService } from '../../services/chat.service';
 import { computed, NgModule,  inject, Signal, NgZone } from '@angular/core';
 import { MessageDto } from '../../../../core/models/message-dto';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -15,7 +16,7 @@ import { MessageDto } from '../../../../core/models/message-dto';
 
 @Component({
   selector: 'app-customer-chats',
-  imports: [NgClass,CommonModule],
+  imports: [NgClass,CommonModule,FormsModule],
   templateUrl: './customer-chats.component.html',
   styleUrl: './customer-chats.component.css',
 })
