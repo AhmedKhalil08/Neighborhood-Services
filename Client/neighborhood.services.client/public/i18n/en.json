@@ -1255,5 +1255,12 @@
         "date": "Date",
         "empty": "No flagged reviews found.",
         "loadFail": "Failed to load review analysis."
+    },
+    "favorites": {
+        "add": "Add to favorites",
+        "remove": "Remove from favorites",
+        "added": "Added to favorites",
+        "removed": "Removed from favorites",
+        "error": "Could not update favorites"
     }
 }
