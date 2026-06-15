@@ -14,30 +14,33 @@ export class FavoritesStore {
   private readonly api = inject(FavoritesService);
 
   private readonly items = signal<FavoriteItem[]>([]);
-  private loaded = false;
+  private loading = false;
 
+  /** Fetch the customer's favorites. Safe to call from every card — concurrent calls
+   *  while a request is in flight are deduped to one. Unlike a load-once cache, this
+   *  re-fetches on each fresh call (e.g. when a page with hearts is (re)opened), so the
+   *  hearts stay in sync with changes made elsewhere such as the Favorites tab. */
   ngOnInit() {
     this.ensureLoaded();
   }
 
   /** Lazily fetch the customer's favorites once. Safe to call from every card. */
   ensureLoaded(): void {
-    if (this.loaded) return;
-    this.loaded = true;
+    if (this.loading) return;
+    this.loading = true;
     this.api.getForCurrentUser().subscribe({
-      next: (list) => this.items.set(list ?? []),
-      error: () => (this.loaded = false), // allow a later card to retry
+      next: (list) => {
+        this.items.set(list ?? []);
+        this.loading = false;
+      },
+      error: () => (this.loading = false), // allow a later card to retry
     });
   }
-  
-   isFavorite(technicianId: number): boolean {
-   
+
+  isFavorite(technicianId: number): boolean {
     return this.items().some((f) => f.technicianId === technicianId);
-   
   }
-  
-    
-  
+
 
   /** Adds or removes the technician; emits the resulting state (true = now favorited). */
   toggle(technicianId: number): Observable<boolean> {
