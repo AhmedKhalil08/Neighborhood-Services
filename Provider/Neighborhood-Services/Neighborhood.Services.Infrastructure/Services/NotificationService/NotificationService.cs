@@ -26,7 +26,7 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
         private readonly ICurrentUserService _current;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public NotificationService(IHubContext<NotificationHub> hubContext, 
+        public NotificationService(IHubContext<NotificationHub> hubContext,
             ILogger<NotificationService> logger,
             INotificationsRepository NotificationsRepository,
             IUnitOfWork unitOfWork,
@@ -35,12 +35,12 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
         {
             _hubContext = hubContext; ;
             _logger = logger;
-            _notificationsRepository= NotificationsRepository;
+            _notificationsRepository = NotificationsRepository;
             _unitOfWork = unitOfWork;
             _current = current;
             _httpContextAccessor = http;
-            
-           
+
+
         }
         public async Task<PushNotificationDto> SendNotificationAsync(string mssg)
         {
@@ -62,10 +62,10 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
             return new PushNotificationDto()
             {
                 Id = notf.Id,
-                UserId=notf.UserId,
-                Message=notf.message,
-                CreatedDate=notf.createdAt,
-                IsRead=notf.isRead,
+                UserId = notf.UserId,
+                Message = notf.message,
+                CreatedDate = notf.createdAt,
+                IsRead = notf.isRead,
             };
 
 
@@ -74,11 +74,14 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
         public async Task<PushNotificationDto> SendNotificationToAdmin(string mssg)
         {
 
+            //for real time 
             await _hubContext.Clients.Group("Staff").SendAsync("ReceiveNotification", new { mssg });
             _logger.LogInformation($"sending to Admins: {mssg}");
+
             if (_httpContextAccessor.HttpContext?.User?
           .FindFirstValue(ClaimTypes.Role) == ApplicationUserRole.Staff.ToString())
             {
+                //for retreiving after being online again
                 var notf = new Notification()
                 {
                     channel = NotificationChannels.push,
@@ -86,7 +89,8 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
                     message = mssg,
                     IsDeleted = false,
                     isRead = false,
-                    UserId = _current.UserId,
+                    UserId = "03102be2-7b75-4e27-9568-5f029b1d5e17",
+                    refrenceId = 2, //2 for admins
                     type = Domain.Notifications.NotificationTypes.general
                 };
                 await _notificationsRepository.AddAsync(notf);
@@ -101,8 +105,7 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
                     IsRead = notf.isRead,
                 };
             }
-            else
-            {
+            else {
                 return new PushNotificationDto()
                 {
                     Id = 1,
@@ -111,11 +114,20 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
                     CreatedDate = DateTime.UtcNow,
                     IsRead = false,
                 };
-
-
-
             }
         }
+
+
+
+
+   
+        
+
+        //all===>refrence id=1
+        //admins==>refrence id =2
+        //technicians ==>refrence id =3 
+        //customers===userid==refrence id 4
+        //certain user=== refrence id 5 ,
 
         public async Task<PushNotificationDto> SendNotificationToAdminIdentity(string mssg)
         {
@@ -248,10 +260,11 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
 
         public async Task<PushNotificationDto> SendNotificationToUser(string userId, string mssg)
         {
+            //for real time notifying
             await _hubContext.Clients.Group($"business-{userId}").SendAsync("ReceiveNotification", new { mssg });
-            if (_httpContextAccessor.HttpContext?.User?
-            .FindFirstValue(ClaimTypes.NameIdentifier) == userId)
-            {
+            
+
+            //for data base retrival
                 var notf = new Notification()
                 {
                     channel = NotificationChannels.push,
@@ -259,7 +272,7 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
                     message = mssg,
                     IsDeleted = false,
                     isRead = false,
-                    UserId = _current.UserId,
+                    UserId = userId,
                     type = Domain.Notifications.NotificationTypes.general
                 };
                 await _notificationsRepository.AddAsync(notf);
@@ -273,20 +286,11 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
                     CreatedDate = notf.createdAt,
                     IsRead = notf.isRead,
                 };
-            }
-            else
-            {
-                return new PushNotificationDto()
-                {
-                    Id = 1,
-                    UserId = "none",
-                    Message = "notf.message",
-                    CreatedDate = DateTime.UtcNow,
-                    IsRead = false,
-                };
+           
+                
             }
 
-        }
+        
 
         //Customer,
         //Technician,

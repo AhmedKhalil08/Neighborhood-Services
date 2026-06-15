@@ -20,11 +20,6 @@ export class FavoritesStore {
    *  while a request is in flight are deduped to one. Unlike a load-once cache, this
    *  re-fetches on each fresh call (e.g. when a page with hearts is (re)opened), so the
    *  hearts stay in sync with changes made elsewhere such as the Favorites tab. */
-  ngOnInit() {
-    this.ensureLoaded();
-  }
-
-  /** Lazily fetch the customer's favorites once. Safe to call from every card. */
   ensureLoaded(): void {
     if (this.loading) return;
     this.loading = true;

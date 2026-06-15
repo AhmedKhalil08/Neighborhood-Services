@@ -42,7 +42,7 @@ export class NotificationServiceService {
       console.log("Receving ..")
       console.log(data);
       const updated = [data, ...this.notificationsSubject.value];
-       this.toastr.success(data.message, 'New Notification');
+       this.toastr.success('New Notification');
       console.log("Updated list: ", updated);
       this.notificationsSubject.next(updated);
       this.notificationReceivedSubject.next(data);
@@ -50,7 +50,7 @@ export class NotificationServiceService {
   }// end of start connection
 
   GetAllNotifications() {
-    return this.httpClient.get<NotificationMessage[]>(`${this.baseUrl}/api/Notifications/GetAll`);
+    return this.httpClient.get<NotificationMessage[]>(`${this.baseUrl}/api/Notifications/GetNotificationsOfCurrentUser`);
   }
 
   setNotifications(list: NotificationMessage[]) {
