@@ -47,6 +47,9 @@ import { ProblemTypeComponent } from './features/public/pages/services/problem-t
 import { PoliciesComponent } from './features/staff/pages/policies/policies.component';
 import { TechReviewsComponent } from './features/technician/pages/reviews/tech-review';
 import { PublicProfileComponent } from './shared/components/public-profile/public-profile.component';
+import {FavoriteListComponent} from '../app/features/customer/pages/favorite-list/favorite-list.component';
+import {CustomerChatsComponent} from '../app/features/customer/pages/customer-chats/customer-chats.component'
+import{NewsletterpublishingComponent} from'../app/features/staff/pages/newsletter/newsletterpublishing/newsletterpublishing.component'
 
 export const routes: Routes = [
   {
@@ -80,9 +83,9 @@ export const routes: Routes = [
       { path: 'find-technician', component: FindTechnicianComponent },
       { path: 'technician/:id', component: PublicProfileComponent, data: { role: 'technician' } },
       { path: 'recurring-bookings', component: RecurringBookingsComponent },
-      { path: 'favorites', component: CustomerPlaceholderComponent, data: { title: 'Favorites' } },
+      { path: 'favorites', component: FavoriteListComponent, data: { title: 'Favorites' } },
       { path: 'wallet', component: CustomerWalletComponent },
-      { path: 'chat', component: CustomerPlaceholderComponent, data: { title: 'Chat' } },
+      { path: 'chat', component:CustomerChatsComponent, data: { title: 'Chat' } },
       { path: 'chats', redirectTo: 'chat', pathMatch: 'full' },
       { path: 'notifications', component: CustomerPlaceholderComponent, data: { title: 'Notifications' } },
       { path: 'profile', component: CustomerProfileComponent },
@@ -110,7 +113,9 @@ export const routes: Routes = [
       { path: 'earnings', component: TechnicianEarningsComponent },
       { path: 'availability', component: AvailiabilityAndExceptionComponent },
        { path: 'reviews', component: TechReviewsComponent },
-      { path: 'pricing', component: PricingComponent },
+        { path: 'pricing', component: PricingComponent },
+        { path: 'chat', component: CustomerChatsComponent, data: { title: 'Chat' } },
+
     ]
   },
 
@@ -130,6 +135,7 @@ export const routes: Routes = [
       { path: 'categories', component: CategoryComponent, title: 'Staff Categories' },
       { path: 'details/:categoryId', component: CategoryDetailsComponent, title: 'Category Details ' },
       { path: 'policies', component: PoliciesComponent, title: 'Staff Policies' },
+
       { path: '**', redirectTo: '' }
     ]
   },
@@ -175,6 +181,7 @@ export const routes: Routes = [
           import('./features/staff/pages/reviews/reviews.component')
             .then(m => m.ReviewsComponent)
       },
+      {path:'newsletters',component:NewsletterpublishingComponent},
       { path: '**', redirectTo: '' }
     ],
   },

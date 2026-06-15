@@ -370,7 +370,7 @@
         }
     },
     "recurring": {
-        "title": "الحجوزات المتكررة",
+        "title": "الحجوزات الدورية",
         "search": "ابحث بالعنوان أو الرقم",
         "new": "جديد",
         "empty": "لا توجد ترتيبات متكررة هنا بعد.",
@@ -639,7 +639,7 @@
             "errScheduledAt": "اختر التاريخ والوقت."
         },
         "recurring": {
-            "title": "المهام المتكررة",
+            "title": "المهام الدورية",
             "search": "ابحث بالعنوان أو الرقم",
             "empty": "لا توجد مهام متكررة هنا بعد.",
             "min": "دقيقة",
@@ -872,16 +872,16 @@
         "myBookings": "حجوزاتي",
         "serviceRequests": "طلبات الخدمة",
         "findTechnician": "ابحث عن فني",
-        "recurringBookings": "الحجوزات المتكررة",
+        "recurringBookings": "الحجوزات الدورية",
         "favorites": "المفضلة",
         "wallet": "المحفظة",
-        "chat": "المحادثة",
+        "chat": "المحادثات",
         "notifications": "الإشعارات",
         "profile": "الملف الشخصي",
         "myJobs": "مهامي",
         "browseRequests": "تصفح الطلبات",
         "offers": "العروض",
-        "recurringJobs": "المهام المتكررة",
+        "recurringJobs": "المهام الدورية",
         "availability": "مواعيد العمل",
         "pricing": "التسعير",
         "earnings": "الأرباح",
@@ -895,7 +895,8 @@
         "categories": "الفئات",
         "policies": "السياسات",
         "promoCodes": "أكواد الخصم",
-        "staffManagement": "إدارة الموظفين"
+        "staffManagement": "إدارة الموظفين",
+        "newsletter":"الموجز"
     },
     "staffBookings": {
         "title": "الحجوزات",
@@ -1103,7 +1104,35 @@
         "empty": "لا توجد تقييمات مُبلّغ عنها.",
         "loadFail": "تعذّر تحميل تحليل التقييمات."
     },
-    "favorites": {
+    
+    "favs":{
+        "favorite":"المفضلة",
+        "empty":"لا عناصر في المفضلة بعد!",
+        "emptyMessage":"الفنيون الذين تتم إضافتهم إلى المفضلة يظهرون هنا",
+        "browseCTA":" تصفح الخدمات"
+    },
+     "generalActins":{
+        "add":"إضافة",
+        "delete":"حذف",
+        "update":"تعديل",
+        "select":"تحديد"
+    },
+     "newsletter":{
+        "pagetitle":"إرسال بريد موجز الأخبار",
+        "pagedescription":"كتابة موجز الأخبار لتنسيقه ومعاينته قبل النشر",
+        "subj":"الموضوع",
+        "publish":"إرسال",
+        "pre":"معاينة",
+        "subPre":"موضوع البريد هنا ...",
+        "content":"المحتوى"
+  
+    },
+     "newslettersubscribe":{
+        "subscribe":"اشترك",
+        "description":"اشترك في نشرة الموجز ليصلك أحدث العروض وأكواد الخصم!"
+
+    },
+     "favorites": {
         "add": "أضف إلى المفضلة",
         "remove": "إزالة من المفضلة",
         "added": "تمت الإضافة إلى المفضلة",
