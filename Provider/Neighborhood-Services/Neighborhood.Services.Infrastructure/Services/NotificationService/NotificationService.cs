@@ -89,7 +89,7 @@ namespace Neighborhood.Services.Infrastructure.Services.NotificationService
                     message = mssg,
                     IsDeleted = false,
                     isRead = false,
-                    UserId = "03102be2-7b75-4e27-9568-5f029b1d5e17",
+                    UserId = _current.UserId,
                     refrenceId = 2, //2 for admins
                     type = Domain.Notifications.NotificationTypes.general
                 };
