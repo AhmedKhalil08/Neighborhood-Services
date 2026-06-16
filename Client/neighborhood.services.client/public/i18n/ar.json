@@ -255,6 +255,11 @@
             "Disputed": "متنازع عليه"
         },
         "min": "دقيقة",
+        "stepBooked": "محجوز",
+        "stepQuoted": "عرض سعر",
+        "stepConfirmed": "مؤكد",
+        "stepDone": "مكتمل",
+        "stepReviewed": "تم التقييم",
         "awaitingTechnician": "بانتظار عرض السعر من الفني.",
         "quotedCallout": "حدد الفني السعر: {{price}}",
         "acceptQuote": "قبول",
