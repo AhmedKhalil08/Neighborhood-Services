@@ -2,9 +2,10 @@ import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core
 import { CategoriesService } from '../../../../core/services/categories.service';
 import { Category } from '../../../../core/models/category';
 import { ProblemTypes } from '../../../staff/models/category-details';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LangService } from '../../../../core/services/lang.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { skip } from 'rxjs';
 
 @Component({
@@ -17,6 +18,8 @@ export class ServicesComponent implements OnInit {
 
   private readonly categoriesService = inject(CategoriesService);
   private readonly LangService = inject(LangService);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   categories: WritableSignal<Category[]> = signal<Category[]>([]);
   isLoading = signal<boolean>(false);
@@ -43,6 +46,11 @@ export class ServicesComponent implements OnInit {
 
       })
     })
+  }
+
+  /** Routes the "Book Now" CTA by role: guest→login, customer→Find Tech, tech/staff→their area. */
+  bookNow(): void {
+    this.router.navigateByUrl(this.auth.getBookNowUrl());
   }
 
 

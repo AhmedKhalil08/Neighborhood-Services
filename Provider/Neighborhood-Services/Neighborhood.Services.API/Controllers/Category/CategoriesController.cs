@@ -26,9 +26,10 @@ namespace Neighborhood.Services.API.Controllers.Category
         }
 
 
+        // Public read: powers the home-page service carousel and the public Services page,
+        // so it must stay anonymous. Admin write ops below keep their permission guard.
         [Cache(600)]
         [HttpGet]
-        [HasPermission(PermissionType.ManageCategories)]
         public async Task<ActionResult<IReadOnlyList<CategoryDto>>> GetAll([FromQuery] string? searchTerm, [FromQuery] string lang = "en")
          => Ok(await _mediator.Send(new GetAllCategoriesQuery(lang, searchTerm)));
 

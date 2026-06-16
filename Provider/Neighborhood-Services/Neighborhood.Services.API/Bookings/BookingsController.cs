@@ -65,7 +65,7 @@ namespace Neighborhood.Services.API.Bookings
         }
 
         // POST /api/bookings/{id}/staff-cancel  (admin cancel — no refund/reassign, separate from customer/tech cancel)
-       
+        [HasPermission(PermissionType.ManageBookings)]
         [HttpPost("{id:int}/staff-cancel")]
         public async Task<IActionResult> StaffCancel(int id, [FromBody] StaffCancelBookingCommand command)
         {

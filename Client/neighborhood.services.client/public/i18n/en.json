@@ -255,6 +255,11 @@
             "Disputed": "Disputed"
         },
         "min": "min",
+        "stepBooked": "Booked",
+        "stepQuoted": "Quoted",
+        "stepConfirmed": "Confirmed",
+        "stepDone": "Done",
+        "stepReviewed": "Reviewed",
         "awaitingTechnician": "Awaiting the technician's price quote.",
         "quotedCallout": "Technician quoted {{price}}",
         "acceptQuote": "Accept",
