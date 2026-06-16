@@ -71,8 +71,8 @@ constructor(private apiService: ApiService,private messagesService: MessagesServ
 
  initializeChat(bookingId: number) {
         this.hubConnection.start().then(() => {
-      //     this.hubConnection.invoke('JoinGroup', bookingId.toString())
-      // .catch(err => console.error(err));
+          this.hubConnection.invoke('JoinGroup', bookingId.toString())
+      .catch(err => console.error(err));
 
             console.log("initializaing hub")
             this.hubConnection.on('ReceiveMessage', (message: MessageDto) => {

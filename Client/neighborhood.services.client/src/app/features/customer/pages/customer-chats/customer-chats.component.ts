@@ -195,11 +195,14 @@ getMyId(): void {
         next: () => {
           this.ngZone.run(() => {  
             console.log("message sent!");
+            
             this.ngZone.run(() => {
-                    this.AllMessagesForBooking.update(msgs => [...msgs, this.MessageToBeSent]);
+              
+              
+                    //this.AllMessagesForBooking.update(msgs => [...msgs, this.MessageToBeSent]);
                 });
             //this.AllMessagesForBooking().push(this.MessageToBeSent);
-             this.isLoading.set(true);
+             this.isLoading.set(false);
              
             this.messageContent = '';
             this.MessageToBeSent = new MessageDto();
