@@ -43,7 +43,7 @@ export class NotificationServiceService {
       console.log(data.mssg);
       const updated = [data, ...this.notificationsSubject.value];
       this.toastr.success(data.mssg);
-      this.toastr.success(data.mssgtype)
+      //this.toastr.success(data.mssgtype)
       console.log("Updated list: ", updated);
       this.notificationsSubject.next(updated);
       this.notificationReceivedSubject.next(data);
