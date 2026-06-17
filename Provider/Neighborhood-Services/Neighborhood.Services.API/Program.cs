@@ -200,6 +200,8 @@ namespace Neighborhood.Services.API
             //Mapping Notification Hub
             app.MapHub<Neighborhood.Services.Infrastructure.Services.NotificationService.NotificationHub>("/notificationHub");
             app.MapHub<Neighborhood.Services.Infrastructure.Services.ChatService.ChatHub>("/chatHub");
+            app.MapHub<Neighborhood.Services.Infrastructure.Services.CustomerService.CustomerServiceHub>("/customerServiceHub");
+
             //app.MapHub<NotificationHub>("/notf");
 
             //END OF ARWA

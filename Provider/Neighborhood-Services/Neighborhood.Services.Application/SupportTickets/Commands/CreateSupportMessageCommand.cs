@@ -9,6 +9,8 @@ namespace Neighborhood.Services.Application.SupportTickets.Commands
         public int TicketId { get; set; }
         // public string SenderId { get; set; }
         public string Message { get; set; }
+
+       // public string? email { set; get; }
         public MessageChannel Channel { get; set; } // is enum (Chat = 1, Mail = 2)
     }
 }

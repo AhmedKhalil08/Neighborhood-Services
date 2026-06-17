@@ -2,6 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LayoutService } from '../../../../core/services/layout.service';
+import {CustomerSupportService} from '../../../public/services/customer-support.service'
+import {TicketDto} from '../../../public/models/ticket-dto';
+
 
 @Component({
   selector: 'app-staff-sidebar',
@@ -11,6 +14,7 @@ import { LayoutService } from '../../../../core/services/layout.service';
 })
 export class StaffSidebarComponent {
   readonly layout = inject(LayoutService);
+  readonly customerSupportService = inject(CustomerSupportService);
   collapsed = signal(false);
 
   toggle() {

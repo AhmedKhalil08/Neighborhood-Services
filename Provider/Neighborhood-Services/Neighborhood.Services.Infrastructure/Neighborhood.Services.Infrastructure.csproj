@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <Folder Include="Persistence\Context\" />
-    <Folder Include="Services\CustomerService\" />
   </ItemGroup>
 
   <ItemGroup>

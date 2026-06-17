@@ -50,6 +50,7 @@ import { PublicProfileComponent } from './shared/components/public-profile/publi
 import {FavoriteListComponent} from '../app/features/customer/pages/favorite-list/favorite-list.component';
 import {CustomerChatsComponent} from '../app/features/customer/pages/customer-chats/customer-chats.component'
 import{NewsletterpublishingComponent} from'../app/features/staff/pages/newsletter/newsletterpublishing/newsletterpublishing.component'
+import {CustomerSupportComponent} from '../app/features/public/pages/customersupport/customer-support/customer-support.component'
 
 export const routes: Routes = [
   {
@@ -64,6 +65,7 @@ export const routes: Routes = [
       { path: 'auth/login', component: LoginComponent, canActivate: [guestGuard] },
       { path: 'auth/register', component: RegisterComponent, canActivate: [guestGuard] },
       { path: 'auth/external-callback', component: ExternalCallbackComponent },
+      { path: 'customer-service-chat', component: CustomerSupportComponent }
     ],
   },
 
