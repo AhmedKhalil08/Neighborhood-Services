@@ -45,6 +45,8 @@
         "addMethod": "إضافة طريقة",
         "noPaymentMethods": "ليس لديك طرق دفع محفوظة.",
         "transactions": "سجل المعاملات",
+        "allTypes": "جميع الأنواع",
+        "allStatuses": "جميع الحالات",
         "date": "التاريخ",
         "type": "النوع",
         "amount": "المبلغ",
@@ -54,7 +56,32 @@
         "selectPaymentMethod": "اختر طريقة الدفع",
         "chooseMethod": "اختر طريقة...",
         "proceedToPayment": "المتابعة للدفع",
-        "availableForPayout": "متاح للسحب القادم"
+        "availableForPayout": "متاح للسحب القادم",
+        "withdraw": "سحب الرصيد",
+        "withdrawFunds": "سحب الأموال",
+        "availableBalance": "الرصيد المتاح",
+        "withdrawalAmount": "مبلغ السحب",
+        "enterAmount": "أدخل المبلغ",
+        "confirmWithdrawal": "تأكيد السحب",
+        "amountExceedsBalance": "المبلغ يتجاوز الرصيد المتاح.",
+        "processing": "جارٍ المعالجة...",
+        "previous": "السابق",
+        "next": "التالي",
+        "pageOf": "صفحة {{current}} من {{total}}",
+        "statusType": {
+            "pending": "قيد الانتظار",
+            "completed": "مكتلمة",
+            "failed": "فشلت",
+            "reversed": "معكوس"
+        },
+        "transactionType": {
+            "topUp": "شحن",
+            "transfer": "تحويل",
+            "withdrawal": "سحب",
+            "bookingPayment": "دفع حجز",
+            "refund": "استرداد",
+            "reversal": "عكس معاملة"
+        }
     },
     "earnings": {
         "title": "الأرباح والفواتير",
@@ -113,7 +140,30 @@
         "geoUnsupported": "المتصفح لا يدعم تحديد الموقع.",
         "openInMaps": "فتح في الخرائط",
         "confirm": "تأكيد",
-        "confirmTitle": "يرجى التأكيد"
+        "confirmTitle": "يرجى التأكيد",
+        "edit": "تعديل",
+        "delete": "حذف"
+    },
+    "gallery": {
+        "title": "معرض الأعمال",
+        "subtitle": "اعرض نماذج من أعمالك في ملفك العام.",
+        "photo": "الصورة",
+        "caption": "الوصف",
+        "changePhoto": "تغيير الصورة",
+        "addPhoto": "إضافة صورة",
+        "updatePhoto": "تحديث الصورة",
+        "fileHint": "JPG, PNG, WebP أو GIF بحد أقصى 5 ميجابايت",
+        "chooseError": "اختر صورة لمعرض الأعمال.",
+        "saving": "جارٍ حفظ الصورة...",
+        "loading": "جارٍ تحميل صور المعرض...",
+        "empty": "لا توجد صور في المعرض حتى الآن.",
+        "workSample": "نموذج عمل",
+        "deleteTitle": "حذف صورة من المعرض؟",
+        "deleteSubtitle": "لا يمكن التراجع عن هذا الإجراء.",
+        "deleteMessage": "هل تريد حذف هذه الصورة من معرض الأعمال؟",
+        "deleteMessageWithCaption": "هل تريد حذف \"{{caption}}\" من معرض الأعمال؟",
+        "deleteConfirm": "حذف الصورة",
+        "deleting": "جارٍ الحذف..."
     },
     "publicProfile": {
         "role": {
@@ -130,7 +180,9 @@
         "reviewsTitle": "المراجعات",
         "noReviews": "لا توجد مراجعات بعد.",
         "anonymous": "مجهول",
-        "loadError": "تعذّر تحميل هذا الملف الشخصي."
+        "loadError": "تعذّر تحميل هذا الملف الشخصي.",
+        "galleryTitle": "معرض الأعمال",
+        "galleryEmpty": "المعرض فارغ."
     },
     "reindex": {
         "confirmTitle": "إعادة فهرسة قاعدة المعرفة؟",
@@ -149,6 +201,8 @@
         "filterAll": "الكل",
         "empty": "لا توجد حجوزات هنا بعد.",
         "details": "التفاصيل",
+        "viewInvoice": "عرض الفاتورة",
+        "downloadInvoice": "تحميل الفاتورة",
         "actions": "إجراءات",
         "confirmCompleted": "تأكيد الاكتمال",
         "cancelBooking": "إلغاء الحجز",
@@ -201,10 +255,16 @@
             "Disputed": "متنازع عليه"
         },
         "min": "دقيقة",
+        "stepBooked": "محجوز",
+        "stepQuoted": "عرض سعر",
+        "stepConfirmed": "مؤكد",
+        "stepDone": "مكتمل",
+        "stepReviewed": "تم التقييم",
         "awaitingTechnician": "بانتظار عرض السعر من الفني.",
         "quotedCallout": "حدد الفني السعر: {{price}}",
         "acceptQuote": "قبول",
         "rejectQuote": "رفض",
+        "promoPlaceholder": "كود الخصم (اختياري)",
         "acceptQuotePrompt": "قبول العرض بقيمة {{price}} جنيه؟ سيتم حجز المبلغ في الضمان حتى تأكيد المهمة.",
         "rejectQuotePrompt": "رفض هذا العرض؟ سيُطلب من الفني إرسال سعر جديد.",
         "quoteAccepted": "تم قبول العرض — تم تأكيد الحجز.",
@@ -311,11 +371,13 @@
             "price": "السعر",
             "duration": "المدة التقديرية",
             "min": "دقيقة",
+            "promoLabel": "كود الخصم",
+            "promoPlaceholder": "أدخل الكود",
             "accept": "قبول العرض"
         }
     },
     "recurring": {
-        "title": "الحجوزات المتكررة",
+        "title": "الحجوزات الدورية",
         "search": "ابحث بالعنوان أو الرقم",
         "new": "جديد",
         "empty": "لا توجد ترتيبات متكررة هنا بعد.",
@@ -584,7 +646,7 @@
             "errScheduledAt": "اختر التاريخ والوقت."
         },
         "recurring": {
-            "title": "المهام المتكررة",
+            "title": "المهام الدورية",
             "search": "ابحث بالعنوان أو الرقم",
             "empty": "لا توجد مهام متكررة هنا بعد.",
             "min": "دقيقة",
@@ -652,15 +714,24 @@
         "nameInArabic": "الاسم باللغة العربية",
         "descInEnglish": "الوصف باللغة الإنجليزية",
         "descInArabic": "الوصف باللغة العربية",
-        "egp": "ج.م"
+        "egp": "ج.م",
+        "loading": "...تحميل",
+        "noProblems": " لا يوجد مشاكل .",
+        "noCategories": " لا يوجد اي فئات.",
+        "categoryImage": "صوره الفئه",
+        "problemTypeName": "اسم المشكله",
+        "englishNameIsRequired": "الاسم بالغه الانجليزيه مطلوب ",
+        "arabicNameIsRequired": " الاسم بالغه العربيه مطلوب ",
+        "deleteProblemType": "حذف المشكله",
+        "problemImage": "   صوره للمشكله"
     },
     "hero": {
-        "badge": "نخدم مصر",
-        "titleLine1": "اعثر على فنيين خدمات منزلية موثوقين",
-        "titleHighlight1": "الخدمة",
-        "titleHighlight2": "الفنيين",
+        "badge": "نخدم جميع أنحاء مصر",
+        "titleLine1": "اعثر على",
+        "titleHighlight1": "فنيين موثوقين",
+        "titleHighlight2": "لخدمات المنزل",
         "titleLine2": "بالقرب منك",
-        "description": "تواصل مع سباكين وكهربائيين ونجارين وغيرهم موثوقين. مدفوعات آمنة، تقييمات حقيقية، وخدمة سريعة.",
+        "description": "تواصل مع سباكين وكهربائيين ونجارين وغيرهم من الفنيين الموثوقين. مدفوعات آمنة، تقييمات حقيقية، وخدمة سريعة.",
         "bookService": "احجز خدمة",
         "browseServices": "تصفح الخدمات"
     },
@@ -675,7 +746,9 @@
         "estimatedPrice": "السعر التقديري",
         "egp": "ج.م",
         "bookNow": "احجز الآن",
-        "cancle": "إلغاء"
+        "cancle": "إلغاء",
+        "noServices": "لا يوجد خدمات",
+        "loading": "...تحميل"
     },
     "howItWorks": {
         "title": "كيف يعمل الموقع",
@@ -723,7 +796,7 @@
         "saveChanges": "حفظ التغييرات",
         "add": "إضافة",
         "workingHours": "ساعات العمل",
-        "deleteAvailiability": "حذف الإتاحة",
+        "deleteAvailiability": " حذف الإتاحة؟",
         "thisActionCannotBeUndone": "لا يمكن التراجع عن هذا الإجراء.",
         "delete": "حذف",
         "noAvailiability": "لا يوجد اتاحات"
@@ -740,7 +813,10 @@
         "save": "حفظ",
         "cancle": "إلغاء",
         "noException": "لا يوجد استثناءات",
-        "date": "التاريخ"
+        "date": "التاريخ",
+        "dateIsRequired": " التاريخ مطلوب ",
+        "deleteException": "حذف الاستثناء",
+        "delete": "حذف"
     },
     "pricing": {
         "technicianPricing": "تسعير الفني",
@@ -759,7 +835,10 @@
         "editPricing": "تحديث التسعير",
         "enterMinimumPrice": "أدخل الحد الأدنى للسعر",
         "enterMaximumPrice": "أدخل الحد الأقصى للسعر",
-        "noPricing": " لا يوجد تسعيره لمشاكل"
+        "noPricing": " لا يوجد تسعيره لمشاكل",
+        "deletePricing": "حذف التسعير",
+        "thisActionCannotBeUndone": "لا يمكن التراجع عن هذا الإجراء.",
+        "close": "إلغاء"
     },
     "problemType": {
         "startingFrom": "يبدأ من",
@@ -783,15 +862,17 @@
         "actions": "الإجراءات",
         "edit": "تعديل",
         "delete": "حذف",
-        "appliesToIsRequired ": "حقل ينطبق على مطلوب",
+        "appliesToIsRequired": "يجب تحديد الياسه علي فني او عميل",
         "hoursBeforeBooking": "عدد الساعات قبل الحجز",
-        "hoursBeforeBookingIsRequired ": "حقل عدد الساعات قبل الحجز مطلوب",
-        "penaltyIsRequired": "حقل الرسوم الجزائية مطلوب",
+        "hoursBeforeBookingIsRequired": "حقل عدد الساعات قبل الحجز يجب ان يكون اكبر من صفر ",
+        "penaltyIsRequired": "حقل الرسوم الجزائية يجب ان تكون اكبر من صفر ",
         "cancle": "إلغاء",
         "save": "حفظ",
         "deletePolicy": "حذف السياسة؟",
         "thisActionCannotBeUndone": "لا يمكن التراجع عن هذا الإجراء.",
-        "hrs": "ساعات"
+        "hrs": "ساعات",
+        "loading": "...تحميل",
+        "noPoliciesFound": "لا يوجد سياسات ."
     },
     "sidebar": {
         "overview": "نظرة عامة",
@@ -799,20 +880,21 @@
         "myBookings": "حجوزاتي",
         "serviceRequests": "طلبات الخدمة",
         "findTechnician": "ابحث عن فني",
-        "recurringBookings": "الحجوزات المتكررة",
+        "recurringBookings": "الحجوزات الدورية",
         "favorites": "المفضلة",
         "wallet": "المحفظة",
-        "chat": "المحادثة",
+        "chat": "المحادثات",
         "notifications": "الإشعارات",
         "profile": "الملف الشخصي",
         "myJobs": "مهامي",
         "browseRequests": "تصفح الطلبات",
         "offers": "العروض",
-        "recurringJobs": "المهام المتكررة",
+        "recurringJobs": "المهام الدورية",
         "availability": "مواعيد العمل",
         "pricing": "التسعير",
         "earnings": "الأرباح",
         "reviews": "التقييمات",
+        "gallery": "معرض الأعمال",
         "users": "المستخدمون",
         "bookings": "الحجوزات",
         "disputes": "النزاعات",
@@ -821,7 +903,8 @@
         "categories": "الفئات",
         "policies": "السياسات",
         "promoCodes": "أكواد الخصم",
-        "staffManagement": "إدارة الموظفين"
+        "staffManagement": "إدارة الموظفين",
+        "newsletter":"الموجز"
     },
     "staffBookings": {
         "title": "الحجوزات",
@@ -836,6 +919,12 @@
         "scheduled": "الموعد",
         "actions": "إجراءات",
         "cancel": "إلغاء",
+        "details": "التفاصيل",
+        "detailsTitle": "حجز",
+        "address": "العنوان",
+        "createdAt": "تاريخ الإنشاء",
+        "estimatedPrice": "السعر التقديري",
+        "finalPrice": "السعر النهائي",
         "tabs": {
             "All": "الكل",
             "Pending": "قيد الانتظار",
@@ -1028,5 +1117,40 @@
         "date": "التاريخ",
         "empty": "لا توجد تقييمات مُبلّغ عنها.",
         "loadFail": "تعذّر تحميل تحليل التقييمات."
+    },
+    
+    "favs":{
+        "favorite":"المفضلة",
+        "empty":"لا عناصر في المفضلة بعد!",
+        "emptyMessage":"الفنيون الذين تتم إضافتهم إلى المفضلة يظهرون هنا",
+        "browseCTA":" تصفح الخدمات"
+    },
+     "generalActins":{
+        "add":"إضافة",
+        "delete":"حذف",
+        "update":"تعديل",
+        "select":"تحديد"
+    },
+     "newsletter":{
+        "pagetitle":"إرسال بريد موجز الأخبار",
+        "pagedescription":"كتابة موجز الأخبار لتنسيقه ومعاينته قبل النشر",
+        "subj":"الموضوع",
+        "publish":"إرسال",
+        "pre":"معاينة",
+        "subPre":"موضوع البريد هنا ...",
+        "content":"المحتوى"
+  
+    },
+     "newslettersubscribe":{
+        "subscribe":"اشترك",
+        "description":"اشترك في نشرة الموجز ليصلك أحدث العروض وأكواد الخصم!"
+
+    },
+     "favorites": {
+        "add": "أضف إلى المفضلة",
+        "remove": "إزالة من المفضلة",
+        "added": "تمت الإضافة إلى المفضلة",
+        "removed": "تمت الإزالة من المفضلة",
+        "error": "تعذّر تحديث المفضلة"
     }
 }

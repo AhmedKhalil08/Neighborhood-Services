@@ -3,7 +3,9 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 import { PublicLayoutComponent } from './layouts/public-layout/public-layout.component';
+import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { CustomerLayoutComponent } from './layouts/customer-layout/customer-layout.component';
 import { TechnicianLayoutComponent } from './layouts/technician-layout/technician-layout.component';
 import { StaffLayoutComponent } from './layouts/staff-layout/staff-layout.component';
@@ -32,6 +34,7 @@ import { StaffDashboardComponent } from './features/staff/pages/dashboard/staff-
 import { FlaggedRequestsComponent } from './features/staff/pages/flagged-requests/flagged-requests.component';
 import { StaffBookingsComponent } from './features/staff/pages/bookings/staff-bookings.component';
 import { TechnicianProfileComponent } from './features/technician/pages/profile/technician-profile.component';
+import { TechnicianGalleryComponent } from './features/technician/pages/gallery/technician-gallery.component';
 import { TechnicianWalletComponent } from './features/technician/pages/wallet/technician-wallet.component';
 import { TechnicianEarningsComponent } from './features/technician/pages/earnings/technician-earnings.component';
 
@@ -46,20 +49,31 @@ import { ProblemTypeComponent } from './features/public/pages/services/problem-t
 import { PoliciesComponent } from './features/staff/pages/policies/policies.component';
 import { TechReviewsComponent } from './features/technician/pages/reviews/tech-review';
 import { PublicProfileComponent } from './shared/components/public-profile/public-profile.component';
+import { categoriesResolver } from './core/resolvers/categories-resolver';
+import {FavoriteListComponent} from '../app/features/customer/pages/favorite-list/favorite-list.component';
+import {CustomerChatsComponent} from '../app/features/customer/pages/customer-chats/customer-chats.component'
+import{NewsletterpublishingComponent} from'../app/features/staff/pages/newsletter/newsletterpublishing/newsletterpublishing.component'
 
 export const routes: Routes = [
   {
     path: '',
     component: PublicLayoutComponent,
     children: [
-      { path: '', component: HomeComponent },
-      { path: 'services', component: ServicesComponent },
+      { path: '', component: HomeComponent, resolve: { "categories": categoriesResolver } },
+      { path: 'services', component: ServicesComponent, resolve: { "categories": categoriesResolver } },
       { path: 'problemType/:id', component: ProblemTypeComponent },
       { path: 'about', component: AboutComponent },
       { path: 'contact', component: ContactComponent },
-      { path: 'auth/login', component: LoginComponent, canActivate: [guestGuard] },
-      { path: 'auth/register', component: RegisterComponent, canActivate: [guestGuard] },
-      { path: 'auth/external-callback', component: ExternalCallbackComponent },
+    ],
+  },
+
+  {
+    path: 'auth',
+    component: AuthLayoutComponent,
+    children: [
+      { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+      { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
+      { path: 'external-callback', component: ExternalCallbackComponent },
     ],
   },
 
@@ -79,16 +93,15 @@ export const routes: Routes = [
       { path: 'find-technician', component: FindTechnicianComponent },
       { path: 'technician/:id', component: PublicProfileComponent, data: { role: 'technician' } },
       { path: 'recurring-bookings', component: RecurringBookingsComponent },
-      { path: 'favorites', component: CustomerPlaceholderComponent, data: { title: 'Favorites' } },
+      { path: 'favorites', component: FavoriteListComponent, data: { title: 'Favorites' } },
       { path: 'wallet', component: CustomerWalletComponent },
-      { path: 'chat', component: CustomerPlaceholderComponent, data: { title: 'Chat' } },
+      { path: 'chat', component:CustomerChatsComponent, data: { title: 'Chat' } },
       { path: 'chats', redirectTo: 'chat', pathMatch: 'full' },
       { path: 'notifications', component: CustomerPlaceholderComponent, data: { title: 'Notifications' } },
       { path: 'profile', component: CustomerProfileComponent },
       { path: '**', redirectTo: '' }
     ],
   },
-
 
 
   {
@@ -105,56 +118,62 @@ export const routes: Routes = [
       { path: 'recurring-jobs', component: TechnicianRecurringJobsComponent },
       { path: 'customer/:id', component: PublicProfileComponent, data: { role: 'customer' } },
       { path: 'profile', component: TechnicianProfileComponent },
+      { path: 'gallery', component: TechnicianGalleryComponent },
       { path: 'wallet', component: TechnicianWalletComponent },
       { path: 'earnings', component: TechnicianEarningsComponent },
       { path: 'availability', component: AvailiabilityAndExceptionComponent },
-       { path: 'reviews', component: TechReviewsComponent },
+      { path: 'reviews', component: TechReviewsComponent },
       { path: 'pricing', component: PricingComponent },
-      { path: '**', redirectTo: '' }
+      { path: 'chat', component: CustomerChatsComponent, data: { title: 'Chat' } },
     ]
   },
-
-
 
   {
     path: 'staff',
     component: StaffLayoutComponent,
     canActivate: [authGuard, roleGuard],
-    canActivateChild: [authGuard, roleGuard],
+    canActivateChild: [authGuard, roleGuard, permissionGuard],
     data: { roles: ['Staff', 'Admin', 'TechnicalSupport'] },
     children: [
+      // Overview has no permission requirement — every staffer can see it.
       { path: '', component: StaffDashboardComponent },
-      { path: 'bookings', component: StaffBookingsComponent },
-      { path: 'flagged-requests', component: FlaggedRequestsComponent },
-      { path: 'users', component: StaffUsersComponent },
-      { path: 'categories', component: CategoryComponent, title: 'Staff Categories' },
-      { path: 'details/:categoryId', component: CategoryDetailsComponent, title: 'Category Details ' },
-      { path: 'policies', component: PoliciesComponent, title: 'Staff Policies' },
-      { path: 'promo-codes', component: StaffPromoCodesComponent },
+      { path: 'bookings', component: StaffBookingsComponent, data: { permission: 'ManageBookings' } },
+      { path: 'flagged-requests', component: FlaggedRequestsComponent, data: { permission: 'ManageFlagedReq' } },
+      { path: 'users', component: StaffUsersComponent, data: { permission: 'ManageUsers' } },
+      { path: 'categories', component: CategoryComponent, title: 'Staff Categories', data: { permission: 'ManageCategories' } },
+      { path: 'details/:categoryId', component: CategoryDetailsComponent, title: 'Category Details ', data: { permission: 'ManageCategories' } },
+      { path: 'policies', component: PoliciesComponent, title: 'Staff Policies', data: { permission: 'ManagePolicies' } },
+      { path: 'promo-codes', component: StaffPromoCodesComponent, data: { permission: 'ManagePromos' } },
       {
         path: 'staff-management',
+        data: { permission: 'FullAccess' },
         loadComponent: () =>
           import('./features/staff/pages/staff-management/staff-management.component')
             .then(m => m.StaffManagementComponent)
       },
       {
         path: 'support-tickets',
+        data: { permission: 'ManageTickets' },
         loadComponent: () =>
           import('./features/staff/pages/support-tickets/support-tickets.component')
             .then(m => m.SupportTicketsComponent)
       },
       {
         path: 'disputes',
+        data: { permission: 'ManageDisputes' },
         loadComponent: () =>
           import('./features/staff/pages/disputes/disputes.component')
             .then(m => m.DisputesComponent)
       },
       {
         path: 'reviews',
+        data: { permission: 'MangeReviews' },
         loadComponent: () =>
           import('./features/staff/pages/reviews/reviews.component')
             .then(m => m.ReviewsComponent)
       },
+      // Newsletters has no matching PermissionType — left open to all staff.
+      {path:'newsletters',component:NewsletterpublishingComponent},
       { path: '**', redirectTo: '' }
     ],
   },

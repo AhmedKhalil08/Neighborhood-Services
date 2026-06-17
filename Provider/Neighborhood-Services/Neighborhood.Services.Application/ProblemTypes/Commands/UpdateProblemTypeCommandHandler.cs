@@ -16,11 +16,13 @@ namespace Neighborhood.Services.Application.ProblemTypes.Commands
     {
         private readonly IProblemTypeRepository _problemTypeRepo;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBackgroundJobScheduler _jobs;
 
-        public UpdateProblemTypeCommandHandler(IProblemTypeRepository problemTypeRepo, IUnitOfWork unitOfWork)
+        public UpdateProblemTypeCommandHandler(IProblemTypeRepository problemTypeRepo, IUnitOfWork unitOfWork, IBackgroundJobScheduler jobs)
         {
             _problemTypeRepo = problemTypeRepo;
             _unitOfWork = unitOfWork;
+            _jobs = jobs;
         }
 
         public async Task<UpdateProblemTypeDto> Handle(UpdateProblemTypeCommand request, CancellationToken cancellationToken)
@@ -40,7 +42,15 @@ namespace Neighborhood.Services.Application.ProblemTypes.Commands
                 throw new ValidationException("MinPrice must be less than MaxPrice.");
 
 
-            if(!string.IsNullOrWhiteSpace(request.DescriptionEn))
+
+            if (!string.IsNullOrWhiteSpace(request.NameEn))
+                problemType.NameEn = request.NameEn;
+
+
+            if (!string.IsNullOrWhiteSpace(request.NameAr))
+                problemType.NameAr = request.NameAr;
+
+            if (!string.IsNullOrWhiteSpace(request.DescriptionEn))
                     problemType.DescriptionEn = request.DescriptionEn;
 
             if (!string.IsNullOrWhiteSpace(request.DescriptionAr))
@@ -54,10 +64,14 @@ namespace Neighborhood.Services.Application.ProblemTypes.Commands
             await _problemTypeRepo.UpdateAsync(problemType);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            // Re-embed this problem type's vectors off the request thread. Fail-open: a queue
+            // hiccup must never undo a committed update.
+            try { _jobs.EnqueueProblemTypeIndex(problemType.Id); } catch { /* RAG sync is best-effort; /reindex is the backstop */ }
 
             var problemTypeDto = new UpdateProblemTypeDto()
             {
                 Description = !string.IsNullOrWhiteSpace(request.DescriptionEn) ? request.DescriptionEn : request.DescriptionAr,
+                
                 MinPrice = request.MinPrice,
                 MaxPrice = request.MaxPrice
             };

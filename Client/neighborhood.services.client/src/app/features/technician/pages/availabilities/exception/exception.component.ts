@@ -1,17 +1,18 @@
 import { DatePipe } from '@angular/common';
-import { Component, ElementRef, inject, Signal, signal, viewChildren, WritableSignal } from '@angular/core';
+import { Component, ElementRef, inject, Signal, signal, viewChild, viewChildren, WritableSignal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Time12Pipe } from '../../../../../shared/pipes/time12-pipe';
 import { ExceptionService } from '../../../services/exception.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { Exception } from '../../../models/exception';
+import { DeleteComponent } from "../../../../../shared/components/delete/delete.component";
 
 @Component({
   selector: 'app-exception',
-  imports: [ReactiveFormsModule, TranslatePipe, Time12Pipe, DatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, Time12Pipe, DatePipe, DeleteComponent],
   templateUrl: './exception.component.html',
   styleUrl: './exception.component.css',
 })
@@ -28,8 +29,13 @@ export class ExceptionComponent {
   $SubException: Subscription = new Subscription();
   exceptions: WritableSignal<Exception[]> = signal<Exception[]>([]);
   existingException: Exception | null = null;
+  deleteModal = viewChild(DeleteComponent)
+
   closBtn: Signal<readonly ElementRef<HTMLButtonElement>[]> = viewChildren<ElementRef<HTMLButtonElement>>('closeBtn');
   exceptiomMode: 'edit' | 'add' = 'add';
+
+  destroy$ = new Subject<void>();
+
 
   exceptionForm = this.fb.group({
     date: ['', [Validators.required]],
@@ -40,13 +46,12 @@ export class ExceptionComponent {
   });
 
   ngOnInit(): void {
-
     this.getException();
   }
 
 
   getException(): void {
-    this.exceptionService.getException().subscribe({
+    this.exceptionService.getException().pipe(takeUntil(this.destroy$)).subscribe({
       next: (res => {
         console.log(res);
         this.exceptions.set(res);
@@ -74,37 +79,27 @@ export class ExceptionComponent {
     this.exceptionForm.reset();
   }
 
-
-
   saveException(): void {
     console.log(this.existingException?.id);
     const value = this.exceptionForm.value;
-    if (this.exceptionForm.valid) {
-      this.$SubException.unsubscribe();
-      if (this.exceptiomMode === 'edit') {
+
+    if (this.exceptiomMode === 'edit') {
+      if (this.exceptionForm.valid) {
         const hasChanged = this.existingException?.date === value.date &&
           this.existingException?.isAvailable === value.isAvailable &&
           this.existingException?.startTime === value.startTime &&
           this.existingException?.endTime === value.endTime &&
           this.existingException?.reason === value.reason;
         if (hasChanged) {
-          this.toastrService.info('No changes detected', 'NS');
           this.closeModal();
           return;
         }
-        this.$SubException = this.exceptionService.updateException(this.existingException?.id, this.exceptionForm.value).subscribe({
-          next: (res => {
-            console.log(res);
-            this.toastrService.success('Exception updates Successfully', 'NS');
-            this.closeModal();
-          }),
-          error: (err => {
-            console.log(err);
 
-          })
-        })
-
+        this.updateException(value);
       }
+
+
+
       else {
         const payload = {
           date: value.date,
@@ -113,20 +108,8 @@ export class ExceptionComponent {
           endTime: value.endTime || null,
           reason: value.reason || null,
         }
-        this.$SubException = this.exceptionService.addException(payload).subscribe({
-          next: (res => {
-            console.log(res);
-            this.toastrService.success("Exception added successfully", "NS");
-            this.closeModal();
-            console.log(this.closBtn);
 
-            this.getException();
-
-          }), error: (err => {
-            console.log(err);
-            this.toastrService.error(err.error.detail, "NS");
-          })
-        })
+        this.addException(payload);
       }
     } else {
       this.exceptionForm.markAllAsTouched();
@@ -134,15 +117,52 @@ export class ExceptionComponent {
   }
 
 
+  updateException(value: object): void {
+    this.loadFlag.set(true);
+
+    this.exceptionService.updateException(this.existingException?.id, value).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res => {
+        console.log(res);
+        this.toastrService.success('Exception updates Successfully');
+        this.getException();
+        this.closeModal();
+        this.loadFlag.set(false);
+
+      }),
+      error: (err => {
+        console.log(err);
+
+      })
+    })
+
+  }
 
 
+  addException(payload: object): void {
+    this.loadFlag.set(true);
+    this.exceptionService.addException(payload).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res => {
+        console.log(res);
+        this.toastrService.success("Exception added successfully");
+        this.closeModal();
+        console.log(this.closBtn);
+        this.getException();
+        this.loadFlag.set(false);
+      }), error: (err => {
+        console.log(err);
+      })
+    })
+  }
 
   confirmDelete() {
+    console.log(this.exceptionId);
+
     this.exceptionService.deleteException(this.exceptionId).subscribe({
       next: (res => {
         console.log(res);
         this.toastrService.show("exception is deleted");
         this.getException();
+        this.deleteModal()?.close();
       })
     })
   }
@@ -157,6 +177,10 @@ export class ExceptionComponent {
 
   ngOnDestroy(): void {
     this.$SubException.unsubscribe();
+
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
 

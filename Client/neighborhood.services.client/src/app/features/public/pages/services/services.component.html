@@ -32,6 +32,10 @@
             <h2 class="fw-bold">{{"services.hireaTrustedTechnicianPresto" |translate}}.</h2>
         </div>
         <div class="row g-4">
+
+
+
+
             @for(category of categories(); track category.id){
             <div class="col-lg-4 col-md-6">
                 <div class="card service-card border-0 shadow-sm h-100">
@@ -66,7 +70,14 @@
                     </div>
                 </div>
             </div>
+            }@empty {
+            <p class=" p-5 bg-info-subtle fw-bold text-black border rounded-1  text-center"> {{
+                "services.noServices" | translate }} </p>
+
             }
+
+
+
         </div>
     </div>
 </section>
@@ -114,7 +125,7 @@
 
                         <div class="d-flex gap-3 flex-wrap">
 
-                            <button class="btn btn-warning px-4">
+                            <button class="btn btn-warning px-4" data-bs-dismiss="modal" (click)="bookNow()">
 
                                 {{"services.bookNow" |translate}}
 

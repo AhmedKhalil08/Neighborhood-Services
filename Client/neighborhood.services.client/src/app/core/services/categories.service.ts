@@ -19,7 +19,7 @@ export class CategoriesService {
   }
 
 
-  updateCategory(body: object, categoryId: number): Observable<any> {
+  updateCategory(body: object, categoryId: number | null): Observable<any> {
     return this.apiService.put(`/Categories/${categoryId}`, body);
   }
 
@@ -35,8 +35,8 @@ export class CategoriesService {
   }
 
 
-  getCategoryDetails(id: number, lang: string): Observable<any> {
-    return this.apiService.get(`/Categories/${id}?lang=${lang}`)
+  getCategoryDetails(id: number): Observable<any> {
+    return this.apiService.get(`/Categories/${id}`)
   }
 
 

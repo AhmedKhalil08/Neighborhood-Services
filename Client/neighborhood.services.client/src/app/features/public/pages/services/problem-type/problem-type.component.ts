@@ -1,13 +1,16 @@
 import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProblemTypeService } from '../../../../../core/services/problem-type.service';
+import { AuthService } from '../../../../auth/services/auth.service';
 import { ProblemType } from '../../../models/problem-type';
 import { HowitworksComponent } from "../../home/howitworks/howitworks.component";
 import { TranslatePipe } from '@ngx-translate/core';
+import { LangService } from '../../../../../core/services/lang.service';
+import { skip } from 'rxjs';
 
 @Component({
   selector: 'app-problem-type',
-  imports: [HowitworksComponent, RouterLink, TranslatePipe],
+  imports: [HowitworksComponent, TranslatePipe],
   templateUrl: './problem-type.component.html',
   styleUrl: './problem-type.component.css',
 })
@@ -15,6 +18,9 @@ export class ProblemTypeComponent implements OnInit {
 
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly problemTypeService = inject(ProblemTypeService);
+  private readonly langService = inject(LangService);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   problemDetails: WritableSignal<ProblemType> = signal<ProblemType>({} as ProblemType);
 
@@ -25,7 +31,10 @@ export class ProblemTypeComponent implements OnInit {
 
   ngOnInit(): void {
     this.getProblemId();
-    this.getProblemType();
+    this.langService.lang$
+      .subscribe(() => {
+        this.getProblemType();
+      });
   }
 
 
@@ -35,7 +44,6 @@ export class ProblemTypeComponent implements OnInit {
 
 
   getProblemType(): void {
-
     this.problemTypeService.getProblemTypeById(this.problemId).subscribe({
       next: (res => {
         console.log(res);
@@ -46,6 +54,11 @@ export class ProblemTypeComponent implements OnInit {
 
       })
     })
+  }
+
+  /** Routes the "Book Now" CTA by role: guest→login, customer→Find Tech, tech/staff→their area. */
+  bookNow(): void {
+    this.router.navigateByUrl(this.auth.getBookNowUrl());
   }
 
 

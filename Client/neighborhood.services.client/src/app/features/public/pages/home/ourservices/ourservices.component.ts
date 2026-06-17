@@ -2,9 +2,10 @@ import { Component, computed, inject, OnInit, Signal, signal, WritableSignal } f
 import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
 import { CategoriesService } from '../../../../../core/services/categories.service';
 import { Category } from '../../../../../core/models/category';
-import { Subscription } from 'rxjs';
+import { skip, Subscription } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
-
+import { LangService } from '../../../../../core/services/lang.service';
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'ourservices',
   imports: [CarouselModule, TranslatePipe],
@@ -14,26 +15,28 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class OurservicesComponent implements OnInit {
 
   private readonly categoriesService = inject(CategoriesService);
+  private readonly LangService = inject(LangService);
+  private readonly activatedRoute = inject(ActivatedRoute);
 
 
   categories: WritableSignal<Category[]> = signal<Category[]>([]);
+
   $Sub: Subscription = new Subscription();
 
   ngOnInit(): void {
-    this.getAllCategories();
+    this.LangService.lang$
+      .subscribe(() => {
+
+        this.activatedRoute.data.subscribe({
+          next: (data => {
+            this.categories.set(data["categories"])
+          })
+        })
+      });
   }
 
 
 
-  getAllCategories(): void {
-    // const lang = localStorage.getItem("lang") || "en";
-
-    this.$Sub = this.categoriesService.getAllCategories().subscribe({
-      next: (res => {
-        this.categories.set(res);
-      })
-    })
-  }
 
 
 

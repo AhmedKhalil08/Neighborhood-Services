@@ -11,17 +11,17 @@ namespace Neighborhood.Services.Application.Categories.Commands
     {
         private readonly ICategoryRepository _categoryRepo;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBackgroundJobScheduler _jobs;
 
-        public AddCategoryCommandHandler(ICategoryRepository categoryRepo, IUnitOfWork unitOfWork)
+        public AddCategoryCommandHandler(ICategoryRepository categoryRepo, IUnitOfWork unitOfWork, IBackgroundJobScheduler jobs)
         {
             _categoryRepo = categoryRepo;
             _unitOfWork = unitOfWork;
+            _jobs = jobs;
         }
 
         public async Task<int> Handle(AddCategoryCommand request, CancellationToken cancellationToken)
         {
-
-            //var result = await _categoryRepo.IsNameExistsAsync(request.NameEn, request.NameAr);
 
             var category = (await _categoryRepo.GetByConditionAsync(c => c.NameEn.Trim().ToLower() == request.NameEn.Trim().ToLower() || c.NameAr.Trim() == request.NameAr.Trim())).FirstOrDefault();
 
@@ -35,6 +35,7 @@ namespace Neighborhood.Services.Application.Categories.Commands
                 category.NameAr = request.NameAr;
                 category.NameEn = request.NameEn;
                 category.Icon = request.Icon;
+                category.Image = request?.Image;
                 category.IsDeleted = false;
                 await _categoryRepo.UpdateAsync(category);
 
@@ -47,13 +48,16 @@ namespace Neighborhood.Services.Application.Categories.Commands
                 Icon = request.Icon!,
                 NameEn = request.NameEn,
                 NameAr = request.NameAr,
+                Image = request?.Image
             };
 
             await _categoryRepo.AddAsync(category);
             }
             await _unitOfWork.SaveChangesAsync();
 
-
+            // Sync the RAG index for this category off the request thread. Fail-open: a
+            // queue hiccup must never undo a committed category.
+            try { _jobs.EnqueueCategoryIndex(category.Id); } catch { /* RAG sync is best-effort; /reindex is the backstop */ }
 
             return category.Id;
         }
