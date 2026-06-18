@@ -43,16 +43,26 @@ namespace Neighborhood.Services.Application.SupportTickets.Handlers
                 throw new Exception(
                     "Cannot send messages to a resolved ticket.");
             }
+           
 
             var senderId = _currentUser.UserId!;
 
             var message = new SupportMessage
             {
                 TicketId = request.TicketId,
-                SenderId = senderId,
+              
                 Message = request.Message,
                 Channel = request.Channel,
                 CreatedAt = DateTime.UtcNow,
+                Attachments = request.Attachments?
+    .Select(a => new MessageAttachment
+    {
+        Url = a.Url,
+        PublicId = a.PublicId,
+        Type = a.Type,
+        CreatedAt = DateTime.UtcNow
+    })
+    .ToList(),
                 IsDeleted = false
             };
 
@@ -62,7 +72,10 @@ namespace Neighborhood.Services.Application.SupportTickets.Handlers
 
             // هل المرسل Staff ولا Customer ؟
             var staff = await _staffRepository.GetByUserIdAsync(senderId);
-
+            var senderType =
+    staff is null
+        ? MessageSenderType.user
+        : MessageSenderType.Staff;
             var isCustomer = staff is null;
 
             // لو التذكرة WaitingOnCustomer والعميل رد
