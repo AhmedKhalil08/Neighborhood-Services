@@ -1077,7 +1077,8 @@
         "policies": "Policies",
         "promoCodes": "Promo Codes",
         "staffManagement": "Staff Management",
-        "newsletter": "Newsletter"
+        "newsletter": "Newsletter",
+        "livesupport":"Customer Live Chat"
     },
     "staffBookings": {
         "title": "Bookings",

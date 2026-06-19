@@ -898,7 +898,8 @@
         "policies": "السياسات",
         "promoCodes": "أكواد الخصم",
         "staffManagement": "إدارة الموظفين",
-        "newsletter":"الموجز"
+        "newsletter":"الموجز",
+        "livesupport":"الدعم الفني المباشر"
     },
     "staffBookings": {
         "title": "الحجوزات",
