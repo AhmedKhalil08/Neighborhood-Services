@@ -34,12 +34,12 @@ namespace Neighborhood.Services.API.Controllers.Notification
             return Ok(result);
         }
 
-        [HttpPost("SendingToAll")]
-        public async Task<ActionResult> CreateNotificationToAll(string mssg)
-        {
-            var result = await _service.SendNotificationAsync(mssg);
-            return Ok(result);
-        }
+        //[HttpPost("SendingToAll")]
+        //public async Task<ActionResult> CreateNotificationToAll(string mssg)
+        //{
+        //    var result = await _service.SendNotificationAsync(mssg);
+        //    return Ok(result);
+        //}
 
         [HttpPost("SendingToAUserById/{id}")]
         public async Task<ActionResult> CreateNotificationToUser(string id,string mssg)
@@ -55,46 +55,46 @@ namespace Neighborhood.Services.API.Controllers.Notification
             return Ok(result);
         }
 
-        [HttpPost("SendingToTechnicians")]
-        public async Task<ActionResult> CreateNotificationToTechnicians(string mssg)
-        {
-            var result = await _service.SendNotificationToTechnician(mssg);
-            return Ok(result);
-        }
+        //[HttpPost("SendingToTechnicians")]
+        //public async Task<ActionResult> CreateNotificationToTechnicians(string mssg)
+        //{
+        //    var result = await _service.SendNotificationToTechnician(mssg);
+        //    return Ok(result);
+        //}
 
-        [HttpPost("SendingToCustomers")]
-        public async Task<ActionResult> CreateNotificationToCustomers(string mssg)
-        {
-            var result = await _service.SendNotificationToCustomer(mssg);
-            return Ok(result);
-        }
+        //[HttpPost("SendingToCustomers")]
+        //public async Task<ActionResult> CreateNotificationToCustomers(string mssg)
+        //{
+        //    var result = await _service.SendNotificationToCustomer(mssg);
+        //    return Ok(result);
+        //}
 
-        [HttpPost("SendingToAdmins")]
-        public async Task<ActionResult> CreateNotificationToAdmins(string mssg)
-        {
-            var result = await _service.SendNotificationToAdmin(mssg);
-            return Ok(result);
-        }
+        //[HttpPost("SendingToAdmins")]
+        //public async Task<ActionResult> CreateNotificationToAdmins(string mssg)
+        //{
+        //    var result = await _service.SendNotificationToAdmin(mssg);
+        //    return Ok(result);
+        //}
 
-        [HttpPost("SendingBasedOnRole")]
-        public async Task<ActionResult> CreateNotificationToGroup(string message, string? userRole=null, string? userId = null)
-        {
-            if (userId != null)
-            {
-                var result = await _service.SendRoleBasedNotificationAsync(message, ApplicationUserRole.Customer, userId);
-                return Ok(result);
+        //[HttpPost("SendingBasedOnRole")]
+        //public async Task<ActionResult> CreateNotificationToGroup(string message, string? userRole=null, string? userId = null)
+        //{
+        //    if (userId != null)
+        //    {
+        //        var result = await _service.SendRoleBasedNotificationAsync(message, ApplicationUserRole.Customer, userId);
+        //        return Ok(result);
 
-            }
-            else if (userRole!=null&& Enum.TryParse<ApplicationUserRole>(userRole, out ApplicationUserRole role))
-            { 
-                var result = await _service.SendRoleBasedNotificationAsync(message, role, userId);
-                return Ok(result);
-            }
-            else
-            {
-                var result = await _service.SendRoleBasedNotificationAsync(message, ApplicationUserRole.Customer, userId);
-                return Ok("Enum Value Not Valid or No userId entered!"); }
-        }
+        //    }
+        //    else if (userRole!=null&& Enum.TryParse<ApplicationUserRole>(userRole, out ApplicationUserRole role))
+        //    { 
+        //        var result = await _service.SendRoleBasedNotificationAsync(message, role, userId);
+        //        return Ok(result);
+        //    }
+        //    else
+        //    {
+        //        var result = await _service.SendRoleBasedNotificationAsync(message, ApplicationUserRole.Customer, userId);
+        //        return Ok("Enum Value Not Valid or No userId entered!"); }
+        //}
 
         [HttpPut("MarkAllAsRead")]
         public async Task<IActionResult> MarkAllAsRead(MarkAllAsReadCommandDto command)

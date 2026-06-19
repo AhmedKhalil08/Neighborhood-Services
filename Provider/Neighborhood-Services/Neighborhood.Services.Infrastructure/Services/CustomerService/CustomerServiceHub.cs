@@ -4,6 +4,7 @@ using Neighborhood.Services.Application.Disputes.Commands;
 using Neighborhood.Services.Application.Notifications.Services;
 using Neighborhood.Services.Application.SupportTickets.Commands;
 using Neighborhood.Services.Domain.ApplicationUsers;
+using Neighborhood.Services.Domain.Notifications;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ namespace Neighborhood.Services.Infrastructure.Services.CustomerService
           //  var result = await _mediator.Send(ticket);
             await JoinGroup(userEmail);
            
-            await _service.SendNotificationToAdmin("There is a new Live Ticket");
+            await _service.SendDirectiveNotificationToUser("7d466805-6429-4940-9434-4990d80263b7", "There is a new Live Ticket",NotificationTypes.support);
             await Clients.Group(ApplicationUserRole.Staff.ToString()).SendAsync("ReceiveTicket",ticket);
         }
         //هيسند التيكت، هينضم للهاب، هيبعت ل
