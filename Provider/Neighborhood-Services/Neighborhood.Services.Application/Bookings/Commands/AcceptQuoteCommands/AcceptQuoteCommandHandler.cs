@@ -98,13 +98,18 @@ namespace Neighborhood.Services.Application.Bookings.Commands.AcceptQuoteCommand
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await _mediator.Send(new CreateConversationCommandDTO { BookingId = booking.Id }, cancellationToken);
 
-            // Notify the technician their quote was accepted — best effort.
+            // Booking confirmed + conversation opened — notify both parties about the chat (best effort).
             try
             {
                 if (!string.IsNullOrEmpty(booking.Technician?.ApplicationUserId))
                     await _notificationService.SendNotificationToUser(
                         booking.Technician.ApplicationUserId,
-                        $"Your quote for booking #{booking.Id} was accepted. The job is confirmed.");
+                        $"Your quote for booking #{booking.Id} was accepted. The job is confirmed — you can now chat with the customer.");
+
+                if (!string.IsNullOrEmpty(booking.Customer?.ApplicationUserId))
+                    await _notificationService.SendNotificationToUser(
+                        booking.Customer.ApplicationUserId,
+                        $"Booking #{booking.Id} is confirmed. You can now chat with your technician.");
             }
             catch (Exception ex)
             {
