@@ -53,6 +53,8 @@ import { categoriesResolver } from './core/resolvers/categories-resolver';
 import {FavoriteListComponent} from '../app/features/customer/pages/favorite-list/favorite-list.component';
 import {CustomerChatsComponent} from '../app/features/customer/pages/customer-chats/customer-chats.component'
 import{NewsletterpublishingComponent} from'../app/features/staff/pages/newsletter/newsletterpublishing/newsletterpublishing.component'
+import {CustomerSupportComponent} from '../app/features/public/pages/customersupport/customer-support/customer-support.component'
+import {CustomerSupportStaffComponent} from '../app/features/staff/pages/customer-support-staff/customer-support-staff.component'
 
 export const routes: Routes = [
   {
@@ -64,16 +66,10 @@ export const routes: Routes = [
       { path: 'problemType/:id', component: ProblemTypeComponent },
       { path: 'about', component: AboutComponent },
       { path: 'contact', component: ContactComponent },
-    ],
-  },
-
-  {
-    path: 'auth',
-    component: AuthLayoutComponent,
-    children: [
-      { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
-      { path: 'register', component: RegisterComponent, canActivate: [guestGuard] },
-      { path: 'external-callback', component: ExternalCallbackComponent },
+      { path: 'auth/login', component: LoginComponent, canActivate: [guestGuard] },
+      { path: 'auth/register', component: RegisterComponent, canActivate: [guestGuard] },
+      { path: 'auth/external-callback', component: ExternalCallbackComponent },
+      { path: 'customer-service-chat', component: CustomerSupportComponent }
     ],
   },
 
@@ -144,6 +140,7 @@ export const routes: Routes = [
       { path: 'details/:categoryId', component: CategoryDetailsComponent, title: 'Category Details ', data: { permission: 'ManageCategories' } },
       { path: 'policies', component: PoliciesComponent, title: 'Staff Policies', data: { permission: 'ManagePolicies' } },
       { path: 'promo-codes', component: StaffPromoCodesComponent, data: { permission: 'ManagePromos' } },
+      {path:'CustomerSupport',component:CustomerSupportStaffComponent},
       {
         path: 'staff-management',
         data: { permission: 'FullAccess' },
