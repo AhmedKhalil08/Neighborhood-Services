@@ -15,6 +15,7 @@ using Neighborhood.Services.Infrastructure.Persistence.Context;
 using Neighborhood.Services.Infrastructure.Persistence.Seeding;
 using Neighborhood.Services.Infrastructure.Services;
 using Neighborhood.Services.Infrastructure.Services.CloudinaryService;
+using Neighborhood.Services.Infrastructure.Services.SupportChat;
 using StackExchange.Redis;
 using System.Text;
 
