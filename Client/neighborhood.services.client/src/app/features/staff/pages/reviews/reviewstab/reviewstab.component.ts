@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ToastrService } from 'ngx-toastr';
 import { ReviewsService } from '../../../services/Reviews.service';
+import { ReviewAnalysisService } from '../../../services/Review-analysis.service';
 import { ReviewDto, ReviewFilters, ReviewStatus } from '../../../models/Review.model';
+import { ReviewAnalysisDto } from '../../../models/ReviewAnalysis.model';
 
 @Component({
   selector: 'app-reviewstab',
@@ -17,6 +19,7 @@ import { ReviewDto, ReviewFilters, ReviewStatus } from '../../../models/Review.m
 
 export class ReviewsTabComponent implements OnInit {
   private svc = inject(ReviewsService);
+  private analysisSvc = inject(ReviewAnalysisService);
   private toastr = inject(ToastrService);
   private translate = inject(TranslateService);
 
@@ -29,6 +32,17 @@ export class ReviewsTabComponent implements OnInit {
   // The review pending delete confirmation (drives the in-app modal; replaces native confirm()).
   pendingDelete = signal<ReviewDto | null>(null);
   deleting = signal(false);
+
+  // The review whose full details modal is open.
+  viewing = signal<ReviewDto | null>(null);
+  // AI analyses keyed by reviewId (loaded once; details modal looks the row up here).
+  private analysisByReview = signal<Map<number, ReviewAnalysisDto>>(new Map());
+
+  // The AI analysis for the currently-viewed review, if one exists.
+  viewingAnalysis = computed(() => {
+    const r = this.viewing();
+    return r ? this.analysisByReview().get(r.id) ?? null : null;
+  });
 
   filters: ReviewFilters = { search: '', status: '', rating: '', revieweeId: '' };
 
@@ -53,7 +67,18 @@ export class ReviewsTabComponent implements OnInit {
     return this.filtered().slice(start, start + this.perPage);
   });
 
-  ngOnInit() { this.loadAll(); }
+  ngOnInit() {
+    this.loadAll();
+    this.loadAnalyses();
+  }
+
+  // Fail-silent: AI analyses enrich the details modal but must not block the reviews list.
+  private loadAnalyses() {
+    this.analysisSvc.getAll().subscribe({
+      next: data => this.analysisByReview.set(new Map(data.map(a => [a.reviewId, a]))),
+      error: () => {}
+    });
+  }
 
   loadAll() {
     this.loading.set(true);
@@ -98,6 +123,16 @@ export class ReviewsTabComponent implements OnInit {
     });
   }
 
+  // ── Details modal ──────────────────────────────────────────────────────────
+
+  openDetails(review: ReviewDto) {
+    this.viewing.set(review);
+  }
+
+  closeDetails() {
+    this.viewing.set(null);
+  }
+
   // ── Delete with in-app confirmation modal ──────────────────────────────────
 
   askDelete(review: ReviewDto) {
@@ -136,6 +171,14 @@ export class ReviewsTabComponent implements OnInit {
       'bg-success': status === 'Approved',
       'bg-danger': status === 'Rejected',
       'bg-secondary': status === 'Flagged',
+    };
+  }
+
+  sentimentClass(sentiment: ReviewAnalysisDto['sentiment']): Record<string, boolean> {
+    return {
+      'bg-success': sentiment === 'Positive',
+      'bg-secondary': sentiment === 'Neutral',
+      'bg-danger': sentiment === 'Negative',
     };
   }
 }

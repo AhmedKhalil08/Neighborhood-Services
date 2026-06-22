@@ -1151,8 +1151,9 @@
         "allRatings": "All ratings",
         "flaggedOnly": "Flagged only",
         "reset": "Reset",
-        "reviewer": "Reviewer ID",
-        "reviewee": "Reviewee ID",
+        "reviewer": "Reviewer",
+        "reviewee": "Reviewee",
+        "unknownUser": "Unknown user",
         "booking": "Booking",
         "rating": "Rating",
         "comment": "Comment",
@@ -1173,11 +1174,24 @@
         "statusUpdated": "Review #{{id}} marked {{status}}.",
         "statusFail": "Failed to update review status.",
         "deleted": "Review #{{id}} deleted.",
+        "details": "Details",
+        "detailsTitle": "Review #{{id}}",
+        "close": "Close",
+        "aiAnalysis": "AI Analysis",
+        "sentiment": "Sentiment",
+        "qualityScore": "Quality Score",
+        "aiFlagged": "Flagged by AI",
+        "noAnalysis": "No AI analysis available for this review.",
         "status_map": {
             "Pending": "Pending",
             "Approved": "Approved",
             "Rejected": "Rejected",
             "Flagged": "Flagged"
+        },
+        "sentiment_map": {
+            "Positive": "Positive",
+            "Neutral": "Neutral",
+            "Negative": "Negative"
         }
     },
     "reviewsAnalysis": {
