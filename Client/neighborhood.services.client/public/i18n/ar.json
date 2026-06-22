@@ -1197,6 +1197,13 @@
         "qualityScore": "درجة الجودة",
         "aiFlagged": "مُبلّغ عنه بواسطة الذكاء الاصطناعي",
         "noAnalysis": "لا يوجد تحليل ذكاء اصطناعي لهذا التقييم.",
+        "selectAll": "تحديد الكل في هذه الصفحة",
+        "selectedCount": "تم تحديد {{count}}",
+        "bulkApprove": "قبول المحدد",
+        "bulkReject": "رفض المحدد",
+        "clearSelection": "مسح",
+        "bulkDone": "تم وضع {{count}} تقييم كـ {{status}}.",
+        "bulkFail": "تعذّر تحديث بعض التقييمات.",
         "status_map": {
             "Pending": "قيد الانتظار",
             "Approved": "مقبول",

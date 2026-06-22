@@ -1182,6 +1182,13 @@
         "qualityScore": "Quality Score",
         "aiFlagged": "Flagged by AI",
         "noAnalysis": "No AI analysis available for this review.",
+        "selectAll": "Select all on this page",
+        "selectedCount": "{{count}} selected",
+        "bulkApprove": "Approve selected",
+        "bulkReject": "Reject selected",
+        "clearSelection": "Clear",
+        "bulkDone": "{{count}} reviews marked {{status}}.",
+        "bulkFail": "Failed to update some reviews.",
         "status_map": {
             "Pending": "Pending",
             "Approved": "Approved",
