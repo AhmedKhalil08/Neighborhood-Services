@@ -1166,8 +1166,9 @@
         "allRatings": "كل التقييمات",
         "flaggedOnly": "المُبلّغ عنها فقط",
         "reset": "إعادة تعيين",
-        "reviewer": "معرّف المُقيّم",
-        "reviewee": "معرّف المُقيَّم",
+        "reviewer": "المُقيّم",
+        "reviewee": "المُقيَّم",
+        "unknownUser": "مستخدم غير معروف",
         "booking": "الحجز",
         "rating": "التقييم",
         "comment": "التعليق",
@@ -1188,11 +1189,24 @@
         "statusUpdated": "تم وضع التقييم #{{id}} كـ {{status}}.",
         "statusFail": "تعذّر تحديث حالة التقييم.",
         "deleted": "تم حذف التقييم #{{id}}.",
+        "details": "التفاصيل",
+        "detailsTitle": "التقييم #{{id}}",
+        "close": "إغلاق",
+        "aiAnalysis": "تحليل الذكاء الاصطناعي",
+        "sentiment": "المشاعر",
+        "qualityScore": "درجة الجودة",
+        "aiFlagged": "مُبلّغ عنه بواسطة الذكاء الاصطناعي",
+        "noAnalysis": "لا يوجد تحليل ذكاء اصطناعي لهذا التقييم.",
         "status_map": {
             "Pending": "قيد الانتظار",
             "Approved": "مقبول",
             "Rejected": "مرفوض",
             "Flagged": "مُبلّغ عنه"
+        },
+        "sentiment_map": {
+            "Positive": "إيجابي",
+            "Neutral": "محايد",
+            "Negative": "سلبي"
         }
     },
     "reviewsAnalysis": {
