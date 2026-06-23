@@ -9,7 +9,6 @@ import { ChatRoomComponent } from '../../features/customer/components/chat-room/
 import {NewsletterpublishingComponent} from '../../features/staff/pages/newsletter/newsletterpublishing/newsletterpublishing.component'
 import {NewsletterSubscribeComponent} from '../../shared/components/newsletter-subscribe/newsletter-subscribe.component'
 import {CustomerSupportFormComponent} from'../../features/public/pages/customer-support-form/customer-support-form.component';
-import {ArwaTestComponent} from'../../features/customer/components/arwa-test/arwa-test.component'
 
 
 @Component({
@@ -22,7 +21,7 @@ import {ArwaTestComponent} from'../../features/customer/components/arwa-test/arw
     NewsletterpublishingComponent,
     NewsletterSubscribeComponent,
     CustomerSupportFormComponent,
-    ArwaTestComponent
+   
     
   ],
   template: `
