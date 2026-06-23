@@ -268,6 +268,13 @@
         "title": "حجوزاتي",
         "search": "ابحث بالوصف أو العنوان أو الرقم",
         "filterAll": "الكل",
+        "sort": {
+            "label": "ترتيب حسب",
+            "NewestCreated": "الأحدث إنشاءً",
+            "OldestCreated": "الأقدم إنشاءً",
+            "SoonestScheduled": "الأقرب موعدًا",
+            "LatestScheduled": "الأبعد موعدًا"
+        },
         "empty": "لا توجد حجوزات هنا بعد.",
         "details": "التفاصيل",
         "viewInvoice": "عرض الفاتورة",
@@ -633,6 +640,13 @@
             "title": "مهامي",
             "search": "ابحث بالوصف أو العنوان أو الرقم",
             "empty": "لا توجد مهام هنا بعد.",
+            "sort": {
+                "label": "ترتيب حسب",
+                "NewestCreated": "الأحدث إنشاءً",
+                "OldestCreated": "الأقدم إنشاءً",
+                "SoonestScheduled": "الأقرب موعدًا",
+                "LatestScheduled": "الأبعد موعدًا"
+            },
             "estimated": "السعر التقديري",
             "yourPrice": "سعرك",
             "min": "دقيقة",
@@ -1002,6 +1016,13 @@
         "title": "الحجوزات",
         "subtitle": "كل الحجوزات عبر المنصة.",
         "searchPlaceholder": "ابحث بالعميل أو الفني أو الرقم…",
+        "sort": {
+            "label": "ترتيب حسب",
+            "NewestCreated": "الأحدث إنشاءً",
+            "OldestCreated": "الأقدم إنشاءً",
+            "SoonestScheduled": "الأقرب موعدًا",
+            "LatestScheduled": "الأبعد موعدًا"
+        },
         "empty": "لا توجد حجوزات هنا.",
         "customer": "العميل",
         "technician": "الفني",
@@ -1083,7 +1104,8 @@
         "budget": "الميزانية",
         "posted": "نُشر",
         "reject": "رفض",
-        "approve": "موافقة ونشر"
+        "approve": "موافقة ونشر",
+        "reason": "سبب الذكاء الاصطناعي"
     },
     "staffDisputes": {
         "title": "نزاعات الموظفين",
@@ -1165,8 +1187,9 @@
         "allRatings": "كل التقييمات",
         "flaggedOnly": "المُبلّغ عنها فقط",
         "reset": "إعادة تعيين",
-        "reviewer": "معرّف المُقيّم",
-        "reviewee": "معرّف المُقيَّم",
+        "reviewer": "المُقيّم",
+        "reviewee": "المُقيَّم",
+        "unknownUser": "مستخدم غير معروف",
         "booking": "الحجز",
         "rating": "التقييم",
         "comment": "التعليق",
@@ -1187,11 +1210,31 @@
         "statusUpdated": "تم وضع التقييم #{{id}} كـ {{status}}.",
         "statusFail": "تعذّر تحديث حالة التقييم.",
         "deleted": "تم حذف التقييم #{{id}}.",
+        "details": "التفاصيل",
+        "detailsTitle": "التقييم #{{id}}",
+        "close": "إغلاق",
+        "aiAnalysis": "تحليل الذكاء الاصطناعي",
+        "sentiment": "المشاعر",
+        "qualityScore": "درجة الجودة",
+        "aiFlagged": "مُبلّغ عنه بواسطة الذكاء الاصطناعي",
+        "noAnalysis": "لا يوجد تحليل ذكاء اصطناعي لهذا التقييم.",
+        "selectAll": "تحديد الكل في هذه الصفحة",
+        "selectedCount": "تم تحديد {{count}}",
+        "bulkApprove": "قبول المحدد",
+        "bulkReject": "رفض المحدد",
+        "clearSelection": "مسح",
+        "bulkDone": "تم وضع {{count}} تقييم كـ {{status}}.",
+        "bulkFail": "تعذّر تحديث بعض التقييمات.",
         "status_map": {
             "Pending": "قيد الانتظار",
             "Approved": "مقبول",
             "Rejected": "مرفوض",
             "Flagged": "مُبلّغ عنه"
+        },
+        "sentiment_map": {
+            "Positive": "إيجابي",
+            "Neutral": "محايد",
+            "Negative": "سلبي"
         }
     },
     "reviewsAnalysis": {
@@ -1251,5 +1294,26 @@
         "f3":"الدعم",
         "f4":"الجودة"
         
-    }
+    },
+ "supportWidget": {
+    "title": "الدعم الفني",
+    "intro": "اشرح المشكلة وسيتواصل معك فريق الدعم.",
+    "name": "الاسم",
+    "namePlaceholder": "أدخل الاسم",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "أدخل البريد الإلكتروني",
+    "subject": "الموضوع",
+    "subjectPlaceholder": "اكتب عنوان المشكلة",
+    "description": "الوصف",
+    "descriptionPlaceholder": "اشرح المشكلة بالتفصيل",
+    "submit": "إنشاء تذكرة",
+    "submitting": "جارٍ الإنشاء...",
+    "newTicket": "تذكرة جديدة",
+    "attach": "إرفاق ملف",
+    "placeholder": "اكتب رسالتك...",
+    "supportTeam": "فريق الدعم",
+    "you": "أنت",
+    "waitingFirstReply": "في انتظار أول رد",
+    "resolvedNotice": "تم حل هذه التذكرة"
+  }
 }

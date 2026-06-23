@@ -1,3 +1,7 @@
 <router-outlet />
 <app-chat-widget />
-<router-outlet />
+@if (showSupportWidget()) {
+  <app-customer-support-widget></app-customer-support-widget>
+}
+<!-- Removed duplicate primary <router-outlet />: Angular allows only one unnamed (primary) outlet; the second conflicts/renders twice. -->
+<!-- <router-outlet /> -->

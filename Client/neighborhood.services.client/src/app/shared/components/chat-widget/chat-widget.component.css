@@ -1,7 +1,7 @@
 /* Floating action button — bottom-right (LTR), bottom-left (RTL) */
 .chat-fab {
   position: fixed;
-  bottom: 1.25rem;
+  bottom: 8rem;
   right: 1.25rem;
   width: 56px;
   height: 56px;
@@ -14,10 +14,12 @@
 
 .chat-panel {
   position: fixed;
-  bottom: 5.5rem;
-  right: 1.25rem;
+  /* Open to the LEFT of the FAB (same row), not above it.
+     Button is at right:1.25rem and is 56px (3.5rem) wide, so 1.25 + 3.5 + 0.75 gap = 5.5rem. */
+  bottom: 8rem;
+  right: 5.5rem;
   width: 360px;
-  max-width: calc(100vw - 2rem);
+  max-width: calc(100vw - 7rem);
   height: 520px;
   max-height: calc(100vh - 8rem);
   z-index: 1050;
@@ -26,11 +28,14 @@
   overflow: hidden;
 }
 
-/* RTL: flip the widget to the left side */
-:host-context([dir='rtl']) .chat-fab,
-:host-context([dir='rtl']) .chat-panel {
+/* RTL: FAB lives on the left, so open the panel to its RIGHT */
+:host-context([dir='rtl']) .chat-fab {
   right: auto;
   left: 1.25rem;
+}
+:host-context([dir='rtl']) .chat-panel {
+  right: auto;
+  left: 5.5rem;
 }
 
 .chat-body {
