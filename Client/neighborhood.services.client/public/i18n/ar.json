@@ -528,6 +528,7 @@
         "form": {
             "title": "ترتيب متكرر جديد",
             "technician": "الفني",
+            "customer": "العميل",
             "chooseTechnician": "اختر فنيًا",
             "category": "الفئة",
             "chooseCategory": "اختر فئة",
