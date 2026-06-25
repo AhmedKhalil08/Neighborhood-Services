@@ -28,6 +28,7 @@ namespace Neighborhood.Services.Application.AgentLogs.Queries.GetAgentLogsByType
             Output = log.Output,
             ReferenceType = log.ReferenceType,
             ReferenceId = log.ReferenceId,
+            TokensUsed = log.TokensUsed,
             CreatedAt = log.CreatedAt
         };
     }

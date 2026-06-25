@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Neighborhood.Services.Application.AgentLogs.Queries.GetAgentLogsByReferenceQuery;
 using Neighborhood.Services.Application.AgentLogs.Queries.GetAgentLogsByTypeQuery;
+using Neighborhood.Services.Application.AgentLogs.Queries.GetAgentLogsPagedQuery;
+using Neighborhood.Services.Application.Authorization;
 using Neighborhood.Services.Domain.AgentLogs;
+using Neighborhood.Services.Domain.Staffs;
 
 namespace Neighborhood.Services.API.AgentLogs
 {
@@ -17,6 +20,30 @@ namespace Neighborhood.Services.API.AgentLogs
         public AgentLogsController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        // GET /api/agentlogs?type=Chatbot&search=&from=&to=&page=1&pageSize=20
+        // Paged + filtered logs for one agent type — the admin "Agent Logs" viewer. Full-access only.
+        [HttpGet]
+        [HasPermission(PermissionType.FullAccess)]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] AgentType type,
+            [FromQuery] string? search,
+            [FromQuery] DateTime? from,
+            [FromQuery] DateTime? to,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            var result = await _mediator.Send(new GetAgentLogsPagedQuery
+            {
+                AgentType = type,
+                Search = search,
+                From = from,
+                To = to,
+                Page = page,
+                PageSize = pageSize
+            });
+            return Ok(result);
         }
 
         // GET /api/agentlogs/type/{agentType}  (admin: all logs for a specific agent)

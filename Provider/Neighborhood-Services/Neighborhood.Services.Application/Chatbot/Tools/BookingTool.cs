@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
+using Neighborhood.Services.Application.AgentLogs.Commands;
 using Neighborhood.Services.Application.AI.Interfaces;
 using Neighborhood.Services.Application.Bookings.Commands.CreateBookingCommands;
 using Neighborhood.Services.Application.Bookings.Queries.GetTechnicianAvailableSlots;
@@ -8,6 +9,7 @@ using Neighborhood.Services.Application.Customers.Interfaces;
 using Neighborhood.Services.Application.Exceptions;
 using Neighborhood.Services.Application.ProblemTypes.Interface;
 using Neighborhood.Services.Application.Shared;
+using Neighborhood.Services.Domain.AgentLogs;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -230,6 +232,25 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
                 });
 
                 _logger.LogInformation("BookingTool: created booking #{Id}", bookingId);
+
+                // Audit the write under the Chatbot agent, referencing the real booking so it's
+                // traceable (GET /agentlogs/reference/Booking/{id}). Fail-open — a log write must
+                // never undo a successful booking.
+                try
+                {
+                    await _mediator.Send(new CreateAgentLogCommand
+                    {
+                        AgentType = AgentType.Chatbot,
+                        Action = "CreateBooking",
+                        Input = $"tech #{technicianId}, problemType #{resolvedProblemTypeId}, " +
+                                $"{when:yyyy-MM-dd HH:mm}, \"{serviceDescription}\"",
+                        Output = $"BOOKED #{bookingId} (PENDING)",
+                        ReferenceType = AgentLogReferenceType.Booking,
+                        ReferenceId = bookingId
+                    });
+                }
+                catch { /* logging is best-effort */ }
+
                 return $"BOOKED: request #{bookingId} created for {when:yyyy-MM-dd HH:mm}. It is PENDING — " +
                        "tell the user the technician will review it and send a price quote; nothing is " +
                        "charged yet.";

@@ -202,8 +202,8 @@
         "back": "Back",
         "guestNudge": "Log in to save your chats.",
         "shareLocation": "Share my location",
-        "locationShared": "📍 Got your location. Now ask me about a price (e.g. \"how much to fix a sink?\") and I'll estimate it for your area.",
-        "locationDenied": "No problem — just tell me your city (e.g. Cairo, Alexandria) for a local estimate.",
+        "locationShared": "📍 Location shared — I'll use it for accurate estimates and booking.",
+        "locationDenied": "Couldn't get your location — you can just tell me your city instead.",
         "locationAttached": "Location attached",
         "removeLocation": "Remove location",
         "attachImage": "Attach a photo",
@@ -1152,6 +1152,7 @@
         "policies": "Policies",
         "promoCodes": "Promo Codes",
         "staffManagement": "Staff Management",
+        "agentLogs": "Agent Logs",
         "newsletter": "Newsletter",
         "livesupport":"Customer Live Chat",
         "yourCategories": "Your Categories"
