@@ -23,10 +23,9 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
         private readonly double? _latitude;
         private readonly double? _longitude;
 
-        // Pricing needs the EXACT problem type (each has its own price range), so a wrong match
-        // means a wrong price — worse than asking for clarification. Keep this STRICT. If Arabic/
-        // colloquial questions fail to match, the right fix is normalizing the query before the
-        // search (improves accuracy), NOT loosening this (which would mis-price).
+        // Pricing needs the exact problem type (each has its own price range), so a wrong match
+        // returns a wrong price. The threshold stays strict; if colloquial phrasings fail to match,
+        // normalize the query before the search rather than lowering this.
         private const float ClassifierConfidenceThreshold = 0.5f;
 
         public PricingTool(

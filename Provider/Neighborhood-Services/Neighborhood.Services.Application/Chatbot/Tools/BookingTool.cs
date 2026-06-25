@@ -15,20 +15,20 @@ using System.Globalization;
 
 namespace Neighborhood.Services.Application.Chatbot.Tools
 {
-    // The chatbot's only WRITE tool: it actually places a Direct booking, closing the loop the
-    // agent already walks the user through (recommend/find technician -> check availability -> book).
-    // It wraps the EXISTING CreateBookingCommand unchanged — region resolution, the per-slot lock,
-    // working-hours/overlap validation and escrow timing all stay in that handler. We only add two
-    // chatbot-specific guards on top:
+    // The chatbot's only write tool: it places a Direct booking, completing the flow the agent
+    // walks the user through (recommend/find technician, check availability, book). It wraps the
+    // existing CreateBookingCommand unchanged — region resolution, the per-slot lock,
+    // working-hours/overlap validation and escrow timing all stay in that handler. Two
+    // chatbot-specific guards are added on top:
     //
-    //   1. The booking is created as PENDING with FinalPrice = 0 (the command's default). The
-    //      `confirmed` parameter here is ONLY the chatbot's user-confirmation gate — it does NOT
-    //      mean the booking is confirmed/priced. The technician still reviews and sends a quote.
-    //   2. Before booking we RE-CHECK the technician's live free slots and require the chosen time
-    //      to be one of them, so we never book a time the model carried over from an earlier turn
-    //      that has since been taken (or was never actually free).
+    //   1. The booking is created Pending with FinalPrice = 0 (the command's default). The
+    //      `confirmed` parameter is only the chatbot's user-confirmation gate; it does not mark the
+    //      booking confirmed or priced. The technician still reviews and sends a quote.
+    //   2. The technician's live free slots are re-checked before booking and the chosen time must
+    //      be one of them, so a slot carried over from an earlier turn that has since been taken
+    //      (or was never free) is never booked.
     //
-    // Built per-request because it carries this request's coords + whether the caller is logged in.
+    // Built per-request because it carries this request's coords and the current user.
     public class BookingTool
     {
         private readonly IMediator _mediator;
@@ -39,14 +39,13 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
         private readonly ILogger _logger;
         private readonly double? _latitude;
         private readonly double? _longitude;
-        // The authenticated user's id (null = guest). A customer record for it is what makes the
-        // user eligible to book — checked lazily only when create_booking is actually called.
+        // The authenticated user's id (null = guest). Eligibility to book is determined by whether a
+        // customer record exists for it, checked lazily only when create_booking is called.
         private readonly string? _currentUserId;
 
-        // A booking pins one EXACT problem type (drives category + price range), so a wrong match is
-        // worse than asking again — keep this STRICT (same threshold the pricing tool uses). This
-        // only applies to the FALLBACK classification; a problemTypeId the model carries from an
-        // earlier recommend_technician/estimate_price result is reused directly (no re-classify).
+        // A booking pins one exact problem type (drives category + price range), so the threshold
+        // stays strict (same as the pricing tool). This only applies to the fallback classification;
+        // a problemTypeId carried from an earlier recommend/estimate result is reused directly.
         private const float ClassifierConfidenceThreshold = 0.5f;
 
         public BookingTool(
@@ -103,30 +102,28 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
                 "BookingTool: create_booking CALLED — tech={Tech} desc='{Desc}' problemTypeId={Ptid} at='{At}' confirmed={Confirmed} userId={UserId}",
                 technicianId, serviceDescription, problemTypeId, scheduledAt, confirmed, _currentUserId ?? "(guest)");
 
-            // 1. WRITE actions are for logged-in CUSTOMERS only.
+            // 1. Booking is for logged-in customers only.
             if (string.IsNullOrWhiteSpace(_currentUserId))
                 return "NOT_LOGGED_IN: The user must be logged in to book. Ask them to log in first, " +
                        "then try again.";
 
-            // Only a CUSTOMER account can place a booking. We detect this by whether the signed-in
-            // user has a customer record — technicians/staff don't, so block them cleanly here
-            // (otherwise it fails deeper with a confusing "customer not found" error).
+            // Only a customer account can place a booking. Technicians and staff have no customer
+            // record, so block them here rather than failing deeper with a "customer not found" error.
             var customer = await _customerRepository.GetByUserIdAsync(_currentUserId);
             if (customer is null)
-                return "ONLY_CUSTOMERS: Bookings can only be placed from a CUSTOMER account. If the " +
+                return "ONLY_CUSTOMERS: Bookings can only be placed from a customer account. If the " +
                        "user is signed in as a technician or staff member, tell them they need a " +
                        "customer account to book a service.";
 
-            // 2. A booking needs a real location point. We require shared GPS coords so the booking
-            //    has accurate Location — and we can reverse-geocode them into a suggested address.
+            // 2. A booking needs a real location. Shared GPS coords give an accurate Location and let
+            //    us reverse-geocode a suggested address.
             if (!_latitude.HasValue || !_longitude.HasValue)
                 return "NO_LOCATION: We don't have the user's location. Ask them to tap 'share location' " +
                        "first so we can book with an accurate address, then try again.";
 
-            // 3. Determine the problem type. PREFER one the model carried from an earlier
-            //    recommend_technician/estimate_price result — the service was already established
-            //    when we picked the technician, so don't make the user describe it again. Only if no
-            //    (valid) id was passed do we fall back to classifying the free text.
+            // 3. Determine the problem type. Prefer one carried from an earlier recommend/estimate
+            //    result (the service was already identified when the technician was chosen), so the
+            //    user isn't asked to describe it again. Fall back to classifying the text otherwise.
             int resolvedProblemTypeId;
             if (problemTypeId > 0 && await _problemTypeRepository.GetByIdAsync(problemTypeId) is not null)
             {
@@ -155,8 +152,8 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
                 return "INVALID_TIME: Could not read the time. Provide it as 'YYYY-MM-DD HH:mm', " +
                        "e.g. '2026-07-02 14:00'.";
 
-            // 5. RE-CHECK live availability — never trust a time the model carried from an earlier
-            //    turn. The chosen start must be one of the technician's currently-free slots.
+            // 5. Re-check live availability rather than trusting a time carried from an earlier turn.
+            //    The chosen start must be one of the technician's currently-free slots.
             var freeSlots = (await _mediator.Send(new GetTechnicianAvailableSlotsQuery
             {
                 TechnicianId = technicianId,
@@ -175,8 +172,8 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
                        $"start-times on {when:yyyy-MM-dd} are: {times}. Ask the user to choose one of these.";
             }
 
-            // 6. Suggest an address from the user's coords (reverse-geocode) for them to confirm or
-            //    correct. Fail-open: if geocoding is down we just leave the suggestion blank.
+            // 6. Reverse-geocode the coords into a suggested address for the user to confirm or
+            //    correct. Fail-open: if geocoding is unavailable the suggestion is left blank.
             string suggestedAddress = address ?? string.Empty;
             if (string.IsNullOrWhiteSpace(suggestedAddress))
             {
@@ -192,7 +189,7 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
                 }
             }
 
-            // 7. Confirmation gate. Until the user explicitly agrees, return a summary and DO NOT book.
+            // 7. Confirmation gate: until the user explicitly agrees, return a summary and book nothing.
             if (!confirmed)
             {
                 var addressLine = string.IsNullOrWhiteSpace(suggestedAddress)
@@ -215,9 +212,9 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
                        "again with confirmed=true and that address.";
             var finalAddress = string.IsNullOrWhiteSpace(address) ? suggestedAddress : address;
 
-            // 8. Place the booking via the EXISTING command (resolves the customer from the authed
-            //    user itself, creates it PENDING with FinalPrice = 0, holds no escrow — the tech
-            //    quotes later). Surface domain validation as readable lines for the model to relay.
+            // 8. Place the booking via the existing command (it resolves the customer from the
+            //    authenticated user, creates it Pending with FinalPrice = 0, and holds no escrow —
+            //    the technician quotes later). Domain validation is surfaced as readable lines.
             try
             {
                 var bookingId = await _mediator.Send(new CreateBookingCommand

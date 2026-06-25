@@ -8,14 +8,14 @@ using System.ComponentModel;
 
 namespace Neighborhood.Services.Application.Chatbot.Tools
 {
-    // Semantic Kernel tool that recommends technicians by NEED (not name): the user describes a
-    // problem, and we run the existing matchmaking agent (GetTechnicianMatchesQuery — rules filter
-    // → LLM rank → rules fallback) and return its ranked picks. We only CALL that query; the Find
-    // Technician "Smart Match" path is untouched.
+    // Semantic Kernel tool that recommends technicians by need rather than name: the user describes
+    // a problem and this runs the existing matchmaking agent (GetTechnicianMatchesQuery — rules
+    // filter, LLM rank, rules fallback) and returns its ranked picks. It only calls that query, so
+    // the Find Technician "Smart Match" path is unaffected.
     //
-    // The query needs a CategoryId, which the chatbot user doesn't give, so we classify the
-    // free-text description into a problemTypeId (same classifier the pricing tool uses) and read
-    // its CategoryId. Built per-request because it carries this request's coords (for proximity).
+    // The query needs a CategoryId, which the user doesn't provide, so the free-text description is
+    // classified into a problemTypeId (the same classifier the pricing tool uses) to read its
+    // CategoryId. Built per-request because it carries this request's coords for proximity.
     public class MatchmakingTool
     {
         private readonly IMediator _mediator;
@@ -25,9 +25,9 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
         private readonly double? _latitude;
         private readonly double? _longitude;
 
-        // Cosine similarity is modest for short, colloquial, or Arabic phrasings even when the
-        // match is correct, so keep this fairly permissive — a wrong category is recoverable
-        // (the user picks from the recommendations), a false NO_MATCH just frustrates them.
+        // Cosine similarity is modest for short or colloquial phrasings even when the match is
+        // correct, so this stays permissive: a slightly-off category is recoverable (the user picks
+        // from the recommendations), whereas a false no-match degrades the experience.
         private const float ClassifierConfidenceThreshold = 0.32f;
 
         public MatchmakingTool(
@@ -71,8 +71,8 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
                 || !int.TryParse(idStr, out var problemTypeId))
             {
                 _logger.LogInformation("MatchmakingTool: NO_MATCH — topScore={Score}", top?.Score);
-                // Break the clarification loop: do NOT keep asking for vague details. Ask the user
-                // to name the service type, or send them to Find Technician.
+                // Avoid a clarification loop: have the model ask for the service type or point the
+                // user to Find Technician, rather than asking for more vague detail.
                 return "NO_MATCH: Could not auto-detect the exact service. Do NOT keep asking the " +
                        "user for more vague details. Instead, ask them to name the service type " +
                        "(e.g. plumbing/سباكة, electrical/كهرباء, carpentry/نجارة, cleaning/تنظيف, " +
@@ -85,7 +85,7 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
             if (problemType is null)
                 return "NO_MATCH: Service not found. Ask the user to describe the problem differently.";
 
-            // 3. Run the EXISTING matchmaking agent unchanged (rules + LLM rank + fallback).
+            // 3. Run the existing matchmaking agent unchanged (rules + LLM rank + fallback).
             var result = await _mediator.Send(new GetTechnicianMatchesQuery
             {
                 CategoryId = problemType.CategoryId,
