@@ -8,16 +8,16 @@ using System.Globalization;
 
 namespace Neighborhood.Services.Application.Chatbot.Tools
 {
-    // Semantic Kernel tools that let the chatbot LLM look up technicians and their free time.
-    // Because a name like "Ali" isn't unique, find_technicians returns a SHORT candidate list
-    // (with id + distinguishing info) and the model asks the user to pick; once it has an id it
-    // calls check_availability. Both wrap the same MediatR queries the controllers use.
+    // Semantic Kernel tools that let the chatbot look up technicians and their free time. A name
+    // isn't unique, so find_technicians returns a short candidate list (id + distinguishing info)
+    // for the model to disambiguate with the user; once it has an id it calls check_availability.
+    // Both wrap the same MediatR queries the controllers use.
     public class TechnicianTool
     {
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
 
-        // Cap how many candidates we hand the model — never dump 50 rows into the context.
+        // Cap the candidate list so an unbounded number of technicians is never sent to the model.
         private const int MaxCandidates = 5;
 
         public TechnicianTool(IMediator mediator, ILogger logger)
@@ -26,8 +26,8 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
             _logger = logger;
         }
 
-        // Words the model commonly appends that aren't part of a real name — stripped so a search
-        // like "خالد فني" still matches the technician "خالد".
+        // Honorifics and titles the model sometimes appends to a name; stripped before matching so
+        // they don't prevent a hit on the real name.
         private static readonly HashSet<string> NameNoise = new(StringComparer.OrdinalIgnoreCase)
         {
             "فني", "الفني", "مهندس", "م", "الاستاذ", "استاذ", "أ",
@@ -66,9 +66,8 @@ namespace Neighborhood.Services.Application.Chatbot.Tools
 
             var all = await _mediator.Send(new GetTechniciansForBrowseQuery());
 
-            // Match on name TOKENS, not the whole string — the model often re-searches with extra
-            // words like the honorific "فني" or "Eng." appended (e.g. "خالد فني"), which a literal
-            // Contains would miss. We rank by how many tokens hit, so the best name match wins.
+            // Match on name tokens rather than the whole string, since the model may append a title
+            // a literal substring match would miss. Ranked by how many tokens hit, best match first.
             var tokens = NameTokens(name);
 
             var matches = all

@@ -58,10 +58,10 @@ namespace Neighborhood.Services.Application.Bookings.Commands.CreateBookingComma
                 ?? throw new NotFoundException("Customer", userId);
 
             // Resolve the region (from the booking's coords or explicit region) and the estimate
-            // BEFORE taking the slot lock. They depend only on the request — not on anything the
-            // lock guards — so there's no reason to hold the per-technician+slot lock across the
-            // Geoapify call. The resolver is fail-open (null => general average), so it never
-            // blocks a booking even if geocoding is down.
+            // before taking the slot lock. They depend only on the request, not on anything the lock
+            // guards, so there's no reason to hold the per-technician/slot lock across the Geoapify
+            // call. The resolver is fail-open (null = general average), so a geocoding outage never
+            // blocks a booking.
             var region = await _regionResolver.ResolveAsync(
                 request.Latitude, request.Longitude, regionOverride: request.Region,
                 cancellationToken: cancellationToken);

@@ -4,17 +4,13 @@ using System.Text;
 
 namespace Neighborhood.Services.Application.Shared
 {
-    // Turns a location signal (GPS coords and/or free text) into one of the price service's
-    // region keys. Strategy, in order:
-    //   1. Explicit valid region override.
-    //   2. GPS -> reverse-geocode -> DETERMINISTIC match on the structured address fields
-    //      (county/city catch neighborhood-level coords where the formatted line omits the city,
-    //      e.g. county "Awel Tanta" -> tanta). This never hallucinates: it only matches when the
-    //      real address literally names one of our cities.
-    //   3. LLM fallback (only if the above found nothing) — maps coords/text to the nearest known
-    //      city. Guarded by a hard haversine distance check so a far-away point (e.g. Luxor) can
-    //      NEVER be mapped to a known city no matter what the model says.
-    // Returns null on anything uncertain; callers treat null as a general (non-localized) average.
+    // Resolves a location (GPS coords and/or free text) to one of the price service's region keys,
+    // or null when it can't be determined. Order: an explicit valid region override; then GPS,
+    // reverse-geocoded and matched against the structured address fields (county/city cover cases
+    // where the formatted line omits the city); then a free-text match. If none of those match, a
+    // constrained LLM call maps the input to the nearest known city, bounded by a haversine
+    // distance check so distant points are rejected. Null means no specific region, and callers
+    // fall back to a general average.
     public class RegionResolver : IRegionResolver
     {
         private readonly IGeocodingService _geocodingService;
@@ -31,9 +27,8 @@ namespace Neighborhood.Services.Application.Shared
             _logger = logger;
         }
 
-        // The region keys the price service understands, each with its city center (lat, lng) and
-        // the name aliases (English + Arabic) we look for in an address or message. SOURCE OF TRUTH
-        // for the keys: PriceEstimationService.GetRegionMultiplier — keep this list in sync.
+        // Known price regions: key, city center (lat/lng) and the name aliases (English + Arabic)
+        // matched in an address or message. Keep in sync with PriceEstimationService.GetRegionMultiplier.
         private static readonly RegionInfo[] Regions =
         {
             new("cairo",   30.0444, 31.2357, new[] { "cairo", "القاهرة", "قاهرة" }),
@@ -43,8 +38,8 @@ namespace Neighborhood.Services.Application.Shared
             new("mahalla", 30.9700, 31.1669, new[] { "mahalla", "mehalla", "محلة", "المحلة" }),
         };
 
-        // Max distance (km) a GPS point may be from a city's center for the LLM fallback to be
-        // trusted. Generous enough to cover a metro area, small enough to reject other governorates.
+        // Max distance (km) a GPS point may be from a city center for the LLM fallback to be
+        // accepted. Wide enough for a metro area, tight enough to reject other governorates.
         private const double MaxDistanceKm = 40;
 
         public async Task<string?> ResolveAsync(
@@ -166,9 +161,8 @@ namespace Neighborhood.Services.Application.Shared
                 return null;
             }
 
-            // Hard safety net: if we have coords, the LLM's pick must be physically close to that
-            // city. This makes it impossible for e.g. Luxor coords to be mapped to Cairo, no matter
-            // how the model reasons about "nearest".
+            // When coords are present, require the chosen city to be physically close. This stops a
+            // distant point from being mapped to a known city if the model's "nearest" guess is wrong.
             if (hasCoords)
             {
                 var distanceKm = HaversineKm(lat!.Value, lng!.Value, region.Lat, region.Lng);

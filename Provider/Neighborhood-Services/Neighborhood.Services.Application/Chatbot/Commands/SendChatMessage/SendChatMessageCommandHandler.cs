@@ -80,7 +80,7 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
                 "Chatbot incoming: lat={Lat} lng={Lng} region='{Region}'",
                 request.Latitude, request.Longitude, request.Region ?? "(none)");
 
-            // 2. Load/create a session ONLY for logged-in users
+            // 2. Load/create a session only for logged-in users
             ChatbotSession? session = null;
             if (request.SessionId.HasValue)
             {
@@ -180,8 +180,8 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
                   """;
 
             // 5. Build ChatHistory for context.
-            //    - Logged-in user: their SAVED session is the source of truth (can't be tampered
-            //      by the client), capped to the last 20 messages so long chats don't blow up tokens.
+            //    - Logged-in user: their saved session is the source of truth (not client-supplied),
+            //      capped to the last 20 messages so long chats stay within a reasonable token budget.
             //    - Guest (no session): replay the turns the frontend sent (already capped client-side)
             //      so guests still get conversation memory.
             const int maxHistoryMessages = 20;
@@ -240,7 +240,7 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
             var matchmakingTool = new MatchmakingTool(
                 _mediator, _memory, _problemTypeRepository, _logger,
                 request.Latitude, request.Longitude);
-            // The only WRITE tool — carries whether the caller is logged in (guests can't book).
+            // The only write tool — carries the current user id (guests can't book).
             var bookingTool = new BookingTool(
                 _mediator, _memory, _geocodingService, _problemTypeRepository, _customerRepository, _logger,
                 request.Latitude, request.Longitude, currentUserId: userId);
@@ -256,10 +256,10 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
                     ReferenceId = session != null && session.Id > 0 ? session.Id : (int?)null
                 });
 
-            // 7. Persist the turn — only for a logged-in user's session. We also save any tool
-            //    results the model produced this turn (SK appended them to `history`) as Tool
-            //    messages, so the model can "remember" ids it surfaced (e.g. technicians) on later
-            //    turns without re-searching. Guests rely on the frontend-replayed history instead.
+            // 7. Persist the turn — only for a logged-in user's session. Tool results produced this
+            //    turn (which SK appended to `history`) are also saved as Tool messages, so the model
+            //    can reuse the ids it surfaced on later turns without re-searching. Guests rely on
+            //    the frontend-replayed history instead.
             if (session is not null)
             {
                 var toolOutputs = history
