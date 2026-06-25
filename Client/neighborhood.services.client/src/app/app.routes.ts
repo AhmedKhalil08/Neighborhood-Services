@@ -161,6 +161,13 @@ export const routes: Routes = [
             .then(m => m.StaffManagementComponent)
       },
       {
+        path: 'agent-logs',
+        data: { permission: 'FullAccess' },
+        loadComponent: () =>
+          import('./features/staff/pages/agent-logs/agent-logs.component')
+            .then(m => m.AgentLogsComponent)
+      },
+      {
         path: 'support-tickets',
         data: { permission: 'ManageTickets' },
         loadComponent: () =>

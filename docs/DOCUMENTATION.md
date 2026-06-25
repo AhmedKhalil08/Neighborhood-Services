@@ -85,7 +85,8 @@ a reputation.
 - **Communication** — real-time customer↔technician chat (SignalR), in-app notifications with a
   topbar bell, email, and newsletter.
 - **AI** — moderation, matchmaking, image analysis, price guidance, review/dispute analysis, and
-  a RAG-grounded chatbot (text + image/vision).
+  a RAG-grounded **tool-using chatbot** (text + image/vision) that can recommend technicians, check
+  availability, estimate prices, and **place a booking** end-to-end in the chat.
 
 ---
 
@@ -325,17 +326,22 @@ set of focused agents each handle one job. The sections below describe each part
 A thin, provider-agnostic abstraction (`IAiClient`) over Microsoft **Semantic Kernel**, so every
 agent talks to one interface and the underlying model provider (OpenAI) is swappable.
 
-`SemanticKernelClient` (Infrastructure) implements two methods:
+`SemanticKernelClient` (Infrastructure) implements three methods:
 
 - `CompleteAsync(systemPrompt, userPrompt, imageUrl?, log?)` — single-shot completion, with
   **vision support** (an image URL is sent as an `ImageContent` alongside the text).
 - `ChatAsync(history, systemPrompt, log?)` — multi-turn completion driven by a `ChatHistory`.
+- `ChatWithToolsAsync(history, systemPrompt, tools, log?)` — **tool-calling** completion. It clones
+  the kernel per request, registers the supplied tool objects (`Plugins.AddFromObject`), and runs
+  with `FunctionChoiceBehavior.Auto()` so the model can **decide to call tools on its own**,
+  Semantic Kernel executes them, feeds the results back, and loops until a final answer. This is
+  what powers the agentic chatbot (§8.3).
 
-Both methods extract **token usage** from the response metadata and, when an `AiCallContext` is
+All methods extract **token usage** from the response metadata and, when an `AiCallContext` is
 supplied, persist an **AgentLog** entry (agent type, action, input, output, tokens, reference
 entity). Logging is wrapped in try/catch so an audit-write failure never breaks the AI call.
 
-`AgentType` enum: `Matching`, `Pricing`, `Booking`, `QA`, `Moderation`.
+`AgentType` enum: `Matching`, `Pricing`, `Booking`, `QA`, `Moderation`, `Chatbot`.
 
 ### 8.2 RAG (Retrieval-Augmented Generation)
 
@@ -358,25 +364,34 @@ classification).
 ### 8.3 The Agents
 
 #### (1) Customer Chatbot — `SendChatMessageCommandHandler`
-The flagship agent. A stateless-friendly, RAG-grounded assistant with several moving parts:
+The flagship agent: a RAG-grounded, **tool-using** assistant. Rather than pre-computing answers in
+code, the chatbot is given a set of **callable tools** and the model itself **decides which to call
+(and chains them)** to walk a customer from a vague problem all the way to a placed booking — e.g.
+*"my kitchen tap is leaking, who's near me?"* → recommend → *"is Khaled free tomorrow?"* → check
+availability → *"how much?"* → estimate → *"book the 4 pm"* → create booking.
 
-1. **Session handling** — logged-in users get a persisted `ChatbotSession` (history replayed into
-   `ChatHistory`); guests chat with nothing saved.
-2. **RAG retrieval** — top-3 hits from `platform-knowledge` injected as context.
-3. **Price classification** — the message is classified against the `problem-types` collection;
-   if the top hit's cosine score ≥ 0.5 and carries a `problemTypeId`, the chatbot calls the
-   **price-estimation service** for a grounded estimate and hoists it into the prompt as an
-   *authoritative pricing directive* (so the model uses the exact number, not the broad range).
-4. **Region resolution** — a constrained one-shot LLM call maps an explicit region, GPS
-   coordinates (reverse-geocoded), or free text to one of `cairo/giza/alex/tanta/mahalla` or
-   "none", so prices can be localized.
-5. **Vision** — an attached image is passed to the model so the bot can describe the likely
-   home-service problem.
-6. **Guardrails** — a hardened system prompt keeps it strictly on-topic, refuses prompt-injection,
-   never invents a city, and replies in the user's language (AR/EN).
+**The tools** (Semantic Kernel functions in `Application/Chatbot/Tools/`, run via
+`ChatWithToolsAsync` with auto function-calling):
 
-Every external step (RAG, classifier, price lookup, geocoding) is independently wrapped so it
-degrades gracefully to a plain RAG answer.
+| Tool | What it does |
+|------|--------------|
+| `estimate_price(service, city?)` | Classifies the problem to a `problemTypeId` and returns a grounded, region-localized estimate from the **price-estimation service**. |
+| `recommend_technician(problem)` | Classifies the problem, then calls the existing **Matchmaking agent** (§8.3.4) to return the best-fit technicians by need. |
+| `find_technicians(name, category?)` | Looks a technician up by name (tolerant, token-based matching), returning a short candidate list to disambiguate. |
+| `check_availability(technicianId, date)` | Returns a technician's free start-times for a day (wraps the available-slots query). |
+| `create_booking(...)` | The only **write** tool — places a Direct booking. **Customers only**, requires shared location, and uses a two-step **confirmation gate** (returns a summary first; only books on an explicit confirm). The booking is created **PENDING** — the technician still reviews and quotes; nothing is charged. It re-checks live availability at book time so a stale slot is never booked. |
+
+**Conversation memory.** Logged-in users have their context rebuilt from a persisted
+`ChatbotSession` (server-authoritative, capped to the recent window); guests get memory too via the
+frontend replaying the recent turns with each message. Tool results (e.g. the ids a tool returned)
+are persisted as `Tool`-role messages and replayed as context, so the agent "remembers" what it
+found across turns without re-searching.
+
+**Still RAG-grounded & multimodal.** It injects top hits from `platform-knowledge`, accepts an
+attached **image** (vision) to describe the likely problem, resolves the user's region from GPS or
+text via the shared region resolver, and is wrapped by a hardened system prompt (strictly on-topic,
+prompt-injection resistant, never invents a city, replies in the user's language). Every tool and
+external step is independently wrapped so the bot degrades gracefully to a plain RAG answer.
 
 #### (2) Image Analysis Agent — `AnalyzeBookingCommandHandler`
 Vision agent that takes a problem description + photo and returns **structured JSON**
@@ -416,9 +431,22 @@ button and the chatbot's authoritative-pricing path.
 
 ### 8.4 Auditing — AgentLog
 Every agent decision is recorded via `CreateAgentLogCommand` with agent type, action, input,
-output, token usage, and the referenced entity. Exposed through `AgentLogsController` for an
-admin-facing agent activity log. This makes the AI layer **observable and explainable** — a key
-requirement for a trust-centric marketplace.
+output, token usage, and the referenced entity. The **chatbot** logs one row per turn (input =
+user message, output = final reply, + tokens) under `AgentType.Chatbot`, and when it **places a
+booking** it writes an additional `CreateBooking` audit row that references the real booking
+(`ReferenceType=Booking`) so the action is traceable to the entity it created.
+
+Logs are surfaced two ways through `AgentLogsController`:
+
+- **By reference** — `GET /agentlogs/reference/{type}/{id}` returns all agent activity on one
+  entity (e.g. every AI touch on Booking #42).
+- **Admin viewer** — a full-access staff page (`/staff/agent-logs`) with **tabs per agent type**,
+  full-text **search** over input/output, **pagination**, and a **row-details modal** that shows
+  the complete input/output (scrollable). Backed by a paged, filtered query
+  (`GET /agentlogs?type=&search=&from=&to=&page=&pageSize=`, gated by `[HasPermission(FullAccess)]`).
+
+This makes the AI layer **observable and explainable** — a key requirement for a trust-centric
+marketplace.
 
 ---
 

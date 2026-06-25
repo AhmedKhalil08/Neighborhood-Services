@@ -168,18 +168,11 @@ export class ChatWidgetComponent {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         this.coords.set({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        // Make it visible in the chat + tell the user what to do next — the coords
-        // are attached to their next message, not sent on their own.
-        this.messages.update((m) => [
-          ...m,
-          { role: 'Assistant', content: this.translate.instant('chatbot.locationShared') },
-        ]);
+        // Toast, NOT a chat message — the coords ride along with the next message, and we don't
+        // want this notice replayed into the conversation history where it would steer the bot.
+        this.toastr.success(this.translate.instant('chatbot.locationShared'));
       },
-      () =>
-        this.messages.update((m) => [
-          ...m,
-          { role: 'Assistant', content: this.translate.instant('chatbot.locationDenied') },
-        ]),
+      () => this.toastr.info(this.translate.instant('chatbot.locationDenied')),
     );
   }
 

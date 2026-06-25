@@ -11,6 +11,7 @@ namespace Neighborhood.Services.Domain.AgentLogs
         Review,
         Technician,
         ServiceRequest,
-        Match
+        Match,
+        ChatbotSession
     }
 }

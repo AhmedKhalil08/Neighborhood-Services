@@ -3,7 +3,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Neighborhood.Services.Application.AI.DTOs;
 using Neighborhood.Services.Application.AI.Interfaces;
+using Neighborhood.Services.Domain.AgentLogs;
 using Neighborhood.Services.Application.Bookings.Services;
 using Neighborhood.Services.Application.Chatbot.DTOs;
 using Neighborhood.Services.Application.Chatbot.Interfaces;
@@ -244,7 +246,15 @@ namespace Neighborhood.Services.Application.Chatbot.Commands.SendChatMessage
                 request.Latitude, request.Longitude, currentUserId: userId);
             var reply = await _aiClient.ChatWithToolsAsync(
                 history, systemPrompt,
-                new object[] { pricingTool, technicianTool, matchmakingTool, bookingTool });
+                new object[] { pricingTool, technicianTool, matchmakingTool, bookingTool },
+                log: new AiCallContext
+                {
+                    AgentType = AgentType.Chatbot,
+                    Action = "Chat",
+                    ReferenceType = AgentLogReferenceType.ChatbotSession,
+                    // 0 until a new session is saved (step 7); reference it only once it has an id.
+                    ReferenceId = session != null && session.Id > 0 ? session.Id : (int?)null
+                });
 
             // 7. Persist the turn — only for a logged-in user's session. We also save any tool
             //    results the model produced this turn (SK appended them to `history`) as Tool

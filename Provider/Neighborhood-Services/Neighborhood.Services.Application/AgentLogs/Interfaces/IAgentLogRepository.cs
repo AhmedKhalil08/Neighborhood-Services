@@ -10,5 +10,9 @@ namespace Neighborhood.Services.Application.AgentLogs.Interfaces
     {
         Task<IEnumerable<AgentLog>> GetByAgentTypeAsync(AgentType agentType);
         Task<IEnumerable<AgentLog>> GetByReferenceAsync(int referenceId, AgentLogReferenceType referenceType);
+
+        // Paged + filtered logs for one agent type (admin viewer). search matches action/input/output.
+        Task<(IReadOnlyList<AgentLog> Items, int Total)> GetPagedByAgentTypeAsync(
+            AgentType agentType, string? search, DateTime? from, DateTime? to, int page, int pageSize);
     }
 }

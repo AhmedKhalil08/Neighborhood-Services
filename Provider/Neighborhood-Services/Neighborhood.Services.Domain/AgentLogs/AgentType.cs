@@ -10,6 +10,7 @@ namespace Neighborhood.Services.Domain.AgentLogs
         Pricing,
         Booking,
         QA,
-        Moderation
+        Moderation,
+        Chatbot
     }
 }
