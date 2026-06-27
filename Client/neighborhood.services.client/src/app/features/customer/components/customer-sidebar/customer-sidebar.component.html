@@ -1,0 +1,67 @@
+<aside class="sidebar bg-white border-end d-flex flex-column" [class.collapsed]="collapsed()" [class.mobile-open]="layout.mobileOpen()">
+
+  <!-- Brand + collapse toggle -->
+  <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+    @if (!collapsed()) {
+      <div class="d-flex align-items-center gap-2">
+        <app-logo />
+        <span class="fw-bold" style="line-height:1.15;">Neighborhood Services</span>
+      </div>
+    }
+    <button class="btn btn-sm btn-light d-none d-lg-inline-flex" type="button" (click)="toggle()">
+      <i class="bi" [class.bi-chevron-left]="!collapsed()" [class.bi-chevron-right]="collapsed()"></i>
+    </button>
+  </div>
+
+  <!-- Nav links -->
+  <nav class="flex-grow-1 p-2 overflow-auto">
+    <a routerLink="/customer" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar-link">
+      <i class="bi bi-grid-1x2"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.overview' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/bookings" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-calendar-check"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.myBookings' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/service-requests" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-megaphone"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.serviceRequests' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/find-technician" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-search"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.findTechnician' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/recurring-bookings" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-arrow-repeat"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.recurringBookings' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/favorites" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-heart"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.favorites' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/wallet" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-wallet2"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.wallet' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/chat" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-chat-dots"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.chat' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/notifications" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-bell"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.notifications' | translate }}</span> }
+    </a>
+    <a routerLink="/customer/profile" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-person"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.profile' | translate }}</span> }
+    </a>
+  </nav>
+
+  <!-- Footer: back to public site -->
+  <div class="p-2 border-top">
+    <a routerLink="/" class="sidebar-link">
+      <i class="bi bi-house"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.goHome' | translate }}</span> }
+    </a>
+  </div>
+</aside>

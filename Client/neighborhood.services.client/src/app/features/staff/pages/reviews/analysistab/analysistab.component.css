@@ -1,0 +1,31 @@
+.stat-card {
+  border: 0;
+  box-shadow: 0 .125rem .5rem rgba(0,0,0,.08);
+}
+
+.stat-card h6 {
+  color: #6c757d;
+  margin-bottom: .5rem;
+}
+
+.stat-card h2 {
+  margin: 0;
+  font-weight: 700;
+}
+
+.positive {
+  border-left: 4px solid #198754;
+}
+
+.negative {
+  border-left: 4px solid #dc3545;
+}
+
+.flagged {
+  border-left: 4px solid #fd7e14;
+}
+
+.quality-score {
+  font-size: 2rem;
+  font-weight: 700;
+}

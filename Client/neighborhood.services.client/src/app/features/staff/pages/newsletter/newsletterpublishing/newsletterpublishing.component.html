@@ -1,0 +1,64 @@
+<div class="newsletter-admin">
+
+  <div class="page-header">
+    <h1>{{ 'newsletter.pagetitle' | translate}}</h1>
+    <p>{{ 'newsletter.pagedescription' | translate}}</p>
+  </div>
+
+  <div class="newsletter-layout">
+  <div class="editor-card">
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">
+        {{ 'newsletter.subj' | translate}}
+      </label>
+
+      <input
+        type="text"
+        class="subject-input"
+        [(ngModel)]="subject"
+        placeholder="Enter subject HERE..." required/>
+    </div>
+
+    
+    <div class="section-header">
+      <h3>{{'newsletter.content' | translate}}</h3>
+    </div>
+
+    <textarea
+      [(ngModel)]="rawHtml"
+      class="newsletter-editor"
+      placeholder="Write your newsletter HTML here..." >
+    </textarea>
+
+    <div class="action-bar">
+      <button
+        class="btn btn-success publish-btn"
+        (click)="publishNewsletter()">
+
+        <i class="bi bi-send-fill me-2"></i>
+        {{'newsletter.publish' | translate}}
+      </button>
+    </div>
+
+  </div>
+
+  <div class="preview-card">
+
+    <div class="section-header">
+      <h3>{{'newsletter.pre' | translate}}</h3>
+
+      <h5 class="preview-subject mt-3">
+        {{ subject || 'newsletter.subPre' | translate}}
+      </h5>
+    </div>
+
+    <div
+      class="preview-container"
+      [innerHTML]="sanitizedHtml">
+    </div>
+
+  </div>
+  </div>
+
+</div>

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Neighborhood.Services.Domain.Shared
+﻿namespace Neighborhood.Services.Domain.Shared
 {
-    internal class BaseEntity
+    public class BaseEntity<T>
     {
+        public T Id { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

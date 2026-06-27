@@ -1,7 +1,8 @@
-﻿namespace Neighborhood.Services.Domain
+﻿
+namespace Neighborhood.Services.Domain
 {
     public class Class1
     {
-
+        // das
     }
 }

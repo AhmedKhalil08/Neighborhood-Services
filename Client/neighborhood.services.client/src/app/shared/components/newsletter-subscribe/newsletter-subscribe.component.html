@@ -1,0 +1,49 @@
+<!-- <section class="newsletter-section py-5 bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h2 class="display-4 mb-4">Stay Updated</h2>
+        <p class="lead mb-5">Subscribe to our newsletter for the latest news, updates, and exclusive offers.</p>
+        <form class="newsletter-form">
+          <div class="input-group mb-3">
+            <input type="email" class="form-control form-control-lg" placeholder="Enter your email" aria-label="Enter your email" 
+            [(ngModel)]="email" (keydown.enter)="subs(email)" required>
+            <button class="btn btn-primary btn-lg" type="submit">Subscribe</button>
+          </div>
+          <div class="form-check text-start">
+          
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+
+    <section>
+    <div class="card" >
+  <h2 class="title" >{{'newslettersubscribe.subscribe' | translate}}</h2>
+  <p class="text" >{{'newslettersubscribe.description' | translate}}</p>
+
+    <input class="input" type="email" [(ngModel)]="email" placeholder="Enter your email here.."  (keydown.enter)="subs()"> 
+ 
+  
+  
+</div>
+</section>
+<!-- <script>
+    const card = document.querySelector('.card'),
+      input = document.querySelector('.input'),
+      line2 = document.querySelector('.line2');
+document.querySelector('.form').addEventListener('submit', function(e) {
+  input.blur();
+  card.classList.add('saving');
+  e.preventDefault();
+});
+line2.addEventListener('animationend', function(e) {
+  setTimeout(() => {
+    card.classList.add('done');
+  }, 1000);
+});
+
+</script> -->

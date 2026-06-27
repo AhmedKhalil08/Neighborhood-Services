@@ -1,0 +1,116 @@
+<div class="tech-reviews" dir="ltr">
+
+  <!-- Header + average rating gauge -->
+  <header class="header">
+    <div class="header-text">
+      <h2 class="title">Verified Reviews</h2>
+      <p class="subtitle">
+        These are reviews submitted by customers after service completion and approved by the administration team.
+      </p>
+    </div>
+
+    <div class="gauge">
+      <svg
+        viewBox="0 0 200 115"
+        class="gauge-svg"
+        role="img"
+        [attr.aria-label]="'Average rating ' + averageRatingLabel() + ' out of 5'"
+      >
+        <path [attr.d]="gaugeBackgroundPath" class="gauge-track"></path>
+        <path [attr.d]="gaugeProgressPath()" class="gauge-progress"></path>
+
+        <line
+          *ngFor="let tick of gaugeTicks"
+          [attr.x1]="tick.x1"
+          [attr.y1]="tick.y1"
+          [attr.x2]="tick.x2"
+          [attr.y2]="tick.y2"
+          class="gauge-tick"
+        ></line>
+
+        <line
+          [attr.x1]="100"
+          [attr.y1]="100"
+          [attr.x2]="gaugeNeedleEnd().x"
+          [attr.y2]="gaugeNeedleEnd().y"
+          class="gauge-needle"
+        ></line>
+
+        <circle cx="100" cy="100" r="5" class="gauge-pivot"></circle>
+      </svg>
+
+      <div class="gauge-readout">
+        <span class="gauge-value">{{ averageRatingLabel() }}</span>
+        <span class="gauge-caption">
+          Out of 5 • Based on {{ reviews().length }} reviews
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- States: loading / no-user / error / empty -->
+  <div class="state loading" *ngIf="status() === 'loading'">
+    <span class="spinner" aria-hidden="true"></span>
+    <span>Loading your reviews...</span>
+  </div>
+
+  <div class="state info" *ngIf="status() === 'no-user'">
+    <p class="state-title">User ID Not Available</p>
+    <p class="state-text">
+      We couldn't identify the current technician account. Please make sure you're logged in and try again.
+    </p>
+  </div>
+
+  <div class="state info" *ngIf="status() === 'error'">
+    <p class="state-title">Failed to Load Reviews</p>
+    <p class="state-text">
+      Unable to connect to the server. Please check your internet connection and try again.
+    </p>
+  </div>
+
+  <div class="state info" *ngIf="status() === 'empty'">
+    <p class="state-title">No Approved Reviews Yet</p>
+    <p class="state-text">
+      Once a customer submits a review for one of your completed services and it is approved by the administration team, it will appear here.
+    </p>
+  </div>
+
+  <!-- Reviews grid -->
+  <div class="reviews-grid" *ngIf="status() === 'success'">
+    <article class="review-card" *ngFor="let review of reviews(); trackBy: trackById">
+      <header class="review-head">
+        <div class="reviewer">
+          <div class="avatar">
+            <span *ngIf="!review.reviewerLoading">{{ initial(review.reviewerName) }}</span>
+            <span class="spinner small" *ngIf="review.reviewerLoading" aria-hidden="true"></span>
+          </div>
+          <div class="reviewer-meta">
+            <p class="reviewer-name">
+              {{ review.reviewerLoading ? 'Loading name...' : (review.reviewerName || 'Customer') }}
+            </p>
+            <p class="review-date">{{ formatDate(review.createdAt) }}</p>
+          </div>
+        </div>
+
+        <div class="stars" aria-hidden="true">
+          <span class="star" *ngFor="let filled of stars(review.rating)" [class.filled]="filled">★</span>
+        </div>
+      </header>
+
+      <div class="booking-line">
+        <span class="booking-label">Service:</span>
+        <span>
+          {{
+            review.bookingLoading
+              ? 'Loading booking details...'
+              : (review.bookingDescription || 'No details available')
+          }}
+        </span>
+      </div>
+
+      <p class="review-comment" *ngIf="review.comment">
+        {{ review.comment }}
+      </p>
+    </article>
+  </div>
+</div>

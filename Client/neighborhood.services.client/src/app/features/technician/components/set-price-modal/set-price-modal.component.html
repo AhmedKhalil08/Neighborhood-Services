@@ -1,0 +1,52 @@
+<div class="modal-header">
+  <h5 class="modal-title">{{ 'technician.recurring.setPriceTitle' | translate }}</h5>
+  <button type="button" class="btn-close" (click)="dismiss()" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+  @if (description || address || scheduleText) {
+    <div class="bg-light rounded-3 p-3 mb-3 small">
+      <div class="d-flex gap-3">
+        @if (imageUrl) {
+          <img [src]="imageUrl" alt="" (click)="lightbox.open(imageUrl)"
+               class="rounded-3 border flex-shrink-0" style="width:4rem;height:4rem;object-fit:cover;cursor:zoom-in;" />
+        }
+        <div class="flex-grow-1 min-w-0">
+          @if (description) {
+            <div class="fw-semibold mb-1">{{ description }}</div>
+          }
+          @if (scheduleText) {
+            <div class="text-muted"><i class="bi bi-arrow-repeat me-1"></i>{{ scheduleText }}</div>
+          }
+          @if (address) {
+            <div class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ address }}</div>
+          }
+          @if (durationMinutes) {
+            <div class="text-muted"><i class="bi bi-clock me-1"></i>{{ durationMinutes }} {{ 'technician.recurring.min' | translate }}</div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <label class="form-label">{{ 'technician.recurring.price' | translate }}</label>
+  <div class="input-group">
+    <span class="input-group-text">EGP</span>
+    <input
+      type="number"
+      class="form-control"
+      min="1"
+      [ngModel]="price()"
+      (ngModelChange)="price.set($event)"
+      [placeholder]="'technician.recurring.pricePlaceholder' | translate" />
+  </div>
+  <div class="form-text">{{ 'technician.recurring.priceHint' | translate }}</div>
+  @if (touched() && (price() == null || price()! <= 0)) {
+    <div class="text-danger small mt-1">{{ 'technician.recurring.priceError' | translate }}</div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="dismiss()">{{ 'common.cancel' | translate }}</button>
+  <button type="button" class="btn btn-primary" (click)="confirm()">{{ 'technician.recurring.submitPrice' | translate }}</button>
+</div>

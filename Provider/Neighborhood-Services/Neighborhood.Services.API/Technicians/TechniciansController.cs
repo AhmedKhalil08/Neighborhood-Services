@@ -1,0 +1,158 @@
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Neighborhood.Services.Application.Bookings.Queries.GetTechnicianAvailableSlots;
+using Neighborhood.Services.Application.Bookings.Queries.GetTechnicianBusySlots;
+using Neighborhood.Services.Application.Technicians.Commands;
+using Neighborhood.Services.Application.Technicians.Queries;
+using Neighborhood.Services.Domain.Technicians;
+
+namespace Neighborhood.Services.API.Technicians
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TechniciansController(IMediator mediator) : ControllerBase
+    {
+        private readonly IMediator _mediator = mediator;
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _mediator.Send(new GetAllTechniciansQuery());
+            return Ok(result);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _mediator.Send(new GetTechnicianByIdQuery { Id = id });
+            return Ok(result);
+        }
+
+        // Public profile (details + stats + approved reviews) — shown when a customer clicks a technician.
+        [Authorize]
+        [HttpGet("{id:int}/public-profile")]
+        public async Task<IActionResult> GetPublicProfile(int id)
+        {
+            var result = await _mediator.Send(new GetTechnicianPublicProfileQuery { TechnicianId = id });
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("user/{applicationUserId}")]
+        public async Task<IActionResult> GetByUserId(string applicationUserId)
+        {
+            // TODO: Enforce self-or-Staff ownership before returning technician details by user id.
+            var result = await _mediator.Send(new GetTechnicianByUserIdQuery { ApplicationUserId = applicationUserId });
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Staff")]
+        [HttpGet("verification-status/{verificationStatus}")]
+        public async Task<IActionResult> GetByVerificationStatus(TechnicianVerificationStatus verificationStatus)
+        {
+            var result = await _mediator.Send(new GetTechniciansByVerificationStatusQuery { VerificationStatus = verificationStatus });
+            return Ok(result);
+        }
+
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailable()
+        {
+            var result = await _mediator.Send(new GetAvailableTechniciansQuery());
+            return Ok(result);
+        }
+
+        // Customer-facing browse list for the "Find Technician" page
+        // (name/photo/location + categories). Additive — does not touch GetAll.
+        [HttpGet("browse")]
+        public async Task<IActionResult> Browse()
+        {
+            var result = await _mediator.Send(new GetTechniciansForBrowseQuery());
+            return Ok(result);
+        }
+
+        // GET /api/technicians/{id}/busy-slots?from=2026-06-20T00:00&to=2026-06-27T00:00
+        // The tech's confirmed-booking windows in the range, so the booking time-picker can
+        // grey out times they're already booked. Returns [] when free.
+        [Authorize]
+        [HttpGet("{id:int}/busy-slots")]
+        public async Task<IActionResult> GetBusySlots(int id, [FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            var result = await _mediator.Send(new GetTechnicianBusySlotsQuery { TechnicianId = id, From = from, To = to });
+            return Ok(result);
+        }
+
+        // GET /api/technicians/{id}/available-slots?date=2026-06-22&slotMinutes=30
+        // Free start-times the customer can book on that date (working hours − busy − past),
+        // ready to render as clickable chips in the booking modal.
+        [Authorize]
+        [HttpGet("{id:int}/available-slots")]
+        public async Task<IActionResult> GetAvailableSlots(int id, [FromQuery] DateTime date, [FromQuery] int slotMinutes = 30)
+        {
+            var result = await _mediator.Send(new GetTechnicianAvailableSlotsQuery { TechnicianId = id, Date = date, SlotMinutes = slotMinutes });
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Technician,Staff")]
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateTechnicianCommand command)
+        {
+            // TODO: Enforce that Technician users can only create their own technician profile.
+            var id = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetById), new { id }, new { Id = id });
+        }
+
+        [Authorize(Roles = "Technician,Staff")]
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, UpdateTechnicianCommand command)
+        {
+            // TODO: Enforce technician-owner-or-Staff before updating technician profile.
+            command.Id = id;
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Technician,Staff")]
+        [HttpPatch("{id:int}/availability")]
+        public async Task<IActionResult> UpdateAvailability(int id, UpdateTechnicianAvailabilityCommand command)
+        {
+            // TODO: Enforce technician-owner-or-Staff before updating availability.
+            command.Id = id;
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Staff")]
+        [HttpPatch("{id:int}/verification-status")]
+        public async Task<IActionResult> UpdateVerificationStatus(int id, UpdateTechnicianVerificationStatusCommand command)
+        {
+            command.Id = id;
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Staff")]
+        [HttpPatch("{id:int}/activate")]
+        public async Task<IActionResult> Activate(int id)
+        {
+            await _mediator.Send(new ActivateTechnicianCommand { Id = id });
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Staff")]
+        [HttpPatch("{id:int}/deactivate")]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            await _mediator.Send(new DeactivateTechnicianCommand { Id = id });
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Staff")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _mediator.Send(new DeleteTechnicianCommand { Id = id });
+            return NoContent();
+        }
+    }
+}

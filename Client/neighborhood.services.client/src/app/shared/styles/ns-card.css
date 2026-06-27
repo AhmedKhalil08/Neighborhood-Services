@@ -1,0 +1,157 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Shared "ns-card" list-card design system.
+   Mirrors the customer Bookings page so the technician Jobs / Offers / Recurring
+   pages share one visual language. Referenced via styleUrls from each component
+   (Angular scopes it per component, so the class names stay collision-free).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.icon-box {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, #60a5fa, #1d4ed8);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(29, 78, 216, 0.25);
+}
+
+/* Modern card shell — subtle lift on hover + status accent bar */
+.ns-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #eef1f6 !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ns-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.75rem 1.75rem rgba(15, 23, 42, 0.1) !important;
+}
+
+/* Left status accent bar (logical side → flips for RTL) */
+.ns-card::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #adb5bd;
+}
+
+/* Booking statuses */
+.ns-card[data-status='Confirmed']::before { background: linear-gradient(180deg, #3b82f6, #1d4ed8); }
+.ns-card[data-status='Completed']::before { background: linear-gradient(180deg, #22c55e, #15803d); }
+.ns-card[data-status='Pending']::before   { background: linear-gradient(180deg, #fbbf24, #d97706); }
+.ns-card[data-status='Quoted']::before    { background: linear-gradient(180deg, #38bdf8, #0284c7); }
+.ns-card[data-status='Cancelled']::before { background: linear-gradient(180deg, #f87171, #dc2626); }
+.ns-card[data-status='Disputed']::before  { background: linear-gradient(180deg, #94a3b8, #475569); }
+/* Offer statuses */
+.ns-card[data-status='Accepted']::before  { background: linear-gradient(180deg, #22c55e, #15803d); }
+.ns-card[data-status='Rejected']::before  { background: linear-gradient(180deg, #f87171, #dc2626); }
+.ns-card[data-status='Expired']::before   { background: linear-gradient(180deg, #cbd5e1, #94a3b8); }
+.ns-card[data-status='Withdrawn']::before { background: linear-gradient(180deg, #cbd5e1, #94a3b8); }
+/* Service-request statuses */
+.ns-card[data-status='Open']::before       { background: linear-gradient(180deg, #38bdf8, #0284c7); }
+/* Recurring statuses */
+.ns-card[data-status='Active']::before                  { background: linear-gradient(180deg, #22c55e, #15803d); }
+.ns-card[data-status='Paused']::before                  { background: linear-gradient(180deg, #fbbf24, #d97706); }
+.ns-card[data-status='PendingApproval']::before         { background: linear-gradient(180deg, #94a3b8, #475569); }
+.ns-card[data-status='PendingCustomerApproval']::before { background: linear-gradient(180deg, #38bdf8, #0284c7); }
+
+.ns-card-title {
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: #0f172a;
+}
+
+.ns-price {
+  font-size: 1.2rem;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+/* Meta row spacing helpers */
+.gap-x-3 { column-gap: 1rem; }
+.gap-y-1 { row-gap: 0.25rem; }
+.min-w-0 { min-width: 0; }
+
+/* Customer-profile link (and similar inline links) */
+.ns-link {
+  font-weight: 600;
+  color: #1d4ed8;
+}
+.ns-link:hover { color: #1e40af; text-decoration: underline; }
+
+/* Divider above the footer */
+.ns-card-footer { border-top: 1px solid #f0f1f3; }
+
+.badge.rounded-pill {
+  padding: 0.45em 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Soft inline call-out (awaiting customer / needs price / agreed price) */
+.ns-note {
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+}
+.ns-note-info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+.ns-note-muted   { background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; }
+.ns-note-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+
+/* ── Buttons: pill-shaped, elevated, with smooth hover ───────────────────── */
+.ns-card .btn {
+  border-radius: 999px;
+  font-weight: 600;
+  padding-inline: 1.1rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.ns-card .btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: none;
+  box-shadow: 0 3px 10px rgba(29, 78, 216, 0.28);
+}
+
+.ns-card .btn-primary:hover,
+.ns-card .btn-primary:focus {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  box-shadow: 0 5px 16px rgba(29, 78, 216, 0.4);
+  transform: translateY(-1px);
+}
+
+.ns-card .btn-outline-secondary {
+  border-color: #e2e8f0;
+  color: #475569;
+  background: #fff;
+}
+.ns-card .btn-outline-secondary:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  transform: translateY(-1px);
+}
+
+.ns-card .btn-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  box-shadow: 0 3px 10px rgba(22, 163, 74, 0.28);
+}
+.ns-card .btn-success:hover {
+  box-shadow: 0 5px 16px rgba(22, 163, 74, 0.4);
+  transform: translateY(-1px);
+}
+
+.ns-card .btn-outline-primary:hover,
+.ns-card .btn-outline-danger:hover,
+.ns-card .btn-outline-success:hover {
+  transform: translateY(-1px);
+}

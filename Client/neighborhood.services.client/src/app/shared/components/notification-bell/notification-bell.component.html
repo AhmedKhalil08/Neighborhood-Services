@@ -1,0 +1,90 @@
+<!-- <button class="btn btn-light position-relative" type="button" (click)="open()" aria-label="Notifications">
+  <i class="bi bi-bell"></i>
+  @if (unreadCount() > 0) {
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+      {{ unreadCount() }}
+    </span>
+  }
+</button> -->
+
+<!-- TODO (Arwa): notification dropdown goes here -->
+<!-- 🔔 Notification Bell -->
+<div ngbDropdown class="d-inline-block notification-bell" >
+  <button
+    type="button"
+    class="btn btn-link position-relative p-0"
+    ngbDropdownToggle
+    aria-label="Show notifications" (click)="loadNotifications()">
+
+    <i class="bi bi-bell fs-4"></i>
+
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+      {{ unreadCount$ | async }}
+    </span>
+  </button>
+
+  <div ngbDropdownMenu class="notification-menu">
+    @for(not of notifications$ | async; track not.id){
+      <div class="dropdown-item d-flex align-items-start" [ngClass]="{'bg-light': !not.isRead}" (click)="onNotificationClick(not)">
+        <i class="bi bi-bell me-2"></i>
+        <div>
+          <p class="mb-1 bg-light">{{ not.message }}</p>
+          @switch ( not.type ) {
+  @case ("booking") {
+      <button class="btn btn-outline-success btn-sm" routerLink="/technician/browse-requests" routerLinkActive="active">
+         <i class="bi bi-calendar-check me-1"></i>
+              Go to Bookings
+            </button>
+  }
+  @case ("dispute") {
+      <button class="btn btn-outline-success btn-sm" routerLink="/staff/disputes" routerLinkActive="active">
+         <i class="bi bi-exclamation-triangle me-1"></i>
+              Go to Disputes
+            </button>
+  }
+  @case ("review") {
+   
+         <button class="btn btn-outline-success btn-sm" routerLink="/technician/reviews" routerLinkActive="active">
+                    <i class="bi bi-star-fill me-1"></i>
+
+              Go to Reviews
+            </button>
+  }
+  @case ("payment") {
+     <button class="btn btn-outline-success btn-sm" routerLink="/technician/wallet" routerLinkActive="active">
+              Go to Payments
+            </button>}
+  @case ("offer") {
+      <button class="btn btn-outline-success btn-sm" routerLink="/customer/service-requests" routerLinkActive="active">
+              Go to Offers
+            </button>
+  }
+  @case ("support") {
+     <button class="btn btn-outline-success btn-sm"routerLink="/staff/CustomerSupport" routerLinkActive="active">
+              Go to Live Support
+            </button>
+  }
+  @case ("system") {
+     <button class="btn bg-info mb-1">Go to Blablabla</button>
+  }
+}
+<!-- End of switch case -->
+          <!-- <button>{{ not.type }}</button> -->
+          <small class="text-muted">{{ not.createdDate | date:'short' }}</small>
+        </div>
+      </div>
+      
+    }
+     @if (this.unreadCount$.value==0){
+    <div class="dropdown-item text-muted" >
+      <i class="bi bi-bell-slash me-2"></i>
+      No notifications
+    </div>}
+    <!-- <div class="dropdown-item text-muted" >
+      <i class="bi bi-bell-slash me-2"></i>
+      
+     <p></p>
+    </div> -->
+   
+  </div>
+</div>

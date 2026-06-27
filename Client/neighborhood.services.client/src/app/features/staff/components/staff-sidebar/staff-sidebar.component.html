@@ -1,0 +1,81 @@
+<aside class="sidebar bg-white border-end d-flex flex-column" [class.collapsed]="collapsed()" [class.mobile-open]="layout.mobileOpen()">
+
+  <!-- Brand + collapse toggle -->
+  <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+    @if (!collapsed()) {
+      <div class="d-flex align-items-center gap-2">
+        <app-logo />
+        <span class="fw-bold" style="line-height:1.15;">Neighborhood Services</span>
+      </div>
+    }
+    <button class="btn btn-sm btn-light d-none d-lg-inline-flex" type="button" (click)="toggle()">
+      <i class="bi" [class.bi-chevron-left]="!collapsed()" [class.bi-chevron-right]="collapsed()"></i>
+    </button>
+  </div>
+
+  <!-- Nav links -->
+  <nav class="flex-grow-1 p-2 overflow-auto">
+    <a routerLink="/staff" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar-link">
+      <i class="bi bi-grid-1x2"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.overview' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'ManageUsers'" routerLink="/staff/users" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-people"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.users' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'ManageBookings'" routerLink="/staff/bookings" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-calendar-check"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.bookings' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'ManageDisputes'" routerLink="/staff/disputes" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-exclamation-triangle"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.disputes' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'ManageFlagedReq'" routerLink="/staff/flagged-requests" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-shield-exclamation"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.flaggedRequests' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'MangeReviews'" routerLink="/staff/reviews" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-star"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.reviews' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'ManageTickets'" routerLink="/staff/support-tickets" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-life-preserver"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.supportTickets' | translate }}</span> }
+    </a>
+     
+    
+    <a *appHasPermission="'ManageCategories'" routerLink="/staff/categories" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-grid"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.categories' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'ManagePolicies'" routerLink="/staff/policies" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-file-earmark-text"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.policies' | translate }}</span> }
+    </a>
+     <a routerLink="/staff/newsletters" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-envelope-at-fill"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.newsletter' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'ManagePromos'" routerLink="/staff/promo-codes" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-tag"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.promoCodes' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'FullAccess'" routerLink="/staff/staff-management" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-person-badge"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.staffManagement' | translate }}</span> }
+    </a>
+    <a *appHasPermission="'FullAccess'" routerLink="/staff/agent-logs" routerLinkActive="active" class="sidebar-link">
+      <i class="bi bi-robot"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.agentLogs' | translate }}</span> }
+    </a>
+  </nav>
+
+  <!-- Footer: back to public site -->
+  <div class="p-2 border-top">
+    <a routerLink="/" class="sidebar-link">
+      <i class="bi bi-house"></i>
+      @if (!collapsed()) { <span>{{ 'sidebar.goHome' | translate }}</span> }
+    </a>
+  </div>
+</aside>
