@@ -254,7 +254,7 @@ namespace Neighborhood.Services.API
 
             //app.UseCors("Frontend");
             //app.UseCors("AllowJs");
-            app.UseCors("AllowAngular");
+            //app.UseCors("AllowAngular");
             //app.UseCors("AllowJS");
             app.UseHttpsRedirection();
             app.UseExceptionHandler();
