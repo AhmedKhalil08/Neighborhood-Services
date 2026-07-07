@@ -1,5 +1,9 @@
 # Neighborhood Services — Technical Documentation
 
+**Repository:** https://github.com/AhmedKhalil08/Neighborhood-Services
+**Live demo:** https://neighborhood-services.vercel.app · **API:** https://neighborhoodservices.runasp.net
+*Demo login: `customer1@test.com` / `Pass@123` — best viewed in Chrome.*
+
 > A full-stack home-services marketplace for the Egyptian market, connecting customers
 > with local technicians across three booking models, with an AI layer for moderation,
 > matchmaking, visual problem analysis, pricing guidance, and a customer chatbot.
