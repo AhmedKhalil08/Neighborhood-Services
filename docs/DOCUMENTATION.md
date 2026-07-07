@@ -1,5 +1,9 @@
 # Neighborhood Services — Technical Documentation
 
+**Repository:** https://github.com/AhmedKhalil08/Neighborhood-Services
+**Live demo:** https://neighborhood-services.vercel.app · **API:** https://neighborhoodservices.runasp.net
+*Demo login: `customer1@test.com` / `Pass@123` — best viewed in Chrome.*
+
 > A full-stack home-services marketplace for the Egyptian market, connecting customers
 > with local technicians across three booking models, with an AI layer for moderation,
 > matchmaking, visual problem analysis, pricing guidance, and a customer chatbot.
@@ -33,7 +37,7 @@ Hangfire · Redis · Semantic Kernel + Qdrant (RAG) · SignalR · Angular 21
 
 **Neighborhood Services** is a two-sided marketplace web application that links customers who
 need home maintenance and repair work (plumbing, electrical, appliances, cleaning, etc.) with
-verified local technicians. It is built as an ITI graduation project by a team of seven, with a
+verified local technicians. It is built as an ITI graduation project by a team of six, with a
 .NET 10 backend following Clean Architecture and an Angular 21 single-page frontend.
 
 The platform supports three distinct ways to get work done — **direct booking**, **competitive
